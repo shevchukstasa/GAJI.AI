@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gaji.AI - Kalkulator Gaji & Payroll Indonesia dengan AI</title>
+    <meta name="description" content="Hitung gaji karyawan Indonesia secara instan. PPh 21 TER 2024, BPJS, Lembur, THR. Akurat, cepat, sesuai hukum. Gratis 5 perhitungan pertama.">
+    <meta name="keywords" content="kalkulator gaji, payroll indonesia, pph 21, bpjs, slip gaji, hitung gaji">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* === 1. CSS Variables === */
+        :root {
+            --color-primary: #10b981;
+            --color-primary-hover: #059669;
+            --color-primary-light: rgba(16, 185, 129, 0.1);
+            --color-accent: #6366f1;
+            --color-accent-hover: #4f46e5;
+            --color-bg: #f9fafb;
+            --color-surface: #ffffff;
+            --color-text: #1f2937;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+            --color-border: #e5e7eb;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
+            --color-success: #10b981;
+            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-card: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 999px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+            --shadow-xl: 0 25px 50px rgba(0,0,0,0.25);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* === 2. Reset & Base === */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font);
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--color-text);
+            background: var(--color-bg);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* === 3. Layout === */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* === 4. Hero Section === */
+        .hero {
+            background: var(--gradient-hero);
+            padding: 60px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: var(--color-bg);
+            border-radius: 50% 50% 0 0;
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.15);
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat { text-align: center; }
+        .hero-stat-value { font-size: 2rem; font-weight: 800; }
+        .hero-stat-label { font-size: 13px; opacity: 0.8; }
+
+        /* Nav */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 20px;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            border: 1px solid rgba(255,255,255,0.4);
+            background: transparent;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active { background: white; color: var(--color-text); }
+
+        /* === 5. Buttons === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary { background: var(--color-primary); color: white; }
+        .btn-primary:hover { background: var(--color-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+
+        .btn-white { background: white; color: var(--color-text); }
+        .btn-white:hover { background: #f3f4f6; transform: translateY(-1px); }
+
+        .btn-outline { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.4); }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+        .btn-accent { background: var(--color-accent); color: white; }
+        .btn-accent:hover { background: var(--color-accent-hover); }
+
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        .btn-lg { padding: 16px 36px; font-size: 16px; }
+
+        /* === 6. Calculator Section === */
+        .calc-section { padding: 40px 0 60px; }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: clamp(1.5rem, 3vw, 2.25rem);
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .section-title p { color: var(--color-text-secondary); font-size: 16px; }
+
+        .calc-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .quick-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .quick-label { color: var(--color-text-secondary); font-weight: 600; font-size: 13px; margin-right: 4px; }
+
+        .example-btn {
+            padding: 7px 14px;
+            background: #f3f4f6;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #4b5563;
+        }
+
+        .example-btn:hover { background: #e5e7eb; border-color: #9ca3af; }
+
+        .chat-container {
+            background: var(--color-bg);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            min-height: 300px;
+            max-height: 450px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            border: 1px solid var(--color-border);
+        }
+
+        .message { margin-bottom: 16px; display: flex; gap: 10px; }
+        .message.user { flex-direction: row-reverse; }
+
+        .message-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar { background: var(--gradient-hero); color: white; }
+        .message.user .message-avatar { background: var(--color-primary); color: white; }
+
+        .message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .message.ai .message-content { background: white; border: 1px solid var(--color-border); }
+        .message.user .message-content { background: var(--color-primary); color: white; }
+
+        .input-area { display: flex; gap: 10px; }
+
+        .input-area input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: var(--font);
+            transition: border-color 0.2s;
+        }
+
+        .input-area input:focus { outline: none; border-color: var(--color-primary); }
+
+        /* Free counter */
+        .free-counter {
+            text-align: center;
+            padding: 10px;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            border-top: 1px solid var(--color-border);
+            margin-top: 16px;
+        }
+
+        .free-counter strong { color: var(--color-primary); }
+
+        /* === 7. Results === */
+        .results-section { margin-top: 24px; }
+
+        .toggle-container {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: var(--radius-md);
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 14px;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--color-text-secondary);
+        }
+
+        .toggle-btn.active { background: white; color: var(--color-text); box-shadow: var(--shadow-sm); }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: var(--gradient-card);
+            padding: 18px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+        }
+
+        .result-card h4 {
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .result-card .value { font-size: 20px; font-weight: 700; }
+
+        .result-card.highlight {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #059669 100%);
+            border: none;
+        }
+
+        .result-card.highlight h4, .result-card.highlight .value { color: white; }
+
+        .breakdown {
+            padding: 18px;
+            background: var(--color-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            margin-bottom: 16px;
+        }
+
+        .breakdown h3 { margin-bottom: 12px; font-size: 15px; }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 14px;
+        }
+
+        .breakdown-item:last-child { border-bottom: none; }
+        .breakdown-item .label { color: var(--color-text-secondary); }
+        .breakdown-item .amount { font-weight: 600; }
+
+        .hint-box {
+            margin-top: 16px;
+            padding: 14px;
+            background: #fef3c7;
+            border-left: 4px solid var(--color-warning);
+            border-radius: var(--radius-sm);
+            color: #78350f;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* PDF button */
+        .pdf-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* === 8. Pricing Section === */
+        .pricing-section { padding: 60px 0; background: white; }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .price-card {
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 30px 24px;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .price-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+        .price-card.popular { border-color: var(--color-primary); }
+
+        .price-card.popular::before {
+            content: 'POPULER';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-primary);
+            color: white;
+            padding: 4px 16px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .price-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .price-desc { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 16px; }
+
+        .price-amount { margin-bottom: 20px; }
+        .price-amount .currency { font-size: 16px; font-weight: 600; }
+        .price-amount .number { font-size: 36px; font-weight: 800; }
+        .price-amount .period { font-size: 14px; color: var(--color-text-secondary); }
+
+        .price-features { list-style: none; margin-bottom: 24px; }
+        .price-features li { padding: 6px 0; font-size: 14px; color: #374151; display: flex; align-items: flex-start; gap: 8px; }
+        .price-features li::before { content: '\2713'; color: var(--color-primary); font-weight: 700; flex-shrink: 0; }
+
+        /* === 9. Features Section === */
+        .features-section { padding: 60px 0; }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            padding: 24px;
+            background: white;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--color-border);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .feature-icon { font-size: 36px; margin-bottom: 12px; }
+        .feature-card h4 { font-size: 15px; margin-bottom: 6px; }
+        .feature-card p { font-size: 13px; color: var(--color-text-secondary); }
+
+        /* === 10. Footer === */
+        .footer {
+            background: #111827;
+            color: #d1d5db;
+            padding: 40px 0 24px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-brand h3 { color: white; font-size: 1.25rem; margin-bottom: 8px; }
+        .footer-brand p { font-size: 14px; max-width: 300px; }
+
+        .footer-links h4 { color: white; font-size: 14px; margin-bottom: 12px; }
+        .footer-links a { display: block; color: #9ca3af; text-decoration: none; font-size: 14px; padding: 3px 0; transition: color 0.2s; }
+        .footer-links a:hover { color: white; }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* === 11. Utilities === */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* === 12. Responsive === */
+        @media (max-width: 768px) {
+            .hero { padding: 40px 0 60px; }
+            .hero-stats { gap: 24px; }
+            .calc-card { padding: 20px; }
+            .message-content { max-width: 85%; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; }
+            .footer-content { flex-direction: column; }
+            .nav-links .btn-outline { display: none; }
+        }
+
+        /* === 13. Print styles for PDF === */
+        @media print {
+            body { background: white; }
+            .hero, .pricing-section, .features-section, .footer, .calc-card, .nav { display: none; }
+            .slip-gaji-print { display: block !important; }
+        }
+
+        .slip-gaji-print {
+            display: none;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px;
+            font-family: var(--font);
+        }
+
+        .slip-header { text-align: center; border-bottom: 3px solid var(--color-text); padding-bottom: 16px; margin-bottom: 20px; }
+        .slip-header h1 { font-size: 18px; }
+        .slip-header p { font-size: 13px; color: var(--color-text-secondary); }
+
+        .slip-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        .slip-table td { padding: 8px 12px; border: 1px solid #ddd; font-size: 14px; }
+        .slip-table .label-col { background: #f9fafb; font-weight: 500; width: 50%; }
+        .slip-total { font-size: 18px; font-weight: 700; text-align: center; padding: 16px; background: #f0fdf4; border-radius: var(--radius-sm); margin: 20px 0; }
+        .slip-footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; }
+        .slip-signature { text-align: center; margin-top: 60px; }
+        .slip-signature-line { border-top: 1px solid #333; width: 200px; margin: 0 auto; padding-top: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- ============ HERO SECTION ============ -->
+<section class="hero" id="top">
+    <div class="container">
+        <nav class="nav">
+            <a href="#top" class="nav-logo">Gaji.AI</a>
+            <div class="nav-links">
+                <button class="lang-btn active" id="btnLangId" onclick="setLang('id')">ID</button>
+                <button class="lang-btn" id="btnLangEn" onclick="setLang('en')">EN</button>
+                <a href="#calculator" class="btn btn-outline btn-sm" id="navCalcBtn">Hitung Gratis</a>
+            </div>
+        </nav>
+        <div class="hero-content">
+            <div class="hero-badge" id="heroBadge">PPh 21 TER 2024 &bull; BPJS 2025 &bull; 38 Provinsi</div>
+            <h1 id="heroTitle">Hitung Gaji Karyawan dalam 5 Detik</h1>
+            <p id="heroDesc">Kalkulator payroll Indonesia berbasis AI. Cukup ketik data gaji dalam bahasa sehari-hari, dapatkan perhitungan PPh 21, BPJS, lembur & slip gaji instan.</p>
+            <div class="hero-cta">
+                <a href="#calculator" class="btn btn-white btn-lg" id="heroCtaCalc">Coba Gratis Sekarang</a>
+                <a href="#pricing" class="btn btn-outline btn-lg" id="heroCtaPricing">Lihat Harga</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-value">38</div>
+                    <div class="hero-stat-label" id="statProvinsi">Provinsi UMP</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">100%</div>
+                    <div class="hero-stat-label" id="statCompliance">Sesuai Hukum</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-value">5x</div>
+                    <div class="hero-stat-label" id="statFree">Gratis</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ CALCULATOR SECTION ============ -->
+<section class="calc-section" id="calculator">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="calcTitle">Kalkulator Gaji AI</h2>
+            <p id="calcDesc">Ketik data gaji dalam format bebas. AI akan otomatis menghitung semuanya.</p>
+        </div>
+
+        <div class="calc-card">
+            <div class="quick-examples">
+                <span class="quick-label" id="quickLabel">Contoh:</span>
+                <button class="example-btn" onclick="fillExample('Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP')">Budi - Jakarta</button>
+                <button class="example-btn" onclick="fillExample('Siti, gaji 5.5 juta, Surabaya, K/1, NPWP')">Siti - Surabaya</button>
+                <button class="example-btn" onclick="fillExample('Ahmad, gaji 15 jt, Bali, lembur 10 jam, ada NPWP, K/2')">Ahmad - Bali</button>
+                <button class="example-btn" onclick="fillExample('Dewi, gaji 4 jt, Yogyakarta')">Dewi - Yogyakarta</button>
+            </div>
+
+            <div class="chat-container" id="chatContainer">
+                <div class="message ai">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content" id="welcomeMessage">
+                        Halo! Saya <strong>Gaji.AI</strong>, asisten payroll Anda.<br><br>
+                        Ketik data karyawan, misalnya:<br>
+                        <em>"Budi, gaji 8 juta, Jakarta, lembur 20 jam, ada NPWP"</em><br><br>
+                        Saya hitung otomatis:<br>
+                        &#10003; PPh 21 (TER 2024)<br>
+                        &#10003; BPJS Kesehatan & Ketenagakerjaan<br>
+                        &#10003; Lembur (1/173, koefisien 1.5x & 2x)<br>
+                        &#10003; Take-Home Pay<br>
+                        &#10003; Optimasi Harmoni<br><br>
+                        Silakan mulai!
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Contoh: Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP" />
+                <button class="btn btn-primary" onclick="sendMessage()" id="sendBtn">
+                    <span id="sendBtnText">Hitung</span>
+                    <span id="sendBtnLoading" class="loading hidden"></span>
+                </button>
+            </div>
+
+            <div class="free-counter" id="freeCounter">
+                <span id="freeCounterText">Perhitungan gratis tersisa: <strong id="freeCountNum">5</strong> / 5</span>
+            </div>
+
+            <!-- Results -->
+            <div id="resultsSection" class="results-section hidden">
+                <div class="toggle-container">
+                    <button class="toggle-btn active" onclick="switchMode('standard')" id="toggleStandard">Standar</button>
+                    <button class="toggle-btn" onclick="switchMode('harmony')" id="toggleHarmony">Harmoni Optimal</button>
+                </div>
+
+                <!-- Standard Results -->
+                <div id="standardResults">
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h4 id="lblGross">Gaji Bruto</h4>
+                            <div class="value" id="valGross">-</div>
+                        </div>
+                        <div class="result-card">
+                            <h4 id="lblDeductions">Total Potongan</h4>
+                            <div class="value" id="valDeductions">-</div>
+                        </div>
+                        <div class="result-card highlight">
+                            <h4 id="lblNet">Gaji Bersih (Take-Home)</h4>
+                            <div class="value" id="valNet">-</div>
+                        </div>
+                        <div class="result-card">
+                            <h4 id="lblCost">Total Biaya Perusahaan</h4>
+                            <div class="value" id="valCost">-</div>
+                        </div>
+                    </div>
+
+                    <div class="breakdown">
+                        <h3 id="brkDeductTitle">Rincian Potongan Karyawan</h3>
+                        <div class="breakdown-item"><span class="label">PPh 21 (TER)</span><span class="amount" id="brkPPh21">-</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS Kesehatan (1%)</span><span class="amount" id="brkBpjsKes">-</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JHT (2%)</span><span class="amount" id="brkJHT">-</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JP (1%)</span><span class="amount" id="brkJP">-</span></div>
+                    </div>
+
+                    <div class="breakdown">
+                        <h3 id="brkCompanyTitle">Kontribusi Perusahaan</h3>
+                        <div class="breakdown-item"><span class="label">BPJS Kesehatan (4%)</span><span class="amount" id="brkCKes">-</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JHT (3.7%)</span><span class="amount" id="brkCJHT">-</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JP (2%)</span><span class="amount" id="brkCJP">-</span></div>
+                        <div class="breakdown-item"><span class="label">JKK (0.54%)</span><span class="amount" id="brkCJKK">-</span></div>
+                        <div class="breakdown-item"><span class="label">JKM (0.3%)</span><span class="amount" id="brkCJKM">-</span></div>
+                    </div>
+
+                    <div class="breakdown" id="overtimeBreakdown" style="display:none">
+                        <h3>Rincian Lembur</h3>
+                        <div class="breakdown-item"><span class="label">Jam lembur</span><span class="amount" id="brkOTHours">-</span></div>
+                        <div class="breakdown-item"><span class="label">Tarif per jam (1/173)</span><span class="amount" id="brkOTRate">-</span></div>
+                        <div class="breakdown-item"><span class="label">Jam ke-1 (1.5x)</span><span class="amount" id="brkOT1st">-</span></div>
+                        <div class="breakdown-item"><span class="label" id="brkOTRestLabel">Jam ke-2+ (2.0x)</span><span class="amount" id="brkOTRest">-</span></div>
+                        <div class="breakdown-item"><span class="label"><strong>Total Lembur</strong></span><span class="amount" id="brkOTTotal"><strong>-</strong></span></div>
+                    </div>
+                </div>
+
+                <!-- Harmony Results -->
+                <div id="harmonyResults" class="hidden">
+                    <div class="results-grid">
+                        <div class="result-card"><h4>Gaji Pokok (70%)</h4><div class="value" id="harmBase">-</div></div>
+                        <div class="result-card"><h4>Tunjangan Bebas Pajak</h4><div class="value" id="harmAllow">-</div></div>
+                        <div class="result-card highlight"><h4>Take-Home (Meningkat!)</h4><div class="value" id="harmNet">-</div></div>
+                        <div class="result-card"><h4>Penghematan per Bulan</h4><div class="value" id="harmSave">-</div></div>
+                    </div>
+
+                    <div class="breakdown">
+                        <h3 id="harmTitle">Rekomendasi Struktur Optimal</h3>
+                        <div class="breakdown-item"><span class="label">Gaji Pokok (70%)</span><span class="amount" id="harmBase70">-</span></div>
+                        <div class="breakdown-item"><span class="label">Tunjangan Transportasi (15%)</span><span class="amount" id="harmTransport">-</span></div>
+                        <div class="breakdown-item"><span class="label">Tunjangan Makan (15%)</span><span class="amount" id="harmMeal">-</span></div>
+                        <div class="breakdown-item"><span class="label">Total Gross (sama)</span><span class="amount" id="harmTotalGross">-</span></div>
+                        <div class="breakdown-item"><span class="label">PPh 21 Baru</span><span class="amount" id="harmNewTax">-</span></div>
+                        <div class="breakdown-item"><span class="label"><strong>Penghematan Pajak</strong></span><span class="amount" id="harmTaxSave"><strong>-</strong></span></div>
+                    </div>
+
+                    <div class="hint-box" id="harmonyHint">
+                        <strong>Keuntungan Harmoni:</strong> Dengan memecah gaji menjadi komponen tunjangan tidak tetap, basis perhitungan pajak dan BPJS menjadi lebih rendah. Karyawan mendapat Take-Home lebih besar, perusahaan hemat biaya. 100% legal sesuai UU Ketenagakerjaan.
+                    </div>
+                </div>
+
+                <!-- PDF Action -->
+                <div class="pdf-actions">
+                    <button class="btn btn-accent btn-sm" onclick="generateSlipGaji()" id="pdfBtn">Cetak Slip Gaji PDF</button>
+                    <button class="btn btn-sm" style="background:#f3f4f6;color:#374151" onclick="copyResult()" id="copyBtn">Salin Hasil</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FEATURES SECTION ============ -->
+<section class="features-section" id="features">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="featTitle">Mengapa Gaji.AI?</h2>
+            <p id="featDesc">Solusi payroll paling sederhana dan akurat untuk bisnis Indonesia</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">&#129504;</div>
+                <h4>AI Natural Language</h4>
+                <p id="f1">Ketik dalam bahasa sehari-hari, AI langsung mengerti</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#9878;&#65039;</div>
+                <h4>100% Compliance</h4>
+                <p id="f2">Sesuai PPh 21 TER 2024, BPJS 2025, UU Cipta Kerja</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128205;</div>
+                <h4>38 Provinsi UMP</h4>
+                <p id="f3">Database UMP/UMK lengkap seluruh Indonesia</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#10024;</div>
+                <h4>Harmoni Optimal</h4>
+                <p id="f4">Optimalkan take-home pay secara legal</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128196;</div>
+                <h4>Slip Gaji PDF</h4>
+                <p id="f5">Generate slip gaji profesional instan</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#128176;</div>
+                <h4>Rp 3.000/Hitung</h4>
+                <p id="f6">Hemat 99% dibanding akuntan tradisional</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ PRICING SECTION ============ -->
+<section class="pricing-section" id="pricing">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="pricingTitle">Pilih Paket Anda</h2>
+            <p id="pricingDesc">Mulai gratis, upgrade kapan saja</p>
+        </div>
+        <div class="pricing-grid">
+            <!-- Tier 1: Sobat -->
+            <div class="price-card">
+                <div class="price-name" id="t1Name">Sobat Gaji</div>
+                <div class="price-desc" id="t1Desc">Perhitungan cepat via chat</div>
+                <div class="price-amount">
+                    <span class="currency">Rp</span>
+                    <span class="number">3.000</span>
+                    <span class="period" id="t1Period">/perhitungan</span>
+                </div>
+                <ul class="price-features">
+                    <li id="t1f1">5 perhitungan gratis</li>
+                    <li id="t1f2">PPh 21 TER 2024</li>
+                    <li id="t1f3">BPJS lengkap</li>
+                    <li id="t1f4">Lembur (1/173)</li>
+                    <li id="t1f5">Slip Gaji PDF</li>
+                </ul>
+                <a href="#calculator" class="btn btn-primary" style="width:100%;justify-content:center" id="t1Btn">Mulai Gratis</a>
+            </div>
+
+            <!-- Tier 2: Pro -->
+            <div class="price-card popular">
+                <div class="price-name" id="t2Name">Gaji Pro</div>
+                <div class="price-desc" id="t2Desc">Dashboard online lengkap</div>
+                <div class="price-amount">
+                    <span class="currency">Rp</span>
+                    <span class="number">150.000</span>
+                    <span class="period" id="t2Period">/bulan</span>
+                </div>
+                <ul class="price-features">
+                    <li id="t2f1">Semua fitur Sobat Gaji</li>
+                    <li id="t2f2">Perhitungan unlimited</li>
+                    <li id="t2f3">Pilih dari 38 provinsi UMP</li>
+                    <li id="t2f4">Surat Keterangan Penghasilan</li>
+                    <li id="t2f5">Riwayat perhitungan 12 bulan</li>
+                    <li id="t2f6">Export CSV</li>
+                </ul>
+                <button class="btn btn-primary" style="width:100%;justify-content:center" id="t2Btn" onclick="alert('Coming soon! Hubungi kami via WhatsApp.')">Pilih Pro</button>
+            </div>
+
+            <!-- Tier 3: Harmony -->
+            <div class="price-card">
+                <div class="price-name" id="t3Name">Harmony</div>
+                <div class="price-desc" id="t3Desc">Optimasi pajak & BPJS</div>
+                <div class="price-amount">
+                    <span class="currency">Rp</span>
+                    <span class="number">300.000</span>
+                    <span class="period" id="t3Period">/bulan</span>
+                </div>
+                <ul class="price-features">
+                    <li id="t3f1">Semua fitur Gaji Pro</li>
+                    <li id="t3f2">Optimasi struktur gaji</li>
+                    <li id="t3f3">Gross-up (perusahaan bayar semua)</li>
+                    <li id="t3f4">Konfigurasi siapa bayar BPJS/PPh</li>
+                    <li id="t3f5">Simulasi penghematan</li>
+                </ul>
+                <button class="btn btn-accent" style="width:100%;justify-content:center" id="t3Btn" onclick="alert('Coming soon! Hubungi kami via WhatsApp.')">Pilih Harmony</button>
+            </div>
+
+            <!-- Tier 4: Architect -->
+            <div class="price-card">
+                <div class="price-name" id="t4Name">Architect</div>
+                <div class="price-desc" id="t4Desc">Kontrol penuh & HRIS</div>
+                <div class="price-amount">
+                    <span class="currency">Rp</span>
+                    <span class="number">500.000</span>
+                    <span class="period" id="t4Period">/bulan</span>
+                </div>
+                <ul class="price-features">
+                    <li id="t4f1">Semua fitur Harmony</li>
+                    <li id="t4f2">Database karyawan lengkap</li>
+                    <li id="t4f3">Reverse-engineering tabeel</li>
+                    <li id="t4f4">Formula kustom (1/172, dll)</li>
+                    <li id="t4f5">Laporan pajak 1721-A1</li>
+                    <li id="t4f6">Riwayat 5 tahun + audit</li>
+                </ul>
+                <button class="btn btn-sm" style="width:100%;justify-content:center;background:#111827;color:white" id="t4Btn" onclick="alert('Coming soon! Hubungi kami via WhatsApp.')">Hubungi Kami</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>Gaji.AI</h3>
+                <p id="footerDesc">Kalkulator payroll Indonesia berbasis AI. Akurat, cepat, dan sesuai hukum.</p>
+            </div>
+            <div class="footer-links">
+                <h4 id="footerProduct">Produk</h4>
+                <a href="#calculator" id="footerCalc">Kalkulator Gratis</a>
+                <a href="#pricing" id="footerPricing">Harga</a>
+                <a href="#features" id="footerFeatures">Fitur</a>
+            </div>
+            <div class="footer-links">
+                <h4 id="footerLegal">Legal</h4>
+                <a href="#">PPh 21 TER 2024</a>
+                <a href="#">BPJS 2025</a>
+                <a href="#">UMP/UMK 2025</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 Gaji.AI. All rights reserved.
+        </div>
+    </div>
+</footer>
+
+<!-- ============ SLIP GAJI PRINT TEMPLATE ============ -->
+<div class="slip-gaji-print" id="slipGajiPrint">
+    <div class="slip-header">
+        <h1 id="slipCompany">SLIP GAJI KARYAWAN</h1>
+        <p id="slipPeriod">-</p>
+    </div>
+    <table class="slip-table">
+        <tr><td class="label-col">Nama Karyawan</td><td id="slipName">-</td></tr>
+        <tr><td class="label-col">Lokasi / Provinsi</td><td id="slipRegion">-</td></tr>
+        <tr><td class="label-col">Status PTKP</td><td id="slipPTKP">-</td></tr>
+        <tr><td class="label-col">NPWP</td><td id="slipNPWP">-</td></tr>
+    </table>
+    <h3 style="margin:16px 0 8px">Pendapatan</h3>
+    <table class="slip-table">
+        <tr><td class="label-col">Gaji Pokok</td><td id="slipGajiPokok">-</td></tr>
+        <tr><td class="label-col">Lembur</td><td id="slipLembur">-</td></tr>
+        <tr><td class="label-col"><strong>Total Pendapatan Bruto</strong></td><td id="slipGross"><strong>-</strong></td></tr>
+    </table>
+    <h3 style="margin:16px 0 8px">Potongan</h3>
+    <table class="slip-table">
+        <tr><td class="label-col">PPh 21</td><td id="slipPPh21">-</td></tr>
+        <tr><td class="label-col">BPJS Kesehatan (1%)</td><td id="slipBpjsKes">-</td></tr>
+        <tr><td class="label-col">BPJS JHT (2%)</td><td id="slipJHT">-</td></tr>
+        <tr><td class="label-col">BPJS JP (1%)</td><td id="slipJP">-</td></tr>
+        <tr><td class="label-col"><strong>Total Potongan</strong></td><td id="slipTotalPot"><strong>-</strong></td></tr>
+    </table>
+    <div class="slip-total" id="slipNetTotal">TAKE HOME PAY: -</div>
+    <div class="slip-footer">
+        <div>Dicetak: <span id="slipDate">-</span></div>
+        <div>Powered by Gaji.AI</div>
+    </div>
+    <div class="slip-signature">
+        <br><br>
+        <div class="slip-signature-line">Tanda Tangan</div>
+    </div>
+</div>
+
+<!-- ============ JAVASCRIPT ============ -->
+<script>
+'use strict';
+
+// ===================================================================
+// 1. DATA: TER RATES (PP 58/2023, PMK 168/2023)
+// ===================================================================
+
+// Category A: PTKP TK/0, TK/1, K/0
+const TER_A = [
+    { max: 5_400_000, rate: 0 },
+    { max: 5_650_000, rate: 0.0025 },
+    { max: 5_950_000, rate: 0.005 },
+    { max: 6_300_000, rate: 0.0075 },
+    { max: 6_750_000, rate: 0.01 },
+    { max: 7_500_000, rate: 0.0125 },
+    { max: 8_550_000, rate: 0.015 },
+    { max: 9_650_000, rate: 0.0175 },
+    { max: 10_050_000, rate: 0.02 },
+    { max: 10_350_000, rate: 0.0225 },
+    { max: 10_700_000, rate: 0.025 },
+    { max: 11_050_000, rate: 0.0275 },
+    { max: 11_600_000, rate: 0.03 },
+    { max: 12_500_000, rate: 0.0325 },
+    { max: 13_750_000, rate: 0.035 },
+    { max: 15_100_000, rate: 0.0375 },
+    { max: 16_950_000, rate: 0.04 },
+    { max: 19_750_000, rate: 0.045 },
+    { max: 24_150_000, rate: 0.05 },
+    { max: 26_450_000, rate: 0.06 },
+    { max: 28_000_000, rate: 0.07 },
+    { max: 30_050_000, rate: 0.08 },
+    { max: 32_400_000, rate: 0.09 },
+    { max: 35_400_000, rate: 0.10 },
+    { max: 39_100_000, rate: 0.11 },
+    { max: 43_850_000, rate: 0.12 },
+    { max: 47_800_000, rate: 0.13 },
+    { max: 54_250_000, rate: 0.14 },
+    { max: 62_200_000, rate: 0.15 },
+    { max: 66_700_000, rate: 0.16 },
+    { max: 73_500_000, rate: 0.17 },
+    { max: 85_850_000, rate: 0.18 },
+    { max: 110_000_000, rate: 0.19 },
+    { max: 134_000_000, rate: 0.20 },
+    { max: 169_000_000, rate: 0.21 },
+    { max: 221_000_000, rate: 0.22 },
+    { max: 390_000_000, rate: 0.23 },
+    { max: 463_000_000, rate: 0.24 },
+    { max: 561_000_000, rate: 0.25 },
+    { max: 709_000_000, rate: 0.26 },
+    { max: 965_000_000, rate: 0.27 },
+    { max: 1_419_000_000, rate: 0.28 },
+    { max: Infinity, rate: 0.30 }
+];
+
+// Category B: PTKP TK/2, TK/3, K/1, K/2
+const TER_B = [
+    { max: 6_200_000, rate: 0 },
+    { max: 6_500_000, rate: 0.0025 },
+    { max: 6_850_000, rate: 0.005 },
+    { max: 7_300_000, rate: 0.0075 },
+    { max: 9_200_000, rate: 0.01 },
+    { max: 10_750_000, rate: 0.015 },
+    { max: 11_250_000, rate: 0.02 },
+    { max: 11_600_000, rate: 0.025 },
+    { max: 12_600_000, rate: 0.03 },
+    { max: 13_600_000, rate: 0.035 },
+    { max: 14_950_000, rate: 0.04 },
+    { max: 16_400_000, rate: 0.045 },
+    { max: 18_450_000, rate: 0.05 },
+    { max: 21_850_000, rate: 0.06 },
+    { max: 26_000_000, rate: 0.07 },
+    { max: 27_700_000, rate: 0.08 },
+    { max: 29_350_000, rate: 0.09 },
+    { max: 33_950_000, rate: 0.10 },
+    { max: 37_100_000, rate: 0.11 },
+    { max: 41_100_000, rate: 0.12 },
+    { max: 45_800_000, rate: 0.13 },
+    { max: 49_500_000, rate: 0.14 },
+    { max: 56_300_000, rate: 0.15 },
+    { max: 62_200_000, rate: 0.16 },
+    { max: 68_600_000, rate: 0.17 },
+    { max: 77_500_000, rate: 0.18 },
+    { max: 89_000_000, rate: 0.19 },
+    { max: 103_000_000, rate: 0.20 },
+    { max: 134_000_000, rate: 0.21 },
+    { max: 169_000_000, rate: 0.22 },
+    { max: 221_000_000, rate: 0.23 },
+    { max: 390_000_000, rate: 0.24 },
+    { max: 463_000_000, rate: 0.25 },
+    { max: 561_000_000, rate: 0.26 },
+    { max: 709_000_000, rate: 0.27 },
+    { max: 965_000_000, rate: 0.28 },
+    { max: 1_419_000_000, rate: 0.29 },
+    { max: Infinity, rate: 0.30 }
+];
+
+// Category C: PTKP K/3
+const TER_C = [
+    { max: 6_600_000, rate: 0 },
+    { max: 6_950_000, rate: 0.0025 },
+    { max: 7_350_000, rate: 0.005 },
+    { max: 7_800_000, rate: 0.0075 },
+    { max: 8_850_000, rate: 0.01 },
+    { max: 9_800_000, rate: 0.0125 },
+    { max: 10_950_000, rate: 0.015 },
+    { max: 11_200_000, rate: 0.02 },
+    { max: 12_050_000, rate: 0.025 },
+    { max: 12_950_000, rate: 0.03 },
+    { max: 14_150_000, rate: 0.035 },
+    { max: 15_550_000, rate: 0.04 },
+    { max: 17_050_000, rate: 0.045 },
+    { max: 19_500_000, rate: 0.05 },
+    { max: 22_700_000, rate: 0.06 },
+    { max: 26_600_000, rate: 0.07 },
+    { max: 28_100_000, rate: 0.08 },
+    { max: 30_100_000, rate: 0.09 },
+    { max: 34_300_000, rate: 0.10 },
+    { max: 37_900_000, rate: 0.11 },
+    { max: 41_900_000, rate: 0.12 },
+    { max: 46_900_000, rate: 0.13 },
+    { max: 51_400_000, rate: 0.14 },
+    { max: 58_500_000, rate: 0.15 },
+    { max: 66_700_000, rate: 0.16 },
+    { max: 74_500_000, rate: 0.17 },
+    { max: 83_200_000, rate: 0.18 },
+    { max: 95_600_000, rate: 0.19 },
+    { max: 110_000_000, rate: 0.20 },
+    { max: 134_000_000, rate: 0.21 },
+    { max: 169_000_000, rate: 0.22 },
+    { max: 221_000_000, rate: 0.23 },
+    { max: 390_000_000, rate: 0.24 },
+    { max: 463_000_000, rate: 0.25 },
+    { max: 561_000_000, rate: 0.26 },
+    { max: 709_000_000, rate: 0.27 },
+    { max: 965_000_000, rate: 0.28 },
+    { max: 1_419_000_000, rate: 0.29 },
+    { max: Infinity, rate: 0.30 }
+];
+
+const TER_TABLES = { A: TER_A, B: TER_B, C: TER_C };
+
+// PTKP status to TER category mapping
+const PTKP_TO_TER = {
+    'TK/0': 'A', 'TK/1': 'A', 'K/0': 'A',
+    'TK/2': 'B', 'TK/3': 'B', 'K/1': 'B', 'K/2': 'B',
+    'K/3': 'C'
+};
+
+// PTKP annual amounts (for reference and December reconciliation)
+const PTKP_AMOUNTS = {
+    'TK/0': 54_000_000, 'TK/1': 58_500_000, 'TK/2': 63_000_000, 'TK/3': 67_500_000,
+    'K/0': 58_500_000, 'K/1': 63_000_000, 'K/2': 67_500_000, 'K/3': 72_000_000
+};
+
+// ===================================================================
+// 2. DATA: UMP 2025 (38 PROVINCES)
+// ===================================================================
+const UMP_DATABASE = {
+    'aceh':              { ump: 3_413_666, label: 'Aceh' },
+    'sumatera utara':    { ump: 2_895_587, label: 'Sumatera Utara' },
+    'medan':             { ump: 2_895_587, label: 'Sumatera Utara' },
+    'sumatera barat':    { ump: 2_811_449, label: 'Sumatera Barat' },
+    'padang':            { ump: 2_811_449, label: 'Sumatera Barat' },
+    'riau':              { ump: 3_294_625, label: 'Riau' },
+    'pekanbaru':         { ump: 3_294_625, label: 'Riau' },
+    'kepulauan riau':    { ump: 3_526_891, label: 'Kepulauan Riau' },
+    'batam':             { ump: 3_526_891, label: 'Kepulauan Riau' },
+    'jambi':             { ump: 3_053_089, label: 'Jambi' },
+    'sumatera selatan':  { ump: 3_456_874, label: 'Sumatera Selatan' },
+    'palembang':         { ump: 3_456_874, label: 'Sumatera Selatan' },
+    'bengkulu':          { ump: 2_515_629, label: 'Bengkulu' },
+    'lampung':           { ump: 2_759_541, label: 'Lampung' },
+    'bangka belitung':   { ump: 3_640_000, label: 'Bangka Belitung' },
+    'dki jakarta':       { ump: 5_396_760, label: 'DKI Jakarta' },
+    'jakarta':           { ump: 5_396_760, label: 'DKI Jakarta' },
+    'jawa barat':        { ump: 2_191_569, label: 'Jawa Barat' },
+    'bandung':           { ump: 4_209_309, label: 'Kota Bandung (UMK)' },
+    'bekasi':            { ump: 5_343_430, label: 'Kota Bekasi (UMK)' },
+    'bogor':             { ump: 4_813_988, label: 'Kota Bogor (UMK)' },
+    'depok':             { ump: 4_686_703, label: 'Kota Depok (UMK)' },
+    'karawang':          { ump: 5_347_837, label: 'Kab. Karawang (UMK)' },
+    'jawa tengah':       { ump: 2_109_635, label: 'Jawa Tengah' },
+    'semarang':          { ump: 3_243_969, label: 'Kota Semarang (UMK)' },
+    'di yogyakarta':     { ump: 2_125_898, label: 'DI Yogyakarta' },
+    'yogyakarta':        { ump: 2_125_898, label: 'DI Yogyakarta' },
+    'jogja':             { ump: 2_125_898, label: 'DI Yogyakarta' },
+    'jawa timur':        { ump: 2_165_244, label: 'Jawa Timur' },
+    'surabaya':          { ump: 4_725_479, label: 'Kota Surabaya (UMK)' },
+    'banten':            { ump: 2_911_050, label: 'Banten' },
+    'tangerang':         { ump: 4_760_289, label: 'Kota Tangerang (UMK)' },
+    'bali':              { ump: 2_988_000, label: 'Bali' },
+    'badung':            { ump: 3_527_783, label: 'Kab. Badung (UMK)' },
+    'gianyar':           { ump: 3_150_000, label: 'Kab. Gianyar (UMK)' },
+    'denpasar':          { ump: 3_227_500, label: 'Kota Denpasar (UMK)' },
+    'nusa tenggara barat': { ump: 2_495_500, label: 'NTB' },
+    'lombok':            { ump: 2_495_500, label: 'NTB' },
+    'nusa tenggara timur': { ump: 2_168_000, label: 'NTT' },
+    'kalimantan barat':  { ump: 2_698_043, label: 'Kalimantan Barat' },
+    'pontianak':         { ump: 2_698_043, label: 'Kalimantan Barat' },
+    'kalimantan tengah': { ump: 3_276_135, label: 'Kalimantan Tengah' },
+    'kalimantan selatan': { ump: 3_242_674, label: 'Kalimantan Selatan' },
+    'banjarmasin':       { ump: 3_242_674, label: 'Kalimantan Selatan' },
+    'kalimantan timur':  { ump: 3_461_523, label: 'Kalimantan Timur' },
+    'balikpapan':        { ump: 3_461_523, label: 'Kalimantan Timur' },
+    'samarinda':         { ump: 3_461_523, label: 'Kalimantan Timur' },
+    'kalimantan utara':  { ump: 3_363_645, label: 'Kalimantan Utara' },
+    'sulawesi utara':    { ump: 3_571_484, label: 'Sulawesi Utara' },
+    'manado':            { ump: 3_571_484, label: 'Sulawesi Utara' },
+    'sulawesi tengah':   { ump: 2_700_932, label: 'Sulawesi Tengah' },
+    'sulawesi selatan':  { ump: 3_460_410, label: 'Sulawesi Selatan' },
+    'makassar':          { ump: 3_460_410, label: 'Sulawesi Selatan' },
+    'sulawesi tenggara': { ump: 2_911_528, label: 'Sulawesi Tenggara' },
+    'gorontalo':         { ump: 2_989_350, label: 'Gorontalo' },
+    'sulawesi barat':    { ump: 2_769_000, label: 'Sulawesi Barat' },
+    'maluku':            { ump: 2_936_407, label: 'Maluku' },
+    'maluku utara':      { ump: 2_975_000, label: 'Maluku Utara' },
+    'papua':             { ump: 3_864_696, label: 'Papua' },
+    'papua barat':       { ump: 3_445_000, label: 'Papua Barat' }
+};
+
+// ===================================================================
+// 3. DATA: BPJS RATES
+// ===================================================================
+const BPJS = {
+    kesehatan: { employee: 0.01, employer: 0.04, maxBase: 12_000_000 },
+    jht:       { employee: 0.02, employer: 0.037 },
+    jp:        { employee: 0.01, employer: 0.02, maxBase: 10_547_400 },
+    jkk:       0.0054,   // Risk class II (Low) default
+    jkm:       0.003
+};
+
+// ===================================================================
+// 4. STATE
+// ===================================================================
+const FREE_LIMIT = 5;
+let calcCount = parseInt(localStorage.getItem('gaji_calc_count') || '0');
+let currentCalc = null;
+let currentLang = 'id';
+
+// ===================================================================
+// 5. COMPLIANCE ENGINE — CORE CALCULATIONS
+// ===================================================================
+
+/**
+ * Get TER rate for given gross income and PTKP category
+ * @param {number} grossMonthly - Monthly gross income
+ * @param {string} ptkpStatus - PTKP status (e.g., 'TK/0', 'K/1')
+ * @returns {number} TER percentage (0 to 0.30)
+ */
+function getTERRate(grossMonthly, ptkpStatus) {
+    const category = PTKP_TO_TER[ptkpStatus] || 'A';
+    const table = TER_TABLES[category];
+    for (const bracket of table) {
+        if (grossMonthly <= bracket.max) return bracket.rate;
+    }
+    return table[table.length - 1].rate;
+}
+
+/**
+ * Calculate PPh 21 using TER method
+ * No NPWP adds 20% penalty
+ */
+function calcPPh21(grossMonthly, ptkpStatus, hasNPWP) {
+    const rate = getTERRate(grossMonthly, ptkpStatus);
+    let tax = Math.round(grossMonthly * rate);
+    if (!hasNPWP) tax = Math.round(tax * 1.2);
+    return tax;
+}
+
+/**
+ * Calculate all BPJS contributions
+ */
+function calcBPJS(baseSalary) {
+    const basisKes = Math.min(baseSalary, BPJS.kesehatan.maxBase);
+    const basisJP = Math.min(baseSalary, BPJS.jp.maxBase);
+
+    return {
+        empKesehatan: Math.round(basisKes * BPJS.kesehatan.employee),
+        empJHT:       Math.round(baseSalary * BPJS.jht.employee),
+        empJP:        Math.round(basisJP * BPJS.jp.employee),
+        coKesehatan:  Math.round(basisKes * BPJS.kesehatan.employer),
+        coJHT:        Math.round(baseSalary * BPJS.jht.employer),
+        coJP:         Math.round(basisJP * BPJS.jp.employer),
+        coJKK:        Math.round(baseSalary * BPJS.jkk),
+        coJKM:        Math.round(baseSalary * BPJS.jkm)
+    };
+}
+
+/**
+ * Calculate overtime pay per Indonesian law (1/173 formula)
+ * 1st hour: 1.5x, subsequent hours: 2.0x
+ */
+function calcOvertime(baseSalary, hours) {
+    if (!hours || hours <= 0) return { total: 0, hourlyRate: 0, firstHour: 0, restHours: 0 };
+    const hourlyRate = baseSalary / 173;
+    const firstHour = Math.min(hours, 1) * hourlyRate * 1.5;
+    const restHours = Math.max(0, hours - 1) * hourlyRate * 2.0;
+    return {
+        total: Math.round(firstHour + restHours),
+        hourlyRate: Math.round(hourlyRate),
+        firstHour: Math.round(firstHour),
+        restHours: Math.round(restHours)
+    };
+}
+
+/**
+ * Full payroll calculation
+ */
+function calculatePayroll(data) {
+    const ot = calcOvertime(data.baseSalary, data.overtime);
+    const gross = data.baseSalary + ot.total;
+    const bpjs = calcBPJS(data.baseSalary);
+    const pph21 = calcPPh21(gross, data.ptkp, data.hasNPWP);
+
+    const totalEmpDeductions = pph21 + bpjs.empKesehatan + bpjs.empJHT + bpjs.empJP;
+    const net = gross - totalEmpDeductions;
+    const companyCost = gross + bpjs.coKesehatan + bpjs.coJHT + bpjs.coJP + bpjs.coJKK + bpjs.coJKM;
+
+    // Harmony calculation: restructure to 70% base + 30% allowances
+    const harmBase = Math.round(gross * 0.70);
+    const harmAllow = gross - harmBase;
+    const harmBPJS = calcBPJS(harmBase);
+    const harmPPh21 = calcPPh21(harmBase, data.ptkp, data.hasNPWP);
+    const harmTotalDeductions = harmPPh21 + harmBPJS.empKesehatan + harmBPJS.empJHT + harmBPJS.empJP;
+    const harmNet = gross - harmTotalDeductions;
+
+    return {
+        input: data,
+        overtime: ot,
+        gross,
+        pph21,
+        bpjs,
+        totalDeductions: totalEmpDeductions,
+        net,
+        companyCost,
+        harmony: {
+            baseSalary: harmBase,
+            allowances: harmAllow,
+            transport: Math.round(harmAllow * 0.5),
+            meal: Math.round(harmAllow * 0.5),
+            pph21: harmPPh21,
+            bpjs: harmBPJS,
+            totalDeductions: harmTotalDeductions,
+            net: harmNet,
+            savings: harmNet - net,
+            taxSavings: pph21 - harmPPh21
+        }
+    };
+}
+
+// ===================================================================
+// 6. NATURAL LANGUAGE PARSER
+// ===================================================================
+
+function parseInput(text) {
+    const data = {
+        name: '',
+        baseSalary: 0,
+        region: '',
+        regionLabel: '',
+        regionUMP: 0,
+        ptkp: 'TK/0',
+        overtime: 0,
+        hasNPWP: false
+    };
+
+    // Extract name (first word that looks like a name)
+    const nameMatch = text.match(/^([A-Za-z][A-Za-z]+)/i);
+    if (nameMatch) data.name = nameMatch[1];
+
+    // Extract salary
+    const salaryPatterns = [
+        /(?:gaji|salary|gajipokok)\s*(?:pokok\s*)?(\d+[\.,]?\d*)\s*(jt|juta|mio|million|m|ribu|rb|k)/i,
+        /(\d+[\.,]?\d*)\s*(jt|juta|mio|million|m|ribu|rb|k)/i
+    ];
+
+    for (const pattern of salaryPatterns) {
+        const match = text.match(pattern);
+        if (match) {
+            let amount = parseFloat(match[1].replace(',', '.'));
+            const unit = match[2].toLowerCase();
+            if (['jt', 'juta', 'mio', 'million', 'm'].includes(unit)) {
+                data.baseSalary = amount * 1_000_000;
+            } else if (['ribu', 'rb', 'k'].includes(unit)) {
+                data.baseSalary = amount * 1_000;
+            }
+            break;
+        }
+    }
+
+    // Extract region
+    const textLower = text.toLowerCase();
+    // Sort by key length descending so longer matches (like "kalimantan timur") take priority
+    const regionKeys = Object.keys(UMP_DATABASE).sort((a, b) => b.length - a.length);
+    for (const key of regionKeys) {
+        if (textLower.includes(key)) {
+            data.region = key;
+            data.regionLabel = UMP_DATABASE[key].label;
+            data.regionUMP = UMP_DATABASE[key].ump;
+            break;
+        }
+    }
+
+    // Default to Jakarta if no region found
+    if (!data.region) {
+        data.region = 'jakarta';
+        data.regionLabel = 'DKI Jakarta (default)';
+        data.regionUMP = UMP_DATABASE['jakarta'].ump;
+    }
+
+    // NPWP
+    if (/npwp|ada\s*npwp|punya\s*npwp|has\s*npwp/i.test(text)) {
+        data.hasNPWP = true;
+    }
+
+    // PTKP status
+    if (/k\/3/i.test(text)) data.ptkp = 'K/3';
+    else if (/k\/2/i.test(text)) data.ptkp = 'K/2';
+    else if (/k\/1/i.test(text)) data.ptkp = 'K/1';
+    else if (/k\/0/i.test(text)) data.ptkp = 'K/0';
+    else if (/tk\/3/i.test(text)) data.ptkp = 'TK/3';
+    else if (/tk\/2/i.test(text)) data.ptkp = 'TK/2';
+    else if (/tk\/1/i.test(text)) data.ptkp = 'TK/1';
+
+    // Overtime hours
+    const otMatch = text.match(/(?:lembur|overtime|ot)\s*(\d+)\s*(?:jam|hours|h)?/i);
+    if (otMatch) data.overtime = parseInt(otMatch[1]);
+
+    return data;
+}
+
+// ===================================================================
+// 7. UI FUNCTIONS
+// ===================================================================
+
+function formatIDR(amount) {
+    return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+}
+
+function addChatMessage(html, isUser) {
+    const container = document.getElementById('chatContainer');
+    const div = document.createElement('div');
+    div.className = 'message ' + (isUser ? 'user' : 'ai');
+    div.innerHTML = `
+        <div class="message-avatar">${isUser ? 'U' : 'AI'}</div>
+        <div class="message-content">${html}</div>
+    `;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function displayResults(calc) {
+    const s = (id, val) => { document.getElementById(id).textContent = formatIDR(val); };
+
+    // Standard
+    s('valGross', calc.gross);
+    s('valDeductions', calc.totalDeductions);
+    s('valNet', calc.net);
+    s('valCost', calc.companyCost);
+    s('brkPPh21', calc.pph21);
+    s('brkBpjsKes', calc.bpjs.empKesehatan);
+    s('brkJHT', calc.bpjs.empJHT);
+    s('brkJP', calc.bpjs.empJP);
+    s('brkCKes', calc.bpjs.coKesehatan);
+    s('brkCJHT', calc.bpjs.coJHT);
+    s('brkCJP', calc.bpjs.coJP);
+    s('brkCJKK', calc.bpjs.coJKK);
+    s('brkCJKM', calc.bpjs.coJKM);
+
+    // Overtime breakdown
+    const otBlock = document.getElementById('overtimeBreakdown');
+    if (calc.input.overtime > 0) {
+        otBlock.style.display = 'block';
+        document.getElementById('brkOTHours').textContent = calc.input.overtime + ' jam';
+        s('brkOTRate', calc.overtime.hourlyRate);
+        s('brkOT1st', calc.overtime.firstHour);
+        s('brkOTRest', calc.overtime.restHours);
+        document.getElementById('brkOTRestLabel').textContent = `Jam ke-2 s/d ${calc.input.overtime} (2.0x)`;
+        s('brkOTTotal', calc.overtime.total);
+    } else {
+        otBlock.style.display = 'none';
+    }
+
+    // Harmony
+    s('harmBase', calc.harmony.baseSalary);
+    s('harmAllow', calc.harmony.allowances);
+    s('harmNet', calc.harmony.net);
+    s('harmSave', calc.harmony.savings);
+    s('harmBase70', calc.harmony.baseSalary);
+    s('harmTransport', calc.harmony.transport);
+    s('harmMeal', calc.harmony.meal);
+    s('harmTotalGross', calc.gross);
+    s('harmNewTax', calc.harmony.pph21);
+    s('harmTaxSave', calc.harmony.taxSavings);
+
+    document.getElementById('resultsSection').classList.remove('hidden');
+}
+
+function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addChatMessage(text, true);
+    input.value = '';
+
+    // Show loading
+    document.getElementById('sendBtnText').classList.add('hidden');
+    document.getElementById('sendBtnLoading').classList.remove('hidden');
+
+    setTimeout(() => {
+        const parsed = parseInput(text);
+
+        if (!parsed.baseSalary || parsed.baseSalary < 100_000) {
+            addChatMessage('Maaf, saya tidak mendeteksi jumlah gaji. Mohon sertakan nominal gaji, misalnya: <em>"gaji 8 juta"</em> atau <em>"5.5 jt"</em>.', false);
+            showSendBtn();
+            return;
+        }
+
+        // Check UMP
+        let umpWarning = '';
+        if (parsed.regionUMP && parsed.baseSalary < parsed.regionUMP) {
+            umpWarning = `<br><br><strong style="color:#ef4444">&#9888; Peringatan:</strong> Gaji ${formatIDR(parsed.baseSalary)} di bawah UMP ${parsed.regionLabel} (${formatIDR(parsed.regionUMP)}). Ini melanggar ketentuan upah minimum.`;
+        }
+
+        currentCalc = calculatePayroll(parsed);
+
+        // Update free counter
+        calcCount++;
+        localStorage.setItem('gaji_calc_count', calcCount.toString());
+        updateFreeCounter();
+
+        const terCat = PTKP_TO_TER[parsed.ptkp] || 'A';
+        const terRate = getTERRate(currentCalc.gross, parsed.ptkp);
+
+        let response = `&#10003; Perhitungan untuk <strong>${parsed.name || 'Karyawan'}</strong> selesai!<br><br>`;
+        response += `&#128205; Lokasi: ${parsed.regionLabel}<br>`;
+        response += `&#128176; Gaji Pokok: ${formatIDR(parsed.baseSalary)}<br>`;
+        if (parsed.overtime > 0) {
+            response += `&#9200; Lembur: ${parsed.overtime} jam (+${formatIDR(currentCalc.overtime.total)})<br>`;
+        }
+        response += `&#128203; PTKP: ${parsed.ptkp} (TER Kategori ${terCat}, rate ${(terRate * 100).toFixed(2)}%)<br>`;
+        response += `&#128203; NPWP: ${parsed.hasNPWP ? 'Ada' : 'Tidak ada (+20% pajak)'}<br>`;
+        response += `<br>&#128181; <strong>Take-Home Pay: ${formatIDR(currentCalc.net)}</strong>`;
+        response += `<br>&#10024; Harmoni Optimal: ${formatIDR(currentCalc.harmony.net)} (+${formatIDR(currentCalc.harmony.savings)})`;
+        response += umpWarning;
+        response += `<br><br><em>Lihat detail lengkap di bawah. Toggle "Harmoni Optimal" untuk tips penghematan.</em>`;
+
+        addChatMessage(response, false);
+        displayResults(currentCalc);
+        showSendBtn();
+    }, 800);
+}
+
+function showSendBtn() {
+    document.getElementById('sendBtnText').classList.remove('hidden');
+    document.getElementById('sendBtnLoading').classList.add('hidden');
+}
+
+function switchMode(mode) {
+    const standard = document.getElementById('standardResults');
+    const harmony = document.getElementById('harmonyResults');
+    const btnStd = document.getElementById('toggleStandard');
+    const btnHrm = document.getElementById('toggleHarmony');
+
+    if (mode === 'standard') {
+        standard.classList.remove('hidden');
+        harmony.classList.add('hidden');
+        btnStd.classList.add('active');
+        btnHrm.classList.remove('active');
+    } else {
+        harmony.classList.remove('hidden');
+        standard.classList.add('hidden');
+        btnHrm.classList.add('active');
+        btnStd.classList.remove('active');
+    }
+}
+
+function fillExample(text) {
+    document.getElementById('userInput').value = text;
+    document.getElementById('userInput').focus();
+}
+
+function updateFreeCounter() {
+    const remaining = Math.max(0, FREE_LIMIT - calcCount);
+    document.getElementById('freeCountNum').textContent = remaining;
+    if (remaining === 0) {
+        document.getElementById('freeCounterText').innerHTML =
+            'Perhitungan gratis habis! <a href="#pricing" style="color:var(--color-primary);font-weight:600">Upgrade sekarang</a>';
+    }
+}
+
+// ===================================================================
+// 8. PDF SLIP GAJI
+// ===================================================================
+
+function generateSlipGaji() {
+    if (!currentCalc) return alert('Belum ada perhitungan. Hitung gaji dulu!');
+
+    const c = currentCalc;
+    const now = new Date();
+    const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    document.getElementById('slipCompany').textContent = 'SLIP GAJI KARYAWAN';
+    document.getElementById('slipPeriod').textContent = `Periode: ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    document.getElementById('slipName').textContent = c.input.name || 'Karyawan';
+    document.getElementById('slipRegion').textContent = c.input.regionLabel;
+    document.getElementById('slipPTKP').textContent = c.input.ptkp;
+    document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? 'Ada' : 'Tidak Ada';
+    document.getElementById('slipGajiPokok').textContent = formatIDR(c.input.baseSalary);
+    document.getElementById('slipLembur').textContent = formatIDR(c.overtime.total);
+    document.getElementById('slipGross').textContent = formatIDR(c.gross);
+    document.getElementById('slipPPh21').textContent = formatIDR(c.pph21);
+    document.getElementById('slipBpjsKes').textContent = formatIDR(c.bpjs.empKesehatan);
+    document.getElementById('slipJHT').textContent = formatIDR(c.bpjs.empJHT);
+    document.getElementById('slipJP').textContent = formatIDR(c.bpjs.empJP);
+    document.getElementById('slipTotalPot').textContent = formatIDR(c.totalDeductions);
+    document.getElementById('slipNetTotal').textContent = 'TAKE HOME PAY: ' + formatIDR(c.net);
+    document.getElementById('slipDate').textContent = now.toLocaleDateString('id-ID');
+
+    window.print();
+}
+
+function copyResult() {
+    if (!currentCalc) return;
+    const c = currentCalc;
+    const text = [
+        `Perhitungan Gaji - ${c.input.name || 'Karyawan'}`,
+        `Lokasi: ${c.input.regionLabel}`,
+        `Gaji Pokok: ${formatIDR(c.input.baseSalary)}`,
+        c.input.overtime > 0 ? `Lembur: ${c.input.overtime} jam = ${formatIDR(c.overtime.total)}` : '',
+        `Gross: ${formatIDR(c.gross)}`,
+        `PPh 21: ${formatIDR(c.pph21)}`,
+        `BPJS Kes: ${formatIDR(c.bpjs.empKesehatan)}`,
+        `BPJS JHT: ${formatIDR(c.bpjs.empJHT)}`,
+        `BPJS JP: ${formatIDR(c.bpjs.empJP)}`,
+        `Total Potongan: ${formatIDR(c.totalDeductions)}`,
+        `TAKE HOME PAY: ${formatIDR(c.net)}`,
+        '',
+        `Harmoni Optimal: ${formatIDR(c.harmony.net)} (+${formatIDR(c.harmony.savings)})`,
+        '',
+        'Dihitung oleh Gaji.AI'
+    ].filter(Boolean).join('\n');
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Tersalin!';
+        setTimeout(() => { btn.textContent = 'Salin Hasil'; }, 2000);
+    });
+}
+
+// ===================================================================
+// 9. I18N (Internationalization)
+// ===================================================================
+
+function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btnLangId').classList.toggle('active', lang === 'id');
+    document.getElementById('btnLangEn').classList.toggle('active', lang === 'en');
+
+    // For MVP, only toggle key hero/nav text. Full i18n can be added later.
+    if (lang === 'en') {
+        document.getElementById('heroTitle').textContent = 'Calculate Employee Salary in 5 Seconds';
+        document.getElementById('heroDesc').textContent = 'AI-powered Indonesia payroll calculator. Type salary data in natural language, get PPh 21, BPJS, overtime & payslip instantly.';
+        document.getElementById('heroCtaCalc').textContent = 'Try Free Now';
+        document.getElementById('heroCtaPricing').textContent = 'See Pricing';
+        document.getElementById('navCalcBtn').textContent = 'Free Calculator';
+        document.getElementById('calcTitle').textContent = 'AI Salary Calculator';
+        document.getElementById('calcDesc').textContent = 'Type salary data in free format. AI automatically calculates everything.';
+        document.getElementById('quickLabel').textContent = 'Examples:';
+        document.getElementById('sendBtnText').textContent = 'Calculate';
+        document.getElementById('featTitle').textContent = 'Why Gaji.AI?';
+        document.getElementById('featDesc').textContent = 'The simplest and most accurate payroll solution for Indonesian businesses';
+        document.getElementById('pricingTitle').textContent = 'Choose Your Plan';
+        document.getElementById('pricingDesc').textContent = 'Start free, upgrade anytime';
+        document.getElementById('pdfBtn').textContent = 'Print Payslip PDF';
+        document.getElementById('copyBtn').textContent = 'Copy Result';
+        document.getElementById('statProvinsi').textContent = 'Provinces';
+        document.getElementById('statCompliance').textContent = 'Legally Compliant';
+        document.getElementById('statFree').textContent = 'Free Calcs';
+        document.getElementById('userInput').placeholder = 'Example: Budi, salary 8 mio, Jakarta, overtime 20 hours, has NPWP';
+    } else {
+        document.getElementById('heroTitle').textContent = 'Hitung Gaji Karyawan dalam 5 Detik';
+        document.getElementById('heroDesc').textContent = 'Kalkulator payroll Indonesia berbasis AI. Cukup ketik data gaji dalam bahasa sehari-hari, dapatkan perhitungan PPh 21, BPJS, lembur & slip gaji instan.';
+        document.getElementById('heroCtaCalc').textContent = 'Coba Gratis Sekarang';
+        document.getElementById('heroCtaPricing').textContent = 'Lihat Harga';
+        document.getElementById('navCalcBtn').textContent = 'Hitung Gratis';
+        document.getElementById('calcTitle').textContent = 'Kalkulator Gaji AI';
+        document.getElementById('calcDesc').textContent = 'Ketik data gaji dalam format bebas. AI akan otomatis menghitung semuanya.';
+        document.getElementById('quickLabel').textContent = 'Contoh:';
+        document.getElementById('sendBtnText').textContent = 'Hitung';
+        document.getElementById('featTitle').textContent = 'Mengapa Gaji.AI?';
+        document.getElementById('featDesc').textContent = 'Solusi payroll paling sederhana dan akurat untuk bisnis Indonesia';
+        document.getElementById('pricingTitle').textContent = 'Pilih Paket Anda';
+        document.getElementById('pricingDesc').textContent = 'Mulai gratis, upgrade kapan saja';
+        document.getElementById('pdfBtn').textContent = 'Cetak Slip Gaji PDF';
+        document.getElementById('copyBtn').textContent = 'Salin Hasil';
+        document.getElementById('statProvinsi').textContent = 'Provinsi UMP';
+        document.getElementById('statCompliance').textContent = 'Sesuai Hukum';
+        document.getElementById('statFree').textContent = 'Gratis';
+        document.getElementById('userInput').placeholder = 'Contoh: Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP';
+    }
+}
+
+// ===================================================================
+// 10. INITIALIZATION
+// ===================================================================
+
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') sendMessage();
+});
+
+updateFreeCounter();
+</script>
+
+</body>
+</html>
