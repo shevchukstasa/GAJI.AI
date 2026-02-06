@@ -14,7 +14,7 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_HD2TfdfOhKFtuN1
 const FREE_LIMIT = parseInt(process.env.FREE_LIMIT) || 10;
 
 // Deepgram configuration for audio transcription (preferred - faster and cheaper)
-const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
+const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '958279e4160c7e0d8e97e696aff4a78ef9029337';
 // OpenAI Whisper as fallback
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
