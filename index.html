@@ -3431,7 +3431,10 @@ function generateSlipGaji() {
     const selectedMonth = parseInt(document.getElementById('formMonth').value) || (now.getMonth() + 1);
     const selectedYear = parseInt(document.getElementById('formYear').value) || now.getFullYear();
     document.getElementById('slipPeriod').textContent = (isEn ? 'Period: ' : 'Periode: ') + monthNames[selectedMonth - 1] + ' ' + selectedYear;
-    document.getElementById('slipName').textContent = c.input.name || (isEn ? 'Employee' : 'Karyawan');
+
+    // Employee name
+    const employeeName = c.input.name || (isEn ? 'Employee' : 'Karyawan');
+    document.getElementById('slipName').textContent = employeeName;
     document.getElementById('slipPosition').textContent = getPositionLabel(c.input.position) || '-';
     document.getElementById('slipRegion').textContent = c.input.regionLabel;
     document.getElementById('slipPTKP').textContent = c.input.ptkp;
@@ -3461,7 +3464,17 @@ function generateSlipGaji() {
     document.getElementById('slipNetTotal').textContent = 'TAKE HOME PAY: ' + formatIDR(c.net);
     document.getElementById('slipDate').textContent = now.toLocaleDateString(isEn ? 'en-US' : 'id-ID');
 
+    // Set document title for PDF filename: Name_Company_Month-Year_Gaji.ai
+    const originalTitle = document.title;
+    const safeName = employeeName.replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+    const safeCompany = (companyName || 'Company').replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+    const periodStr = monthNames[selectedMonth - 1] + '-' + selectedYear;
+    document.title = `${safeName}_${safeCompany}_${periodStr}_Gaji.ai`;
+
     window.print();
+
+    // Restore original title after print dialog
+    setTimeout(() => { document.title = originalTitle; }, 1000);
 }
 
 // ===================================================================
