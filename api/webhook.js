@@ -615,17 +615,25 @@ export default async function handler(req, res) {
     // Handle POST request (incoming messages)
     if (req.method === 'POST') {
         try {
-            const { phone, message, pushName, messageType, file, media, isMedia } = req.body;
+            // Log full request body for debugging voice messages
+            console.log('=== WEBHOOK REQUEST ===');
+            console.log('Body:', JSON.stringify(req.body, null, 2));
 
-            console.log('Incoming message:', { phone, message, pushName, messageType, isMedia });
+            const { phone, message, pushName, messageType, file, media, isMedia, url, document: docUrl } = req.body;
+
+            console.log('Extracted:', { phone, messageType, isMedia, hasFile: !!file, hasMedia: !!media });
 
             if (!phone) {
                 return res.status(400).json({ error: 'Missing phone' });
             }
 
-            // Check for audio/voice message
-            if (messageType === 'audio' || messageType === 'ptt') {
-                const audioUrl = file || media;
+            // Check for audio/voice message (handle various formats from Wablas)
+            const msgType = (messageType || '').toLowerCase();
+            const isVoiceMessage = msgType === 'audio' || msgType === 'ptt' || msgType === 'voice';
+
+            if (isVoiceMessage) {
+                const audioUrl = file || media || url || docUrl;
+                console.log('Voice message detected, URL:', audioUrl);
 
                 if (!audioUrl) {
                     res.setHeader('Content-Type', 'text/plain');
@@ -638,9 +646,12 @@ export default async function handler(req, res) {
                 }
 
                 // Try to transcribe the audio
+                console.log('Starting transcription for:', audioUrl);
                 const transcribedText = await transcribeAudio(audioUrl);
+                console.log('Transcription result:', transcribedText);
 
                 if (!transcribedText) {
+                    console.log('Transcription failed or empty');
                     res.setHeader('Content-Type', 'text/plain');
                     return res.status(200).send(
                         `🎤 *Pesan Suara Terdeteksi*\n\n` +
