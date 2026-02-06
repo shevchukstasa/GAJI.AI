@@ -6,7 +6,7 @@ const WABLAS_API = 'https://sby.wablas.com/api/send-message';
 
 // Supabase configuration
 const SUPABASE_URL = 'https://ofnsqxyoqjgwuzzpgewx.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mbnNxeHlvcWpnd3V6enBnZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg4NTIwMDAsImV4cCI6MjA1NDQyODAwMH0.placeholder';
+const SUPABASE_KEY = 'sb_publishable_HD2TfdfOhKFtuN1Kyt6guQ_rG-FTwcr';
 const FREE_LIMIT = 5;
 
 // ===================================================================
