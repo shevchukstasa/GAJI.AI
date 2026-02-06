@@ -13,6 +13,61 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ofnsqxyoqjgwuzzpgewx.s
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_HD2TfdfOhKFtuN1Kyt6guQ_rG-FTwcr';
 const FREE_LIMIT = parseInt(process.env.FREE_LIMIT) || 5;
 
+// OpenAI Whisper configuration for audio transcription
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+// ===================================================================
+// AUDIO TRANSCRIPTION (OpenAI Whisper)
+// ===================================================================
+
+async function transcribeAudio(audioUrl) {
+    if (!OPENAI_API_KEY) {
+        console.error('OpenAI API key not configured');
+        return null;
+    }
+
+    try {
+        // Download audio file from Wablas URL
+        console.log('Downloading audio from:', audioUrl);
+        const audioResponse = await fetch(audioUrl);
+        if (!audioResponse.ok) {
+            throw new Error(`Failed to download audio: ${audioResponse.status}`);
+        }
+
+        const audioBuffer = await audioResponse.arrayBuffer();
+        const audioBlob = new Blob([audioBuffer], { type: 'audio/ogg' });
+
+        // Create form data for Whisper API
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'audio.ogg');
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'id'); // Indonesian
+
+        // Send to OpenAI Whisper API
+        console.log('Sending to Whisper API...');
+        const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`
+            },
+            body: formData
+        });
+
+        if (!whisperResponse.ok) {
+            const error = await whisperResponse.text();
+            throw new Error(`Whisper API error: ${error}`);
+        }
+
+        const result = await whisperResponse.json();
+        console.log('Transcription result:', result.text);
+        return result.text;
+
+    } catch (error) {
+        console.error('Transcription error:', error);
+        return null;
+    }
+}
+
 // ===================================================================
 // SUPABASE USAGE TRACKING
 // ===================================================================
@@ -250,6 +305,7 @@ function calculatePayroll(data) {
 function parseMessage(text) {
     const data = {
         name: '',
+        position: '',
         baseSalary: 0,
         region: 'jakarta',
         regionLabel: 'DKI Jakarta',
@@ -338,6 +394,27 @@ function parseMessage(text) {
     // Overtime
     const otMatch = text.match(/(?:lembur|overtime|ot)\s*(\d+)\s*(?:jam|hours|h)?/i);
     if (otMatch) data.overtime = parseInt(otMatch[1]);
+
+    // Position detection
+    const textLower = text.toLowerCase();
+    const positionKeywords = {
+        'c-level': 'c_level', 'ceo': 'c_level', 'cfo': 'c_level', 'cto': 'c_level', 'coo': 'c_level',
+        'direktur': 'director', 'director': 'director',
+        'vice president': 'vp', 'vp': 'vp',
+        'senior manager': 'senior_manager',
+        'manager': 'manager', 'manajer': 'manager',
+        'supervisor': 'supervisor', 'spv': 'supervisor',
+        'staff': 'staff', 'staf': 'staff',
+        'magang': 'intern', 'intern': 'intern',
+        'kontrak': 'contract', 'contract': 'contract', 'outsource': 'contract',
+        'freelance': 'freelance', 'freelancer': 'freelance'
+    };
+    for (const [keyword, position] of Object.entries(positionKeywords)) {
+        if (textLower.includes(keyword)) {
+            data.position = position;
+            break;
+        }
+    }
 
     return data;
 }
@@ -505,15 +582,66 @@ export default async function handler(req, res) {
             }
 
             // Check for audio/voice message
-            if (messageType === 'audio' || messageType === 'ptt' || isMedia === true || file || media) {
+            if (messageType === 'audio' || messageType === 'ptt') {
+                const audioUrl = file || media;
+
+                if (!audioUrl) {
+                    res.setHeader('Content-Type', 'text/plain');
+                    return res.status(200).send(
+                        `🎤 *Pesan Suara Terdeteksi*\n\n` +
+                        `Maaf, tidak dapat mengakses file audio.\n\n` +
+                        `*Mohon kirim dalam format teks*, contoh:\n` +
+                        `"Budi, gaji 8 juta, Jakarta, lembur 10 jam, ada NPWP"`
+                    );
+                }
+
+                // Try to transcribe the audio
+                const transcribedText = await transcribeAudio(audioUrl);
+
+                if (!transcribedText) {
+                    res.setHeader('Content-Type', 'text/plain');
+                    return res.status(200).send(
+                        `🎤 *Pesan Suara Terdeteksi*\n\n` +
+                        `Maaf, gagal memproses pesan suara Anda.\n\n` +
+                        `*Mohon kirim dalam format teks*, contoh:\n` +
+                        `"Budi, gaji 8 juta, Jakarta, lembur 10 jam, ada NPWP"`
+                    );
+                }
+
+                // Process the transcribed text as normal message
+                console.log('Processing transcribed text:', transcribedText);
+
+                // Parse the transcribed message
+                const data = parseMessage(transcribedText);
+
+                // Check if we have valid salary data
+                if (!data.baseSalary || data.baseSalary < 100000) {
+                    res.setHeader('Content-Type', 'text/plain');
+                    let response = `🎤 *Pesan Suara Diterima*\n\n`;
+                    response += `📝 Saya dengar: "${transcribedText}"\n\n`;
+                    response += formatError(data);
+                    return res.status(200).send(response);
+                }
+
+                // Check usage limit before calculating
+                const usage = await checkUsageLimit(phone);
+                if (!usage.allowed) {
+                    res.setHeader('Content-Type', 'text/plain');
+                    return res.status(200).send(formatLimitReached(usage.count));
+                }
+
+                // Calculate payroll
+                const calc = calculatePayroll(data);
+
+                // Increment usage counter
+                await incrementUsage(phone, usage.existing, usage.id, usage.count);
+
+                // Format and return response
+                let response = `🎤 *Pesan Suara Diterima*\n\n`;
+                response += `📝 Saya dengar: "${transcribedText}"\n\n`;
+                response += formatResponse(data, calc);
                 res.setHeader('Content-Type', 'text/plain');
-                return res.status(200).send(
-                    `🎤 *Pesan Suara Terdeteksi*\n\n` +
-                    `Maaf, saat ini saya belum bisa memproses pesan suara.\n\n` +
-                    `*Mohon kirim dalam format teks*, contoh:\n` +
-                    `"Budi, gaji 8 juta, Jakarta, lembur 10 jam, ada NPWP"\n\n` +
-                    `Fitur voice note akan segera hadir! 🔜`
-                );
+                return res.status(200).send(response);
             }
 
             if (!message) {

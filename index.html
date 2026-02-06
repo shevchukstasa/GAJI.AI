@@ -658,7 +658,8 @@
         /* === 13. Print styles for PDF === */
         @media print {
             body { background: white; }
-            .hero, .pricing-section, .features-section, .footer, .calc-card, .nav { display: none; }
+            .hero, .pricing-section, .features-section, .footer, .calc-card, .nav, .custom-solutions { display: none; }
+            .whatsapp-float, .ai-agent-btn, .ai-agent-panel { display: none !important; }
             .slip-gaji-print { display: block !important; }
         }
 
@@ -1306,6 +1307,30 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label id="formLblPeriod">Periode Gaji</label>
+                        <div style="display:flex;gap:10px">
+                            <select id="formMonth" style="flex:1">
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">Juli</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                            <select id="formYear" style="flex:1">
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2026">2026</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label id="formLblSalary">Gaji Pokok (Rp)</label>
                         <input type="number" id="formSalary" placeholder="8000000" min="0">
                     </div>
@@ -1345,7 +1370,12 @@
                     </div>
                     <div class="form-group">
                         <label id="formLblOvertime">Jam Lembur</label>
-                        <input type="number" id="formOvertime" placeholder="0" min="0" value="0">
+                        <input type="number" id="formOvertime" placeholder="0" min="0" value="0" onchange="syncOvertimeFromHours()">
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblOvertimeAmount">Atau Masukkan Nominal Lembur (Rp)</label>
+                        <input type="number" id="formOvertimeAmount" placeholder="0" min="0" value="0" onchange="syncOvertimeFromAmount()">
+                        <span class="hint" id="formOvertimeAmountHint">Auto-hitung jam: <span id="calculatedHours">0</span> jam (formula 1.5x + 2x)</span>
                     </div>
                     <div class="form-group checkbox-group">
                         <input type="checkbox" id="formNpwp" checked>
@@ -1698,6 +1728,13 @@
     <div class="slip-signature">
         <br><br>
         <div class="slip-signature-line">Tanda Tangan</div>
+    </div>
+    <div class="slip-bottom-links" style="display:flex;justify-content:space-between;align-items:center;margin-top:30px;padding-top:15px;border-top:1px dashed #ccc">
+        <a href="https://gaji.ai" target="_blank" style="color:#2563eb;text-decoration:none;font-size:14px">🌐 gaji.ai</a>
+        <a href="https://wa.me/6287776740102" target="_blank" style="color:#25D366;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:5px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+        </a>
     </div>
 </div>
 
@@ -2311,6 +2348,61 @@ function calcOvertime(baseSalary, hours) {
         firstHour: Math.round(firstHour),
         restHours: Math.round(restHours)
     };
+}
+
+/**
+ * REVERSE Overtime calculation: Amount → Hours
+ * Given overtime pay amount, calculate equivalent hours
+ * Formula: 1st hour = 1.5x, subsequent = 2.0x
+ */
+function calcOvertimeHoursFromAmount(baseSalary, amount) {
+    if (!amount || amount <= 0 || !baseSalary || baseSalary <= 0) return 0;
+
+    const hourlyRate = baseSalary / 173;
+    const firstHourPay = hourlyRate * 1.5;
+
+    // If amount is less than first hour pay
+    if (amount <= firstHourPay) {
+        return Math.round((amount / (hourlyRate * 1.5)) * 100) / 100; // 2 decimal places
+    }
+
+    // More than 1 hour
+    const remainingAmount = amount - firstHourPay;
+    const additionalHours = remainingAmount / (hourlyRate * 2.0);
+    return Math.round((1 + additionalHours) * 100) / 100; // 2 decimal places
+}
+
+/**
+ * Sync overtime hours when amount is entered
+ */
+function syncOvertimeFromAmount() {
+    const baseSalary = parseInt(document.getElementById('formSalary').value) || 0;
+    const amount = parseInt(document.getElementById('formOvertimeAmount').value) || 0;
+
+    if (baseSalary > 0 && amount > 0) {
+        const hours = calcOvertimeHoursFromAmount(baseSalary, amount);
+        document.getElementById('formOvertime').value = Math.round(hours);
+        document.getElementById('calculatedHours').textContent = hours.toFixed(1);
+    } else {
+        document.getElementById('calculatedHours').textContent = '0';
+    }
+}
+
+/**
+ * Sync overtime amount when hours are entered
+ */
+function syncOvertimeFromHours() {
+    const baseSalary = parseInt(document.getElementById('formSalary').value) || 0;
+    const hours = parseInt(document.getElementById('formOvertime').value) || 0;
+
+    if (baseSalary > 0 && hours > 0) {
+        const ot = calcOvertime(baseSalary, hours);
+        document.getElementById('formOvertimeAmount').value = ot.total;
+        document.getElementById('calculatedHours').textContent = hours;
+    } else {
+        document.getElementById('formOvertimeAmount').value = 0;
+        document.getElementById('calculatedHours').textContent = '0';
+    }
 }
 
 /**
@@ -3003,7 +3095,10 @@ function generateSlipGaji() {
         : (isEn ? 'EMPLOYEE PAYSLIP' : 'SLIP GAJI KARYAWAN');
     document.getElementById('slipCompany').textContent = slipTitle;
 
-    document.getElementById('slipPeriod').textContent = (isEn ? 'Period: ' : 'Periode: ') + monthNames[now.getMonth()] + ' ' + now.getFullYear();
+    // Get selected period from form
+    const selectedMonth = parseInt(document.getElementById('formMonth').value) || (now.getMonth() + 1);
+    const selectedYear = parseInt(document.getElementById('formYear').value) || now.getFullYear();
+    document.getElementById('slipPeriod').textContent = (isEn ? 'Period: ' : 'Periode: ') + monthNames[selectedMonth - 1] + ' ' + selectedYear;
     document.getElementById('slipName').textContent = c.input.name || (isEn ? 'Employee' : 'Karyawan');
     document.getElementById('slipPosition').textContent = getPositionLabel(c.input.position, isEn) || '-';
     document.getElementById('slipRegion').textContent = c.input.regionLabel;
@@ -3244,11 +3339,16 @@ function setLang(lang) {
     document.getElementById('modeFormBtn').textContent = isEn ? '📝 Form' : '📝 Form';
     document.getElementById('formLblName').textContent = isEn ? 'Employee Name' : 'Nama Karyawan';
     document.getElementById('formLblPosition').textContent = isEn ? 'Position' : 'Jabatan';
+    document.getElementById('formLblPeriod').textContent = isEn ? 'Salary Period' : 'Periode Gaji';
     document.getElementById('formLblSalary').textContent = isEn ? 'Base Salary (Rp)' : 'Gaji Pokok (Rp)';
     document.getElementById('formLblRegion').textContent = isEn ? 'Province / City' : 'Provinsi / Kota';
     document.getElementById('formLblPtkp').textContent = isEn ? 'PTKP Status (for PPh 21)' : 'Status PTKP (untuk PPh 21)';
     document.getElementById('formPtkpHint').textContent = isEn ? 'TK = Single, K = Married. Number = dependents.' : 'TK = Tidak Kawin, K = Kawin. Angka = jumlah tanggungan.';
     document.getElementById('formLblOvertime').textContent = isEn ? 'Overtime Hours' : 'Jam Lembur';
+    document.getElementById('formLblOvertimeAmount').textContent = isEn ? 'Or Enter Overtime Amount (Rp)' : 'Atau Masukkan Nominal Lembur (Rp)';
+    document.getElementById('formOvertimeAmountHint').innerHTML = isEn
+        ? 'Auto-calc hours: <span id="calculatedHours">0</span> hrs (formula 1.5x + 2x)'
+        : 'Auto-hitung jam: <span id="calculatedHours">0</span> jam (formula 1.5x + 2x)';
     document.getElementById('formLblNpwp').textContent = isEn ? 'Has NPWP (Tax ID)' : 'Punya NPWP';
     document.getElementById('formNpwpHint').textContent = isEn ? '(Without NPWP = +20% tax)' : '(Tanpa NPWP = +20% pajak)';
     document.getElementById('formLblMeal').textContent = isEn ? 'Meal Allowance (Rp)' : 'Tunjangan Makan (Rp)';
@@ -3535,6 +3635,31 @@ function checkSlipParameter() {
     }
 }
 
+// Initialize period selector to current month/year
+function initPeriodSelector() {
+    const now = new Date();
+    const monthSelect = document.getElementById('formMonth');
+    const yearSelect = document.getElementById('formYear');
+
+    if (monthSelect) {
+        monthSelect.value = (now.getMonth() + 1).toString();
+    }
+
+    // Update year options
+    if (yearSelect) {
+        const currentYear = now.getFullYear();
+        yearSelect.innerHTML = '';
+        for (let y = currentYear + 1; y >= currentYear - 2; y--) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSelect.appendChild(opt);
+        }
+        yearSelect.value = currentYear.toString();
+    }
+}
+
+initPeriodSelector();
 checkSlipParameter();
 </script>
 
