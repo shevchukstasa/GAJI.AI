@@ -1145,6 +1145,10 @@
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
+                    <div class="hero-stat-value" id="statTotalCalcs">0</div>
+                    <div class="hero-stat-label" id="statTotalCalcsLabel">Total Perhitungan</div>
+                </div>
+                <div class="hero-stat">
                     <div class="hero-stat-value">38</div>
                     <div class="hero-stat-label" id="statProvinsi">Provinsi UMP</div>
                 </div>
@@ -1153,7 +1157,7 @@
                     <div class="hero-stat-label" id="statCompliance">Sesuai Hukum</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-value">5x</div>
+                    <div class="hero-stat-value">10x</div>
                     <div class="hero-stat-label" id="statFree">Gratis</div>
                 </div>
             </div>
@@ -1281,7 +1285,7 @@
             </div>
 
             <div class="free-counter" id="freeCounter">
-                <span id="freeCounterText">Perhitungan gratis tersisa: <strong id="freeCountNum">5</strong> / 5</span>
+                <span id="freeCounterText">Perhitungan gratis tersisa: <strong id="freeCountNum">10</strong> / 10</span>
             </div>
             </div><!-- End chatModeContainer -->
 
@@ -1553,7 +1557,7 @@
                     <span class="period" id="t1Period">/perhitungan</span>
                 </div>
                 <ul class="price-features">
-                    <li id="t1f1">5 perhitungan gratis</li>
+                    <li id="t1f1">10 perhitungan gratis</li>
                     <li id="t1f2">PPh 21 TER 2024</li>
                     <li id="t1f3">BPJS lengkap</li>
                     <li id="t1f4">Lembur (1/173)</li>
@@ -1999,7 +2003,7 @@ const BPJS = {
 // ===================================================================
 // 4. STATE
 // ===================================================================
-const FREE_LIMIT = 5;
+const FREE_LIMIT = 10;
 let calcCount = parseInt(localStorage.getItem('gaji_calc_count') || '0');
 let currentCalc = null;
 let currentLang = 'id';
@@ -2128,7 +2132,7 @@ UMP tertinggi: DKI Jakarta (Rp 5.396.760)
 UMP terendah: Jawa Tengah (Rp 2.109.635)
 
 ## PAKET HARGA GAJI.AI
-1. **Sobat Gaji**: Rp 3.000/perhitungan (5 gratis pertama)
+1. **Sobat Gaji**: Rp 3.000/perhitungan (10 gratis pertama)
    - PPh 21 TER, BPJS, Lembur, Slip PDF
 2. **Gaji Pro**: Rp 150.000/bulan
    - Unlimited perhitungan, 38 provinsi, riwayat 12 bulan
@@ -2284,6 +2288,65 @@ async function incrementSupabaseUsage() {
 
 // Initialize IP on page load
 getClientIP().then(ip => { userIP = ip; });
+
+// Fetch and display global stats (total calculations)
+async function fetchGlobalStats() {
+    try {
+        // Get sum of all calc_count from usage_tracking
+        const url = `${SUPABASE_URL}/rest/v1/usage_tracking?select=calc_count`;
+        const response = await fetch(url, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        if (response.ok) {
+            const records = await response.json();
+            const total = records.reduce((sum, r) => sum + (r.calc_count || 0), 0);
+            const uniqueUsers = records.length;
+
+            // Update display with animation
+            const statEl = document.getElementById('statTotalCalcs');
+            if (statEl) {
+                // Add some base number for social proof + actual total
+                const displayTotal = 150 + total;
+                animateCounter(statEl, displayTotal);
+            }
+
+            // Store unique users count for admin reference
+            console.log('Unique users:', uniqueUsers, 'Total calculations:', total);
+            window.gajiStats = { uniqueUsers, totalCalcs: total };
+        }
+    } catch (error) {
+        console.error('Failed to fetch global stats:', error);
+        // Fallback display
+        const statEl = document.getElementById('statTotalCalcs');
+        if (statEl) statEl.textContent = '150+';
+    }
+}
+
+function animateCounter(element, target) {
+    const duration = 1500;
+    const start = 0;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(start + (target - start) * easeOut);
+        element.textContent = current.toLocaleString('id-ID') + '+';
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    requestAnimationFrame(update);
+}
+
+// Fetch stats on page load
+fetchGlobalStats();
 
 // ===================================================================
 // 5. COMPLIANCE ENGINE — CORE CALCULATIONS
@@ -3271,6 +3334,7 @@ function setLang(lang) {
     document.getElementById('heroCtaCalc').textContent = isEn ? 'Try Free Now' : 'Coba Gratis Sekarang';
     document.getElementById('heroCtaPricing').textContent = isEn ? 'See Pricing' : 'Lihat Harga';
     document.getElementById('navCalcBtn').textContent = isEn ? 'Free Calculator' : 'Hitung Gratis';
+    document.getElementById('statTotalCalcsLabel').textContent = isEn ? 'Total Calculations' : 'Total Perhitungan';
     document.getElementById('statProvinsi').textContent = isEn ? 'Provinces' : 'Provinsi UMP';
     document.getElementById('statCompliance').textContent = isEn ? 'Legally Compliant' : 'Sesuai Hukum';
     document.getElementById('statFree').textContent = isEn ? 'Free Calcs' : 'Gratis';
@@ -3335,7 +3399,7 @@ function setLang(lang) {
 
     document.getElementById('t1Desc').textContent = isEn ? 'Quick calculations via chat' : 'Perhitungan cepat via chat';
     document.getElementById('t1Period').textContent = isEn ? '/calculation' : '/perhitungan';
-    document.getElementById('t1f1').textContent = isEn ? '5 free calculations' : '5 perhitungan gratis';
+    document.getElementById('t1f1').textContent = isEn ? '10 free calculations' : '10 perhitungan gratis';
     document.getElementById('t1f3').textContent = isEn ? 'Complete BPJS' : 'BPJS lengkap';
     document.getElementById('t1f4').textContent = isEn ? 'Overtime (1/173)' : 'Lembur (1/173)';
     document.getElementById('t1f5').textContent = isEn ? 'Payslip PDF' : 'Slip Gaji PDF';

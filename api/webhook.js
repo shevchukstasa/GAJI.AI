@@ -11,7 +11,7 @@ const WABLAS_API = process.env.WABLAS_API || 'https://sby.wablas.com/api/send-me
 // Supabase configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ofnsqxyoqjgwuzzpgewx.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_HD2TfdfOhKFtuN1Kyt6guQ_rG-FTwcr';
-const FREE_LIMIT = parseInt(process.env.FREE_LIMIT) || 5;
+const FREE_LIMIT = parseInt(process.env.FREE_LIMIT) || 10;
 
 // OpenAI Whisper configuration for audio transcription
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -503,7 +503,7 @@ _"Budi, gaji 8 juta, Jakarta, lembur 20 jam, ada NPWP"_
 ✓ Take-Home Pay & Biaya Perusahaan
 ✓ *BONUS: Slip Gaji PDF!* 📄
 
-*🎁 5 perhitungan GRATIS!*
+*🎁 10 perhitungan GRATIS!*
 
 Kirim data gaji Anda sekarang 👇`;
 }
