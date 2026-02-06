@@ -3181,25 +3181,53 @@ function displayResults(calc) {
     s('valNet', calc.net);
     s('valCost', calc.companyCost);
 
-    // PPh 21 with who-pays indicator
+    // PPh 21 - always show actual amount, note indicates who pays
     const isEn = currentLang === 'en';
-    const paidByCompany = isEn ? ' (Paid by Employer)' : ' (Ditanggung Perusahaan)';
-    const pph21Label = cfg.pph21Payer === 'company' ? 'PPh 21 (TER)' + paidByCompany : 'PPh 21 (TER)';
+    const paidByCompanyText = isEn ? 'Paid by Employer' : 'Dibayar Perusahaan';
+    const deductedText = isEn ? 'Deducted' : 'Potong Gaji';
+
+    const paidByCompanyLabel = isEn ? ' (Paid by Employer)' : ' (Ditanggung Perusahaan)';
+    const pph21Label = cfg.pph21Payer === 'company' ? 'PPh 21 (TER)' + paidByCompanyLabel : 'PPh 21 (TER)';
     document.getElementById('brkPPh21').parentElement.querySelector('.label').textContent = pph21Label;
-    s('brkPPh21', calc.pph21Employee !== undefined ? calc.pph21Employee : calc.pph21);
+    s('brkPPh21', calc.pph21);  // Always show actual PPh 21 amount
 
-    // BPJS with who-pays indicators
-    const kesLabel = cfg.bpjsKesPayer === 'company' ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompany : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)');
+    // Update PPh 21 note
+    const notePph21 = document.getElementById('notePPh21');
+    if (notePph21) {
+        notePph21.textContent = cfg.pph21Payer === 'company' ? paidByCompanyText : deductedText;
+        notePph21.className = cfg.pph21Payer === 'company' ? 'note' : 'note employee';
+    }
+
+    // BPJS with who-pays indicators - always show actual amounts
+    const kesLabel = cfg.bpjsKesPayer === 'company' ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompanyLabel : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)');
     document.getElementById('brkBpjsKes').parentElement.querySelector('.label').textContent = kesLabel;
-    s('brkBpjsKes', calc.bpjsEmployee ? calc.bpjsEmployee.kesehatan : calc.bpjs.empKesehatan);
+    s('brkBpjsKes', calc.bpjs.empKesehatan);  // Always show actual amount
 
-    const jhtLabel = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompany : 'BPJS TK - JHT (2%)';
+    const noteBpjsKes = document.getElementById('noteBpjsKes');
+    if (noteBpjsKes) {
+        noteBpjsKes.textContent = cfg.bpjsKesPayer === 'company' ? paidByCompanyText : deductedText;
+        noteBpjsKes.className = cfg.bpjsKesPayer === 'company' ? 'note' : 'note employee';
+    }
+
+    const jhtLabel = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompanyLabel : 'BPJS TK - JHT (2%)';
     document.getElementById('brkJHT').parentElement.querySelector('.label').textContent = jhtLabel;
-    s('brkJHT', calc.bpjsEmployee ? calc.bpjsEmployee.jht : calc.bpjs.empJHT);
+    s('brkJHT', calc.bpjs.empJHT);  // Always show actual amount
 
-    const jpLabel = cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompany : 'BPJS TK - JP (1%)';
+    const noteJHT = document.getElementById('noteJHT');
+    if (noteJHT) {
+        noteJHT.textContent = cfg.bpjsJhtPayer === 'company' ? paidByCompanyText : deductedText;
+        noteJHT.className = cfg.bpjsJhtPayer === 'company' ? 'note' : 'note employee';
+    }
+
+    const jpLabel = cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompanyLabel : 'BPJS TK - JP (1%)';
     document.getElementById('brkJP').parentElement.querySelector('.label').textContent = jpLabel;
-    s('brkJP', calc.bpjsEmployee ? calc.bpjsEmployee.jp : calc.bpjs.empJP);
+    s('brkJP', calc.bpjs.empJP);  // Always show actual amount
+
+    const noteJP = document.getElementById('noteJP');
+    if (noteJP) {
+        noteJP.textContent = cfg.bpjsJpPayer === 'company' ? paidByCompanyText : deductedText;
+        noteJP.className = cfg.bpjsJpPayer === 'company' ? 'note' : 'note employee';
+    }
 
     s('brkCKes', calc.bpjs.coKesehatan);
     s('brkCJHT', calc.bpjs.coJHT);
