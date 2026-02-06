@@ -1291,20 +1291,7 @@
                     </div>
                     <div class="form-group">
                         <label id="formLblPosition">Jabatan</label>
-                        <select id="formPosition">
-                            <option value="" id="posSelect">-- Pilih Jabatan --</option>
-                            <option value="staff" id="posStaff">Staff</option>
-                            <option value="supervisor" id="posSupervisor">Supervisor</option>
-                            <option value="manager" id="posManager">Manager</option>
-                            <option value="senior_manager" id="posSeniorManager">Senior Manager</option>
-                            <option value="director" id="posDirector">Direktur</option>
-                            <option value="vp" id="posVP">Vice President</option>
-                            <option value="c_level" id="posCLevel">C-Level (CEO/CFO/CTO)</option>
-                            <option value="intern" id="posIntern">Magang / Intern</option>
-                            <option value="contract" id="posContract">Kontrak / Outsource</option>
-                            <option value="freelance" id="posFreelance">Freelance</option>
-                            <option value="other" id="posOther">Lainnya</option>
-                        </select>
+                        <input type="text" id="formPosition" placeholder="Contoh: Staff, Manager, dll">
                     </div>
                     <div class="form-group">
                         <label id="formLblPeriod">Periode Gaji</label>
@@ -2671,24 +2658,8 @@ function formatIDR(amount) {
     return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
 }
 
-const POSITION_LABELS = {
-    'staff': { id: 'Staff', en: 'Staff' },
-    'supervisor': { id: 'Supervisor', en: 'Supervisor' },
-    'manager': { id: 'Manager', en: 'Manager' },
-    'senior_manager': { id: 'Senior Manager', en: 'Senior Manager' },
-    'director': { id: 'Direktur', en: 'Director' },
-    'vp': { id: 'Vice President', en: 'Vice President' },
-    'c_level': { id: 'C-Level', en: 'C-Level' },
-    'intern': { id: 'Magang', en: 'Intern' },
-    'contract': { id: 'Kontrak', en: 'Contract' },
-    'freelance': { id: 'Freelance', en: 'Freelance' },
-    'other': { id: 'Lainnya', en: 'Other' }
-};
-
-function getPositionLabel(position, isEn = false) {
-    if (!position) return '';
-    const labels = POSITION_LABELS[position];
-    return labels ? (isEn ? labels.en : labels.id) : position;
+function getPositionLabel(position) {
+    return position || '';
 }
 
 function addChatMessage(html, isUser) {
@@ -3100,7 +3071,7 @@ function generateSlipGaji() {
     const selectedYear = parseInt(document.getElementById('formYear').value) || now.getFullYear();
     document.getElementById('slipPeriod').textContent = (isEn ? 'Period: ' : 'Periode: ') + monthNames[selectedMonth - 1] + ' ' + selectedYear;
     document.getElementById('slipName').textContent = c.input.name || (isEn ? 'Employee' : 'Karyawan');
-    document.getElementById('slipPosition').textContent = getPositionLabel(c.input.position, isEn) || '-';
+    document.getElementById('slipPosition').textContent = getPositionLabel(c.input.position) || '-';
     document.getElementById('slipRegion').textContent = c.input.regionLabel;
     document.getElementById('slipPTKP').textContent = c.input.ptkp;
     document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? (isEn ? 'Yes' : 'Ada') : (isEn ? 'No' : 'Tidak Ada');
@@ -3374,19 +3345,8 @@ function setLang(lang) {
     document.getElementById('ptkpK2').textContent = isEn ? 'K/2 - Married, 2 children' : 'K/2 - Kawin, 2 anak';
     document.getElementById('ptkpK3').textContent = isEn ? 'K/3 - Married, 3 children' : 'K/3 - Kawin, 3 anak';
 
-    // Position dropdown options
-    document.getElementById('posSelect').textContent = isEn ? '-- Select Position --' : '-- Pilih Jabatan --';
-    document.getElementById('posStaff').textContent = 'Staff';
-    document.getElementById('posSupervisor').textContent = 'Supervisor';
-    document.getElementById('posManager').textContent = 'Manager';
-    document.getElementById('posSeniorManager').textContent = 'Senior Manager';
-    document.getElementById('posDirector').textContent = isEn ? 'Director' : 'Direktur';
-    document.getElementById('posVP').textContent = 'Vice President';
-    document.getElementById('posCLevel').textContent = 'C-Level (CEO/CFO/CTO)';
-    document.getElementById('posIntern').textContent = isEn ? 'Intern' : 'Magang / Intern';
-    document.getElementById('posContract').textContent = isEn ? 'Contract / Outsource' : 'Kontrak / Outsource';
-    document.getElementById('posFreelance').textContent = 'Freelance';
-    document.getElementById('posOther').textContent = isEn ? 'Other' : 'Lainnya';
+    // Position placeholder
+    document.getElementById('formPosition').placeholder = isEn ? 'e.g. Staff, Manager, etc' : 'Contoh: Staff, Manager, dll';
 
     // Welcome message
     document.getElementById('welcomeMessage').innerHTML = isEn
