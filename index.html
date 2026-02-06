@@ -1404,22 +1404,8 @@
                         </select>
                     </div>
                     <div class="config-row">
-                        <span class="config-label">BPJS Kesehatan</span>
-                        <select class="config-select" id="cfgBpjsKesPayer" onchange="updateConfig()">
-                            <option value="employee">Karyawan</option>
-                            <option value="company">Perusahaan</option>
-                        </select>
-                    </div>
-                    <div class="config-row">
-                        <span class="config-label">BPJS JHT</span>
-                        <select class="config-select" id="cfgBpjsJhtPayer" onchange="updateConfig()">
-                            <option value="employee">Karyawan</option>
-                            <option value="company">Perusahaan</option>
-                        </select>
-                    </div>
-                    <div class="config-row">
-                        <span class="config-label">BPJS JP</span>
-                        <select class="config-select" id="cfgBpjsJpPayer" onchange="updateConfig()">
+                        <span class="config-label">BPJS (Iuran Karyawan)</span>
+                        <select class="config-select" id="cfgBpjsPayer" onchange="updateConfig()">
                             <option value="employee">Karyawan</option>
                             <option value="company">Perusahaan</option>
                         </select>
@@ -4052,9 +4038,11 @@ function toggleConfig() {
 
 function updateConfig() {
     calcConfig.pph21Payer = document.getElementById('cfgPph21Payer').value;
-    calcConfig.bpjsKesPayer = document.getElementById('cfgBpjsKesPayer').value;
-    calcConfig.bpjsJhtPayer = document.getElementById('cfgBpjsJhtPayer').value;
-    calcConfig.bpjsJpPayer = document.getElementById('cfgBpjsJpPayer').value;
+    // All BPJS employee contributions use the same payer setting
+    const bpjsPayer = document.getElementById('cfgBpjsPayer').value;
+    calcConfig.bpjsKesPayer = bpjsPayer;
+    calcConfig.bpjsJhtPayer = bpjsPayer;
+    calcConfig.bpjsJpPayer = bpjsPayer;
     calcConfig.includeTHR = document.getElementById('cfgIncludeTHR').checked;
     calcConfig.tenureMonths = parseInt(document.getElementById('cfgTenureMonths').value) || 12;
 }
