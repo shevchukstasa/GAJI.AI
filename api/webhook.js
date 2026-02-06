@@ -431,8 +431,7 @@ export default async function handler(req, res) {
             // Check for greeting or help
             const msgLower = message.toLowerCase().trim();
             if (['halo', 'hai', 'hi', 'hello', 'help', 'bantuan', 'mulai', 'start'].includes(msgLower)) {
-                await sendWhatsAppMessage(phone, formatWelcome());
-                return res.status(200).json({ status: 'welcome sent' });
+                return res.status(200).json({ message: formatWelcome() });
             }
 
             // Parse the message
@@ -440,15 +439,13 @@ export default async function handler(req, res) {
 
             // Check if we have valid salary data
             if (!data.baseSalary || data.baseSalary < 100000) {
-                await sendWhatsAppMessage(phone, formatError());
-                return res.status(200).json({ status: 'error message sent' });
+                return res.status(200).json({ message: formatError() });
             }
 
             // Check usage limit before calculating
             const usage = await checkUsageLimit(phone);
             if (!usage.allowed) {
-                await sendWhatsAppMessage(phone, formatLimitReached(usage.count));
-                return res.status(200).json({ status: 'limit reached', count: usage.count });
+                return res.status(200).json({ message: formatLimitReached(usage.count) });
             }
 
             // Calculate payroll
@@ -457,11 +454,9 @@ export default async function handler(req, res) {
             // Increment usage counter
             await incrementUsage(phone, usage.existing, usage.id, usage.count);
 
-            // Format and send response
+            // Format and return response for Wablas auto-reply
             const response = formatResponse(data, calc);
-            await sendWhatsAppMessage(phone, response);
-
-            return res.status(200).json({ status: 'calculation sent', data, calc, usage: usage.count + 1 });
+            return res.status(200).json({ message: response });
 
         } catch (error) {
             console.error('Webhook error:', error);
