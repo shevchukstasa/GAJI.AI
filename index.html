@@ -1599,7 +1599,7 @@
                     <div class="form-group">
                         <label id="formLblPeriod">Periode Gaji</label>
                         <div style="display:flex;gap:10px">
-                            <select id="formMonth" style="flex:1">
+                            <select id="formMonth" style="flex:1" onchange="updateWorkingDaysDisplay()">
                                 <option value="1">Januari</option>
                                 <option value="2">Februari</option>
                                 <option value="3">Maret</option>
@@ -1613,11 +1613,29 @@
                                 <option value="11">November</option>
                                 <option value="12">Desember</option>
                             </select>
-                            <select id="formYear" style="flex:1">
+                            <select id="formYear" style="flex:1" onchange="updateWorkingDaysDisplay()">
                                 <option value="2025">2025</option>
                                 <option value="2024">2024</option>
                                 <option value="2026">2026</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="formTimesheet" onchange="toggleTimesheetMode()">
+                        <label for="formTimesheet" id="formLblTimesheet">Hitung berdasarkan hari kerja (Timesheet)</label>
+                    </div>
+                    <div class="form-group" id="timesheetGroup" style="display:none">
+                        <div style="display:flex;gap:10px;align-items:center">
+                            <div style="flex:1">
+                                <label id="formLblWorkingDays">Hari Kerja di Bulan Ini</label>
+                                <input type="number" id="formWorkingDays" readonly style="background:#f0f0f0;cursor:not-allowed">
+                                <span class="hint" id="formWorkingDaysHint">(Otomatis dihitung)</span>
+                            </div>
+                            <div style="flex:1">
+                                <label id="formLblDaysWorked">Hari Masuk Kerja</label>
+                                <input type="number" id="formDaysWorked" placeholder="0" min="0" value="0">
+                                <span class="hint" id="formDaysWorkedHint">(Jumlah hari karyawan bekerja)</span>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -1730,6 +1748,7 @@
 
                     <div class="breakdown" id="incomeBreakdown">
                         <h3 id="brkIncomeTitle">Rincian Pendapatan</h3>
+                        <div class="breakdown-item" id="brkTimesheetRow" style="display:none"><span class="label" id="brkTimesheetLabel">Hari Kerja</span><span class="amount" id="brkTimesheet">-</span><span class="note" id="noteTimesheet" style="background:#e0f2fe;color:#0369a1">Prorata</span></div>
                         <div class="breakdown-item"><span class="label" id="brkBaseSalaryLabel">Gaji Pokok</span><span class="amount" id="brkBaseSalary">-</span></div>
                         <div class="breakdown-item" id="brkLemburRow"><span class="label">Lembur</span><span class="amount" id="brkLembur">-</span></div>
                         <div class="breakdown-item" id="brkBpjsCompRow" style="display:none"><span class="label">Kompensasi BPJS</span><span class="amount" id="brkBpjsComp">-</span></div>
@@ -2006,7 +2025,8 @@
     </table>
     <h3 style="margin:16px 0 8px">Pendapatan</h3>
     <table class="slip-table">
-        <tr><td class="label-col">Gaji Pokok</td><td id="slipGajiPokok">-</td></tr>
+        <tr id="slipTimesheetRow" style="display:none"><td class="label-col" id="slipTimesheetLabel">Hari Kerja</td><td id="slipTimesheet">-</td></tr>
+        <tr><td class="label-col" id="slipGajiPokokLabel">Gaji Pokok</td><td id="slipGajiPokok">-</td></tr>
         <tr><td class="label-col">Lembur</td><td id="slipLembur">-</td></tr>
         <tr id="slipBpjsCompRow" style="display:none"><td class="label-col">Kompensasi BPJS</td><td id="slipBpjsComp">-</td></tr>
         <tr><td class="label-col"><strong>Total Pendapatan Bruto</strong></td><td id="slipGross"><strong>-</strong></td></tr>
@@ -2322,6 +2342,138 @@ const BPJS = {
 };
 
 // ===================================================================
+// 3.1 DATA: INDONESIAN PUBLIC HOLIDAYS
+// ===================================================================
+// Indonesian public holidays by year (month is 1-indexed)
+// Includes fixed holidays + estimated dates for Islamic holidays (which shift yearly)
+const INDONESIA_HOLIDAYS = {
+    2024: [
+        { month: 1, day: 1 },   // Tahun Baru
+        { month: 2, day: 8 },   // Isra Mi'raj
+        { month: 2, day: 10 },  // Tahun Baru Imlek
+        { month: 3, day: 11 },  // Hari Raya Nyepi
+        { month: 3, day: 29 },  // Wafat Isa Almasih
+        { month: 4, day: 10 },  // Idul Fitri
+        { month: 4, day: 11 },  // Idul Fitri
+        { month: 5, day: 1 },   // Hari Buruh
+        { month: 5, day: 9 },   // Kenaikan Isa Almasih
+        { month: 5, day: 23 },  // Hari Raya Waisak
+        { month: 6, day: 1 },   // Hari Lahir Pancasila
+        { month: 6, day: 17 },  // Idul Adha
+        { month: 7, day: 7 },   // Tahun Baru Islam
+        { month: 8, day: 17 },  // Hari Kemerdekaan
+        { month: 9, day: 16 },  // Maulid Nabi
+        { month: 12, day: 25 }, // Natal
+    ],
+    2025: [
+        { month: 1, day: 1 },   // Tahun Baru
+        { month: 1, day: 27 },  // Isra Mi'raj
+        { month: 1, day: 29 },  // Tahun Baru Imlek
+        { month: 3, day: 29 },  // Hari Raya Nyepi
+        { month: 3, day: 31 },  // Idul Fitri
+        { month: 4, day: 1 },   // Idul Fitri
+        { month: 4, day: 18 },  // Wafat Isa Almasih
+        { month: 5, day: 1 },   // Hari Buruh
+        { month: 5, day: 12 },  // Hari Raya Waisak
+        { month: 5, day: 29 },  // Kenaikan Isa Almasih
+        { month: 6, day: 1 },   // Hari Lahir Pancasila
+        { month: 6, day: 6 },   // Idul Adha
+        { month: 6, day: 27 },  // Tahun Baru Islam
+        { month: 8, day: 17 },  // Hari Kemerdekaan
+        { month: 9, day: 5 },   // Maulid Nabi
+        { month: 12, day: 25 }, // Natal
+    ],
+    2026: [
+        { month: 1, day: 1 },   // Tahun Baru
+        { month: 1, day: 17 },  // Isra Mi'raj
+        { month: 2, day: 17 },  // Tahun Baru Imlek
+        { month: 3, day: 19 },  // Hari Raya Nyepi
+        { month: 3, day: 20 },  // Idul Fitri
+        { month: 3, day: 21 },  // Idul Fitri
+        { month: 4, day: 3 },   // Wafat Isa Almasih
+        { month: 5, day: 1 },   // Hari Buruh
+        { month: 5, day: 14 },  // Kenaikan Isa Almasih
+        { month: 5, day: 27 },  // Idul Adha
+        { month: 5, day: 31 },  // Hari Raya Waisak
+        { month: 6, day: 1 },   // Hari Lahir Pancasila
+        { month: 6, day: 16 },  // Tahun Baru Islam
+        { month: 8, day: 17 },  // Hari Kemerdekaan
+        { month: 8, day: 25 },  // Maulid Nabi
+        { month: 12, day: 25 }, // Natal
+    ]
+};
+
+/**
+ * Get Indonesian public holidays for a specific month/year
+ */
+function getHolidaysInMonth(month, year) {
+    const yearHolidays = INDONESIA_HOLIDAYS[year] || [];
+    return yearHolidays.filter(h => h.month === month);
+}
+
+/**
+ * Calculate working days in Indonesia for a given month/year
+ * Excludes weekends (Saturday, Sunday) and Indonesian public holidays
+ */
+function getIndonesianWorkingDays(month, year) {
+    const daysInMonth = new Date(year, month, 0).getDate(); // month is 1-indexed, so this gives last day
+    const holidays = getHolidaysInMonth(month, year);
+
+    let workingDays = 0;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month - 1, day); // JS Date uses 0-indexed month
+        const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+
+        // Skip weekends
+        if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+        // Skip holidays
+        const isHoliday = holidays.some(h => h.day === day);
+        if (isHoliday) continue;
+
+        workingDays++;
+    }
+
+    return workingDays;
+}
+
+/**
+ * Toggle timesheet mode visibility
+ */
+function toggleTimesheetMode() {
+    const checkbox = document.getElementById('formTimesheet');
+    const timesheetGroup = document.getElementById('timesheetGroup');
+
+    if (checkbox.checked) {
+        timesheetGroup.style.display = 'block';
+        updateWorkingDaysDisplay();
+    } else {
+        timesheetGroup.style.display = 'none';
+    }
+}
+
+/**
+ * Update working days display based on selected month/year
+ */
+function updateWorkingDaysDisplay() {
+    const month = parseInt(document.getElementById('formMonth').value);
+    const year = parseInt(document.getElementById('formYear').value);
+    const workingDays = getIndonesianWorkingDays(month, year);
+
+    document.getElementById('formWorkingDays').value = workingDays;
+
+    // Also set max for days worked input
+    const daysWorkedInput = document.getElementById('formDaysWorked');
+    daysWorkedInput.max = workingDays;
+
+    // If days worked is greater than working days, adjust it
+    if (parseInt(daysWorkedInput.value) > workingDays) {
+        daysWorkedInput.value = workingDays;
+    }
+}
+
+// ===================================================================
 // 4. STATE
 // ===================================================================
 const FREE_LIMIT = 10;
@@ -2345,7 +2497,10 @@ let calcConfig = {
     tenureMonths: 12,
     ownBpjs: false,
     bpjsCompensation: 0,
-    probation: false
+    probation: false,
+    useTimesheet: false,
+    workingDays: 0,
+    daysWorked: 0
 };
 
 // AI Agent state
@@ -3211,6 +3366,18 @@ function displayResults(calc) {
     s('valNet', calc.net);
     s('valCost', calc.companyCost);
 
+    // Timesheet info
+    const timesheetRow = document.getElementById('brkTimesheetRow');
+    if (cfg.useTimesheet && cfg.workingDays > 0 && cfg.daysWorked > 0) {
+        timesheetRow.style.display = '';
+        const isEn = currentLang === 'en';
+        document.getElementById('brkTimesheetLabel').textContent = isEn ? 'Working Days' : 'Hari Kerja';
+        document.getElementById('brkTimesheet').textContent = `${cfg.daysWorked} / ${cfg.workingDays}`;
+        document.getElementById('noteTimesheet').textContent = isEn ? 'Prorated' : 'Prorata';
+    } else {
+        timesheetRow.style.display = 'none';
+    }
+
     // Income breakdown
     s('brkBaseSalary', calc.input.baseSalary);
     s('brkLembur', calc.overtime.total);
@@ -3503,15 +3670,39 @@ async function submitForm() {
     const ownBpjs = document.getElementById('formOwnBpjs').checked;
     const bpjsCompensation = parseInt(document.getElementById('formBpjsCompensation').value) || 0;
 
+    // Timesheet options
+    const useTimesheet = document.getElementById('formTimesheet').checked;
+    const workingDays = parseInt(document.getElementById('formWorkingDays').value) || 0;
+    const daysWorked = parseInt(document.getElementById('formDaysWorked').value) || 0;
+
     if (baseSalary < 100000) {
         alert(currentLang === 'en' ? 'Please enter a valid base salary' : 'Mohon masukkan gaji pokok yang valid');
         return;
     }
 
+    // Validate timesheet input
+    if (useTimesheet) {
+        if (daysWorked <= 0) {
+            alert(currentLang === 'en' ? 'Please enter the number of days worked' : 'Mohon masukkan jumlah hari kerja');
+            return;
+        }
+        if (daysWorked > workingDays) {
+            alert(currentLang === 'en' ? 'Days worked cannot exceed working days in the month' : 'Hari kerja tidak boleh melebihi hari kerja di bulan tersebut');
+            return;
+        }
+    }
+
     // Get region info from UMP_DATABASE
     const regionInfo = UMP_DATABASE[region] || UMP_DATABASE['jakarta'];
     const totalAllowances = meal + transport + other;
-    const effectiveBaseSalary = baseSalary + totalAllowances;
+
+    // Calculate effective salary - if timesheet mode, prorate based on days worked
+    let effectiveBaseSalary = baseSalary + totalAllowances;
+    let timesheetRatio = 1;
+    if (useTimesheet && workingDays > 0) {
+        timesheetRatio = daysWorked / workingDays;
+        effectiveBaseSalary = Math.round((baseSalary + totalAllowances) * timesheetRatio);
+    }
 
     const data = {
         name,
@@ -3537,6 +3728,11 @@ async function submitForm() {
     calcConfig.ownBpjs = ownBpjs;
     calcConfig.bpjsCompensation = bpjsCompensation;
 
+    // Update calcConfig with timesheet settings
+    calcConfig.useTimesheet = useTimesheet;
+    calcConfig.workingDays = workingDays;
+    calcConfig.daysWorked = daysWorked;
+
     currentCalc = calculatePayroll(data, calcConfig);
 
     // Store allowances info for display
@@ -3556,6 +3752,15 @@ async function submitForm() {
     let response = `✓ Perhitungan untuk <strong>${name}</strong> selesai!<br><br>`;
     response += `📍 Lokasi: ${regionInfo.label}<br>`;
     response += `💰 Gaji Pokok: ${formatIDR(baseSalary)}<br>`;
+    if (useTimesheet && workingDays > 0) {
+        const isEn = currentLang === 'en';
+        response += isEn
+            ? `📅 Timesheet: ${daysWorked} of ${workingDays} working days (${Math.round(timesheetRatio * 100)}%)<br>`
+            : `📅 Hari Kerja: ${daysWorked} dari ${workingDays} hari (${Math.round(timesheetRatio * 100)}%)<br>`;
+        response += isEn
+            ? `💰 Prorated Salary: ${formatIDR(effectiveBaseSalary)}<br>`
+            : `💰 Gaji Prorata: ${formatIDR(effectiveBaseSalary)}<br>`;
+    }
     if (totalAllowances > 0) {
         response += `🍽️ Tunjangan Makan: ${formatIDR(meal)}<br>`;
         response += `🚗 Tunjangan Transport: ${formatIDR(transport)}<br>`;
@@ -3649,6 +3854,18 @@ function generateSlipGaji() {
     document.getElementById('slipRegion').textContent = c.input.regionLabel;
     document.getElementById('slipPTKP').textContent = c.input.ptkp;
     document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? (isEn ? 'Yes' : 'Ada') : (isEn ? 'No' : 'Tidak Ada');
+    // Timesheet info in PDF
+    const slipTimesheetRow = document.getElementById('slipTimesheetRow');
+    if (cfg.useTimesheet && cfg.workingDays > 0 && cfg.daysWorked > 0) {
+        slipTimesheetRow.style.display = '';
+        document.getElementById('slipTimesheetLabel').textContent = isEn ? 'Working Days' : 'Hari Kerja';
+        document.getElementById('slipTimesheet').textContent = `${cfg.daysWorked} / ${cfg.workingDays} (${Math.round(cfg.daysWorked / cfg.workingDays * 100)}%)`;
+        document.getElementById('slipGajiPokokLabel').textContent = isEn ? 'Prorated Salary' : 'Gaji Prorata';
+    } else {
+        slipTimesheetRow.style.display = 'none';
+        document.getElementById('slipGajiPokokLabel').textContent = isEn ? 'Base Salary' : 'Gaji Pokok';
+    }
+
     document.getElementById('slipGajiPokok').textContent = formatIDR(c.input.baseSalary);
     document.getElementById('slipLembur').textContent = formatIDR(c.overtime.total);
 
@@ -3984,6 +4201,13 @@ function setLang(lang) {
     document.getElementById('formLblBpjsComp').textContent = isEn ? 'BPJS Compensation to Employee (Rp)' : 'Kompensasi BPJS ke Karyawan (Rp)';
     document.getElementById('formBpjsCompHint').textContent = isEn ? 'BPJS substitute allowance' : 'Tunjangan pengganti BPJS';
 
+    // Timesheet fields
+    document.getElementById('formLblTimesheet').textContent = isEn ? 'Calculate by working days (Timesheet)' : 'Hitung berdasarkan hari kerja (Timesheet)';
+    document.getElementById('formLblWorkingDays').textContent = isEn ? 'Working Days in Month' : 'Hari Kerja di Bulan Ini';
+    document.getElementById('formWorkingDaysHint').textContent = isEn ? '(Auto-calculated)' : '(Otomatis dihitung)';
+    document.getElementById('formLblDaysWorked').textContent = isEn ? 'Days Worked' : 'Hari Masuk Kerja';
+    document.getElementById('formDaysWorkedHint').textContent = isEn ? '(Number of days employee worked)' : '(Jumlah hari karyawan bekerja)';
+
     // PTKP dropdown options
     document.getElementById('ptkpTK0').textContent = isEn ? 'TK/0 - Single, no dependents' : 'TK/0 - Tidak Kawin, tanpa tanggungan';
     document.getElementById('ptkpTK1').textContent = isEn ? 'TK/1 - Single, 1 dependent' : 'TK/1 - Tidak Kawin, 1 tanggungan';
@@ -4028,6 +4252,11 @@ function updateConfig() {
     calcConfig.probation = document.getElementById('cfgProbation').checked;
     calcConfig.includeTHR = document.getElementById('cfgIncludeTHR').checked;
     calcConfig.tenureMonths = parseInt(document.getElementById('cfgTenureMonths').value) || 12;
+
+    // Timesheet settings
+    calcConfig.useTimesheet = document.getElementById('formTimesheet')?.checked || false;
+    calcConfig.workingDays = parseInt(document.getElementById('formWorkingDays')?.value) || 0;
+    calcConfig.daysWorked = parseInt(document.getElementById('formDaysWorked')?.value) || 0;
 }
 
 // ===================================================================
