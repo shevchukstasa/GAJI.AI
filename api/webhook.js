@@ -629,11 +629,18 @@ export default async function handler(req, res) {
 
             // Check for audio/voice message (handle various formats from Wablas)
             const msgType = (messageType || '').toLowerCase();
-            const isVoiceMessage = msgType === 'audio' || msgType === 'ptt' || msgType === 'voice';
+            const isVoiceMessage = msgType === 'audio' || msgType === 'ptt' || msgType === 'voice' ||
+                                   msgType === 'document' || isMedia === true || isMedia === 'true';
 
-            if (isVoiceMessage) {
+            // Also check if there's media but no text message
+            const hasMediaUrl = file || media || url || docUrl;
+            const shouldProcessAsVoice = isVoiceMessage || (hasMediaUrl && !message);
+
+            console.log('Voice detection:', { msgType, isVoiceMessage, hasMediaUrl, shouldProcessAsVoice });
+
+            if (shouldProcessAsVoice && hasMediaUrl) {
                 const audioUrl = file || media || url || docUrl;
-                console.log('Voice message detected, URL:', audioUrl);
+                console.log('Processing as voice message, URL:', audioUrl);
 
                 if (!audioUrl) {
                     res.setHeader('Content-Type', 'text/plain');
