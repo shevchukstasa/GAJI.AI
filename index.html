@@ -3080,10 +3080,16 @@ async function submitForm() {
 
 function updateFreeCounter() {
     const remaining = Math.max(0, FREE_LIMIT - calcCount);
-    document.getElementById('freeCountNum').textContent = remaining;
+    const freeCountNum = document.getElementById('freeCountNum');
+    const freeCounterText = document.getElementById('freeCounterText');
+
+    if (freeCountNum) {
+        freeCountNum.textContent = remaining;
+    }
+
     const isEn = currentLang === 'en';
-    if (remaining === 0) {
-        document.getElementById('freeCounterText').innerHTML = isEn
+    if (remaining === 0 && freeCounterText) {
+        freeCounterText.innerHTML = isEn
             ? 'Free calculations used up! <a href="#pricing" style="color:var(--color-primary);font-weight:600">Upgrade now</a>'
             : 'Perhitungan gratis habis! <a href="#pricing" style="color:var(--color-primary);font-weight:600">Upgrade sekarang</a>';
     }
