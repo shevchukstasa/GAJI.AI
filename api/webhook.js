@@ -431,7 +431,8 @@ export default async function handler(req, res) {
             // Check for greeting or help
             const msgLower = message.toLowerCase().trim();
             if (['halo', 'hai', 'hi', 'hello', 'help', 'bantuan', 'mulai', 'start'].includes(msgLower)) {
-                return res.status(200).json({ message: formatWelcome() });
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(200).send(formatWelcome());
             }
 
             // Parse the message
@@ -439,13 +440,15 @@ export default async function handler(req, res) {
 
             // Check if we have valid salary data
             if (!data.baseSalary || data.baseSalary < 100000) {
-                return res.status(200).json({ message: formatError() });
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(200).send(formatError());
             }
 
             // Check usage limit before calculating
             const usage = await checkUsageLimit(phone);
             if (!usage.allowed) {
-                return res.status(200).json({ message: formatLimitReached(usage.count) });
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(200).send(formatLimitReached(usage.count));
             }
 
             // Calculate payroll
@@ -454,9 +457,10 @@ export default async function handler(req, res) {
             // Increment usage counter
             await incrementUsage(phone, usage.existing, usage.id, usage.count);
 
-            // Format and return response for Wablas auto-reply
+            // Format and return response as plain text for Wablas auto-reply
             const response = formatResponse(data, calc);
-            return res.status(200).json({ message: response });
+            res.setHeader('Content-Type', 'text/plain');
+            return res.status(200).send(response);
 
         } catch (error) {
             console.error('Webhook error:', error);
