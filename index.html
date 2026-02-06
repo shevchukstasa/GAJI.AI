@@ -1625,15 +1625,22 @@
                         <label for="formTimesheet" id="formLblTimesheet">Hitung berdasarkan hari kerja (Timesheet)</label>
                     </div>
                     <div class="form-group" id="timesheetGroup" style="display:none">
-                        <div style="display:flex;gap:10px;align-items:center">
-                            <div style="flex:1">
+                        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+                            <div style="flex:1;min-width:120px">
+                                <label id="formLblWorkWeek">Hari Kerja per Minggu</label>
+                                <select id="formWorkWeek" onchange="updateWorkingDaysDisplay()" style="width:100%">
+                                    <option value="5">5 hari (Senin-Jumat)</option>
+                                    <option value="6">6 hari (Senin-Sabtu)</option>
+                                </select>
+                            </div>
+                            <div style="flex:1;min-width:120px">
                                 <label id="formLblWorkingDays">Hari Kerja di Bulan Ini</label>
-                                <input type="number" id="formWorkingDays" readonly style="background:#f0f0f0;cursor:not-allowed">
+                                <input type="number" id="formWorkingDays" readonly style="background:#f0f0f0;cursor:not-allowed;width:100%">
                                 <span class="hint" id="formWorkingDaysHint">(Otomatis dihitung)</span>
                             </div>
-                            <div style="flex:1">
+                            <div style="flex:1;min-width:120px">
                                 <label id="formLblDaysWorked">Hari Masuk Kerja</label>
-                                <input type="number" id="formDaysWorked" placeholder="0" min="0" value="0">
+                                <input type="number" id="formDaysWorked" placeholder="0" min="0" value="0" style="width:100%">
                                 <span class="hint" id="formDaysWorkedHint">(Jumlah hari karyawan bekerja)</span>
                             </div>
                         </div>
@@ -2413,9 +2420,11 @@ function getHolidaysInMonth(month, year) {
 
 /**
  * Calculate working days in Indonesia for a given month/year
- * Excludes weekends (Saturday, Sunday) and Indonesian public holidays
+ * @param month - 1-indexed month (1 = January)
+ * @param year - full year (e.g., 2025)
+ * @param workDaysPerWeek - 5 (Mon-Fri) or 6 (Mon-Sat)
  */
-function getIndonesianWorkingDays(month, year) {
+function getIndonesianWorkingDays(month, year, workDaysPerWeek = 5) {
     const daysInMonth = new Date(year, month, 0).getDate(); // month is 1-indexed, so this gives last day
     const holidays = getHolidaysInMonth(month, year);
 
@@ -2425,8 +2434,11 @@ function getIndonesianWorkingDays(month, year) {
         const date = new Date(year, month - 1, day); // JS Date uses 0-indexed month
         const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
 
-        // Skip weekends
-        if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+        // Skip Sunday always
+        if (dayOfWeek === 0) continue;
+
+        // Skip Saturday only for 5-day work week
+        if (workDaysPerWeek === 5 && dayOfWeek === 6) continue;
 
         // Skip holidays
         const isHoliday = holidays.some(h => h.day === day);
@@ -2454,12 +2466,13 @@ function toggleTimesheetMode() {
 }
 
 /**
- * Update working days display based on selected month/year
+ * Update working days display based on selected month/year and work week
  */
 function updateWorkingDaysDisplay() {
     const month = parseInt(document.getElementById('formMonth').value);
     const year = parseInt(document.getElementById('formYear').value);
-    const workingDays = getIndonesianWorkingDays(month, year);
+    const workWeek = parseInt(document.getElementById('formWorkWeek')?.value) || 5;
+    const workingDays = getIndonesianWorkingDays(month, year, workWeek);
 
     document.getElementById('formWorkingDays').value = workingDays;
 
@@ -4203,6 +4216,12 @@ function setLang(lang) {
 
     // Timesheet fields
     document.getElementById('formLblTimesheet').textContent = isEn ? 'Calculate by working days (Timesheet)' : 'Hitung berdasarkan hari kerja (Timesheet)';
+    document.getElementById('formLblWorkWeek').textContent = isEn ? 'Work Days per Week' : 'Hari Kerja per Minggu';
+    const workWeekSelect = document.getElementById('formWorkWeek');
+    if (workWeekSelect) {
+        workWeekSelect.options[0].text = isEn ? '5 days (Mon-Fri)' : '5 hari (Senin-Jumat)';
+        workWeekSelect.options[1].text = isEn ? '6 days (Mon-Sat)' : '6 hari (Senin-Sabtu)';
+    }
     document.getElementById('formLblWorkingDays').textContent = isEn ? 'Working Days in Month' : 'Hari Kerja di Bulan Ini';
     document.getElementById('formWorkingDaysHint').textContent = isEn ? '(Auto-calculated)' : '(Otomatis dihitung)';
     document.getElementById('formLblDaysWorked').textContent = isEn ? 'Days Worked' : 'Hari Masuk Kerja';
