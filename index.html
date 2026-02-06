@@ -2241,48 +2241,120 @@ function setLang(lang) {
     document.getElementById('btnLangId').classList.toggle('active', lang === 'id');
     document.getElementById('btnLangEn').classList.toggle('active', lang === 'en');
 
-    // For MVP, only toggle key hero/nav text. Full i18n can be added later.
-    if (lang === 'en') {
-        document.getElementById('heroTitle').textContent = 'Calculate Employee Salary in 5 Seconds';
-        document.getElementById('heroDesc').textContent = 'AI-powered Indonesia payroll calculator. Type salary data in natural language, get PPh 21, BPJS, overtime & payslip instantly.';
-        document.getElementById('heroCtaCalc').textContent = 'Try Free Now';
-        document.getElementById('heroCtaPricing').textContent = 'See Pricing';
-        document.getElementById('navCalcBtn').textContent = 'Free Calculator';
-        document.getElementById('calcTitle').textContent = 'AI Salary Calculator';
-        document.getElementById('calcDesc').textContent = 'Type salary data in free format. AI automatically calculates everything.';
-        document.getElementById('quickLabel').textContent = 'Examples:';
-        document.getElementById('sendBtnText').textContent = 'Calculate';
-        document.getElementById('featTitle').textContent = 'Why Gaji.AI?';
-        document.getElementById('featDesc').textContent = 'The simplest and most accurate payroll solution for Indonesian businesses';
-        document.getElementById('pricingTitle').textContent = 'Choose Your Plan';
-        document.getElementById('pricingDesc').textContent = 'Start free, upgrade anytime';
-        document.getElementById('pdfBtn').textContent = 'Print Payslip PDF';
-        document.getElementById('copyBtn').textContent = 'Copy Result';
-        document.getElementById('statProvinsi').textContent = 'Provinces';
-        document.getElementById('statCompliance').textContent = 'Legally Compliant';
-        document.getElementById('statFree').textContent = 'Free Calcs';
-        document.getElementById('userInput').placeholder = 'Example: Budi, salary 8 mio, Jakarta, overtime 20 hours, has NPWP';
-    } else {
-        document.getElementById('heroTitle').textContent = 'Hitung Gaji Karyawan dalam 5 Detik';
-        document.getElementById('heroDesc').textContent = 'Kalkulator payroll Indonesia berbasis AI. Cukup ketik data gaji dalam bahasa sehari-hari, dapatkan perhitungan PPh 21, BPJS, lembur & slip gaji instan.';
-        document.getElementById('heroCtaCalc').textContent = 'Coba Gratis Sekarang';
-        document.getElementById('heroCtaPricing').textContent = 'Lihat Harga';
-        document.getElementById('navCalcBtn').textContent = 'Hitung Gratis';
-        document.getElementById('calcTitle').textContent = 'Kalkulator Gaji AI';
-        document.getElementById('calcDesc').textContent = 'Ketik data gaji dalam format bebas. AI akan otomatis menghitung semuanya.';
-        document.getElementById('quickLabel').textContent = 'Contoh:';
-        document.getElementById('sendBtnText').textContent = 'Hitung';
-        document.getElementById('featTitle').textContent = 'Mengapa Gaji.AI?';
-        document.getElementById('featDesc').textContent = 'Solusi payroll paling sederhana dan akurat untuk bisnis Indonesia';
-        document.getElementById('pricingTitle').textContent = 'Pilih Paket Anda';
-        document.getElementById('pricingDesc').textContent = 'Mulai gratis, upgrade kapan saja';
-        document.getElementById('pdfBtn').textContent = 'Cetak Slip Gaji PDF';
-        document.getElementById('copyBtn').textContent = 'Salin Hasil';
-        document.getElementById('statProvinsi').textContent = 'Provinsi UMP';
-        document.getElementById('statCompliance').textContent = 'Sesuai Hukum';
-        document.getElementById('statFree').textContent = 'Gratis';
-        document.getElementById('userInput').placeholder = 'Contoh: Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP';
-    }
+    const isEn = lang === 'en';
+
+    // Hero section
+    document.getElementById('heroTitle').textContent = isEn ? 'Calculate Employee Salary in 5 Seconds' : 'Hitung Gaji Karyawan dalam 5 Detik';
+    document.getElementById('heroDesc').textContent = isEn ? 'AI-powered Indonesia payroll calculator. Type salary data in natural language, get PPh 21, BPJS, overtime & payslip instantly.' : 'Kalkulator payroll Indonesia berbasis AI. Cukup ketik data gaji dalam bahasa sehari-hari, dapatkan perhitungan PPh 21, BPJS, lembur & slip gaji instan.';
+    document.getElementById('heroCtaCalc').textContent = isEn ? 'Try Free Now' : 'Coba Gratis Sekarang';
+    document.getElementById('heroCtaPricing').textContent = isEn ? 'See Pricing' : 'Lihat Harga';
+    document.getElementById('navCalcBtn').textContent = isEn ? 'Free Calculator' : 'Hitung Gratis';
+    document.getElementById('statProvinsi').textContent = isEn ? 'Provinces' : 'Provinsi UMP';
+    document.getElementById('statCompliance').textContent = isEn ? 'Legally Compliant' : 'Sesuai Hukum';
+    document.getElementById('statFree').textContent = isEn ? 'Free Calcs' : 'Gratis';
+
+    // Calculator section
+    document.getElementById('calcTitle').textContent = isEn ? 'AI Salary Calculator' : 'Kalkulator Gaji AI';
+    document.getElementById('calcDesc').textContent = isEn ? 'Type salary data in free format. AI automatically calculates everything.' : 'Ketik data gaji dalam format bebas. AI akan otomatis menghitung semuanya.';
+    document.getElementById('quickLabel').textContent = isEn ? 'Examples:' : 'Contoh:';
+    document.getElementById('sendBtnText').textContent = isEn ? 'Calculate' : 'Hitung';
+    document.getElementById('userInput').placeholder = isEn ? 'Example: Budi, salary 8 mio, Jakarta, overtime 20 hours, has NPWP' : 'Contoh: Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP';
+
+    // Config panel
+    document.querySelector('.config-header span').textContent = isEn ? '⚙ Calculation Settings' : '⚙ Pengaturan Perhitungan';
+    const cfgSections = document.querySelectorAll('.config-section-title');
+    if (cfgSections[0]) cfgSections[0].textContent = isEn ? 'Who Pays?' : 'Siapa Bayar?';
+    if (cfgSections[1]) cfgSections[1].textContent = isEn ? 'THR (Holiday Bonus)' : 'THR (Tunjangan Hari Raya)';
+    if (cfgSections[2]) cfgSections[2].textContent = isEn ? 'Reverse Engineering' : 'Reverse Engineering';
+
+    const cfgLabels = document.querySelectorAll('.config-row .config-label');
+    if (cfgLabels[0]) cfgLabels[0].textContent = 'PPh 21';
+    if (cfgLabels[1]) cfgLabels[1].textContent = isEn ? 'BPJS Health' : 'BPJS Kesehatan';
+    if (cfgLabels[2]) cfgLabels[2].textContent = 'BPJS JHT';
+    if (cfgLabels[3]) cfgLabels[3].textContent = 'BPJS JP';
+    if (cfgLabels[4]) cfgLabels[4].textContent = isEn ? 'Target Take-Home:' : 'Target Take-Home:';
+
+    document.querySelectorAll('.config-select').forEach(sel => {
+        if (sel.options[0]) sel.options[0].text = isEn ? 'Employee' : 'Karyawan';
+        if (sel.options[1]) sel.options[1].text = sel.id === 'cfgPph21Payer'
+            ? (isEn ? 'Company (Gross-up)' : 'Perusahaan (Gross-up)')
+            : (isEn ? 'Company' : 'Perusahaan');
+    });
+
+    const cfgCheckLabels = document.querySelectorAll('.config-checkbox span');
+    if (cfgCheckLabels[0]) cfgCheckLabels[0].textContent = isEn ? 'Calculate THR' : 'Hitung THR';
+    if (cfgCheckLabels[1]) cfgCheckLabels[1].textContent = isEn ? 'Calculate overtime from target net' : 'Hitung jam lembur dari target net';
+
+    // Results section
+    document.getElementById('toggleStandard').textContent = isEn ? 'Standard' : 'Standar';
+    document.getElementById('toggleHarmony').textContent = isEn ? 'Harmony Optimal' : 'Harmoni Optimal';
+    document.getElementById('lblGross').textContent = isEn ? 'Gross Salary' : 'Gaji Bruto';
+    document.getElementById('lblDeductions').textContent = isEn ? 'Total Deductions' : 'Total Potongan';
+    document.getElementById('lblNet').textContent = isEn ? 'Net Salary (Take-Home)' : 'Gaji Bersih (Take-Home)';
+    document.getElementById('lblCost').textContent = isEn ? 'Total Company Cost' : 'Total Biaya Perusahaan';
+    document.getElementById('brkDeductTitle').textContent = isEn ? 'Employee Deductions' : 'Rincian Potongan Karyawan';
+    document.getElementById('brkCompanyTitle').textContent = isEn ? 'Company Contributions' : 'Kontribusi Perusahaan';
+    document.getElementById('pdfBtn').textContent = isEn ? 'Print Payslip PDF' : 'Cetak Slip Gaji PDF';
+    document.getElementById('copyBtn').textContent = isEn ? 'Copy Result' : 'Salin Hasil';
+
+    // Features section
+    document.getElementById('featTitle').textContent = isEn ? 'Why Gaji.AI?' : 'Mengapa Gaji.AI?';
+    document.getElementById('featDesc').textContent = isEn ? 'The simplest and most accurate payroll solution for Indonesian businesses' : 'Solusi payroll paling sederhana dan akurat untuk bisnis Indonesia';
+    document.getElementById('f1').textContent = isEn ? 'Type in everyday language, AI understands instantly' : 'Ketik dalam bahasa sehari-hari, AI langsung mengerti';
+    document.getElementById('f2').textContent = isEn ? 'Compliant with PPh 21 TER 2024, BPJS 2025, Job Creation Law' : 'Sesuai PPh 21 TER 2024, BPJS 2025, UU Cipta Kerja';
+    document.getElementById('f3').textContent = isEn ? 'Complete UMP/UMK database for all of Indonesia' : 'Database UMP/UMK lengkap seluruh Indonesia';
+    document.getElementById('f4').textContent = isEn ? 'Optimize take-home pay legally' : 'Optimalkan take-home pay secara legal';
+    document.getElementById('f5').textContent = isEn ? 'Generate professional payslips instantly' : 'Generate slip gaji profesional instan';
+    document.getElementById('f6').textContent = isEn ? 'Save 99% compared to traditional accountants' : 'Hemat 99% dibanding akuntan tradisional';
+
+    // Pricing section
+    document.getElementById('pricingTitle').textContent = isEn ? 'Choose Your Plan' : 'Pilih Paket Anda';
+    document.getElementById('pricingDesc').textContent = isEn ? 'Start free, upgrade anytime' : 'Mulai gratis, upgrade kapan saja';
+
+    document.getElementById('t1Desc').textContent = isEn ? 'Quick calculations via chat' : 'Perhitungan cepat via chat';
+    document.getElementById('t1Period').textContent = isEn ? '/calculation' : '/perhitungan';
+    document.getElementById('t1f1').textContent = isEn ? '5 free calculations' : '5 perhitungan gratis';
+    document.getElementById('t1f3').textContent = isEn ? 'Complete BPJS' : 'BPJS lengkap';
+    document.getElementById('t1f4').textContent = isEn ? 'Overtime (1/173)' : 'Lembur (1/173)';
+    document.getElementById('t1f5').textContent = isEn ? 'Payslip PDF' : 'Slip Gaji PDF';
+    document.getElementById('t1Btn').textContent = isEn ? 'Start Free' : 'Mulai Gratis';
+
+    document.getElementById('t2Desc').textContent = isEn ? 'Complete online dashboard' : 'Dashboard online lengkap';
+    document.getElementById('t2Period').textContent = isEn ? '/month' : '/bulan';
+    document.getElementById('t2f1').textContent = isEn ? 'All Sobat Gaji features' : 'Semua fitur Sobat Gaji';
+    document.getElementById('t2f2').textContent = isEn ? 'Unlimited calculations' : 'Perhitungan unlimited';
+    document.getElementById('t2f3').textContent = isEn ? 'Choose from 38 provinces' : 'Pilih dari 38 provinsi UMP';
+    document.getElementById('t2f4').textContent = isEn ? 'Income certificate' : 'Surat Keterangan Penghasilan';
+    document.getElementById('t2f5').textContent = isEn ? '12 months history' : 'Riwayat perhitungan 12 bulan';
+    document.getElementById('t2f6').textContent = isEn ? 'CSV export' : 'Export CSV';
+    document.getElementById('t2Btn').textContent = isEn ? 'Choose Pro' : 'Pilih Pro';
+
+    document.getElementById('t3Desc').textContent = isEn ? 'Tax & BPJS optimization' : 'Optimasi pajak & BPJS';
+    document.getElementById('t3Period').textContent = isEn ? '/month' : '/bulan';
+    document.getElementById('t3f1').textContent = isEn ? 'All Gaji Pro features' : 'Semua fitur Gaji Pro';
+    document.getElementById('t3f2').textContent = isEn ? 'Salary structure optimization' : 'Optimasi struktur gaji';
+    document.getElementById('t3f3').textContent = isEn ? 'Gross-up (company pays all)' : 'Gross-up (perusahaan bayar semua)';
+    document.getElementById('t3f4').textContent = isEn ? 'Configure who pays BPJS/PPh' : 'Konfigurasi siapa bayar BPJS/PPh';
+    document.getElementById('t3f5').textContent = isEn ? 'Savings simulation' : 'Simulasi penghematan';
+    document.getElementById('t3Btn').textContent = isEn ? 'Choose Harmony' : 'Pilih Harmony';
+
+    document.getElementById('t4Desc').textContent = isEn ? 'Full control & HRIS' : 'Kontrol penuh & HRIS';
+    document.getElementById('t4Period').textContent = isEn ? '/month' : '/bulan';
+    document.getElementById('t4f1').textContent = isEn ? 'All Harmony features' : 'Semua fitur Harmony';
+    document.getElementById('t4f2').textContent = isEn ? 'Complete employee database' : 'Database karyawan lengkap';
+    document.getElementById('t4f3').textContent = isEn ? 'Reverse-engineering timesheet' : 'Reverse-engineering tabeel';
+    document.getElementById('t4f4').textContent = isEn ? 'Custom formulas (1/172, etc.)' : 'Formula kustom (1/172, dll)';
+    document.getElementById('t4f5').textContent = isEn ? 'Tax report 1721-A1' : 'Laporan pajak 1721-A1';
+    document.getElementById('t4f6').textContent = isEn ? '5-year history + audit' : 'Riwayat 5 tahun + audit';
+    document.getElementById('t4Btn').textContent = isEn ? 'Contact Us' : 'Hubungi Kami';
+
+    // Footer
+    document.getElementById('footerDesc').textContent = isEn ? 'AI-powered Indonesia payroll calculator. Accurate, fast, and legally compliant.' : 'Kalkulator payroll Indonesia berbasis AI. Akurat, cepat, dan sesuai hukum.';
+    document.getElementById('footerProduct').textContent = isEn ? 'Product' : 'Produk';
+    document.getElementById('footerCalc').textContent = isEn ? 'Free Calculator' : 'Kalkulator Gratis';
+    document.getElementById('footerPricing').textContent = isEn ? 'Pricing' : 'Harga';
+    document.getElementById('footerFeatures').textContent = isEn ? 'Features' : 'Fitur';
+    document.getElementById('footerLegal').textContent = isEn ? 'Legal' : 'Legal';
 }
 
 // ===================================================================
