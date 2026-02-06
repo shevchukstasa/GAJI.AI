@@ -1540,70 +1540,70 @@
             <!-- Reverse Engineering Block -->
             <div class="reverse-engineering-block" id="reverseEngBlock">
                 <div class="reverse-eng-header">
-                    <h3>🔧 Reverse Engineering Lembur</h3>
-                    <p>Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay</p>
+                    <h3 id="revTitle">🔧 Reverse Engineering Lembur</h3>
+                    <p id="revDesc">Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay</p>
                 </div>
                 <div class="reverse-eng-inputs">
                     <div class="reverse-eng-row">
-                        <label>Gaji Pokok:</label>
+                        <label id="revLblBaseSalary">Gaji Pokok:</label>
                         <div class="input-with-prefix">
                             <span>Rp</span>
                             <input type="number" id="revBaseSalary" placeholder="4500000" value="">
                         </div>
                     </div>
                     <div class="reverse-eng-row">
-                        <label>Target Take-Home:</label>
+                        <label id="revLblTargetNet">Target Take-Home:</label>
                         <div class="input-with-prefix">
                             <span>Rp</span>
                             <input type="number" id="revTargetNet" placeholder="6000000" value="">
                         </div>
                     </div>
                     <div class="reverse-eng-row">
-                        <label>Status PTKP:</label>
+                        <label id="revLblPtkp">Status PTKP:</label>
                         <select id="revPtkp">
-                            <option value="TK/0">TK/0 - Tidak Kawin</option>
-                            <option value="K/0">K/0 - Kawin, tanpa anak</option>
-                            <option value="K/1">K/1 - Kawin, 1 anak</option>
-                            <option value="K/2">K/2 - Kawin, 2 anak</option>
-                            <option value="K/3">K/3 - Kawin, 3 anak</option>
+                            <option value="TK/0" id="revPtkpTK0">TK/0 - Tidak Kawin</option>
+                            <option value="K/0" id="revPtkpK0">K/0 - Kawin, tanpa anak</option>
+                            <option value="K/1" id="revPtkpK1">K/1 - Kawin, 1 anak</option>
+                            <option value="K/2" id="revPtkpK2">K/2 - Kawin, 2 anak</option>
+                            <option value="K/3" id="revPtkpK3">K/3 - Kawin, 3 anak</option>
                         </select>
                     </div>
                     <div class="reverse-eng-row checkbox-row">
                         <label class="config-checkbox">
                             <input type="checkbox" id="revHasNpwp" checked>
-                            <span>Punya NPWP</span>
+                            <span id="revLblNpwp">Punya NPWP</span>
                         </label>
                     </div>
                     <button class="btn btn-accent" onclick="calculateReverseOvertime()" id="revCalcBtn">
-                        🧮 Hitung Jam Lembur
+                        🧮 <span id="revCalcBtnText">Hitung Jam Lembur</span>
                     </button>
                 </div>
                 <div class="reverse-eng-results" id="revResults" style="display:none">
-                    <h4>📊 Hasil Perhitungan:</h4>
+                    <h4 id="revResultsTitle">📊 Hasil Perhitungan:</h4>
                     <div class="rev-result-grid">
                         <div class="rev-result-item highlight">
-                            <span class="rev-label">Total Jam Lembur:</span>
+                            <span class="rev-label" id="revLblTotalHours">Total Jam Lembur:</span>
                             <span class="rev-value" id="revTotalHours">0 jam</span>
                         </div>
                         <div class="rev-result-item">
-                            <span class="rev-label">Jam ke-1 (1.5x):</span>
+                            <span class="rev-label" id="revLblFirstHour">Jam ke-1 (1.5x):</span>
                             <span class="rev-value" id="revFirstHour">1 jam = <span id="revFirstHourAmount">Rp 0</span></span>
                         </div>
                         <div class="rev-result-item">
-                            <span class="rev-label">Jam ke-2+ (2.0x):</span>
+                            <span class="rev-label" id="revLblRestHours">Jam ke-2+ (2.0x):</span>
                             <span class="rev-value" id="revRestHours">0 jam = <span id="revRestHoursAmount">Rp 0</span></span>
                         </div>
                         <div class="rev-result-item total">
-                            <span class="rev-label">Total Lembur:</span>
+                            <span class="rev-label" id="revLblTotalAmount">Total Lembur:</span>
                             <span class="rev-value" id="revTotalAmount">Rp 0</span>
                         </div>
                         <div class="rev-result-item total">
-                            <span class="rev-label">Estimasi Take-Home:</span>
+                            <span class="rev-label" id="revLblEstimatedNet">Estimasi Take-Home:</span>
                             <span class="rev-value" id="revEstimatedNet">Rp 0</span>
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="applyReverseToForm()" id="revApplyBtn">
-                        ✅ Terapkan ke Form
+                        ✅ <span id="revApplyBtnText">Terapkan ke Form</span>
                     </button>
                 </div>
             </div>
@@ -2736,18 +2736,19 @@ function reverseEngineerOvertime(targetNet, baseSalary, ptkpStatus, hasNPWP) {
  * UI function: Calculate reverse overtime and display results
  */
 function calculateReverseOvertime() {
+    const isEn = currentLang === 'en';
     const baseSalary = parseInt(document.getElementById('revBaseSalary').value) || 0;
     const targetNet = parseInt(document.getElementById('revTargetNet').value) || 0;
     const ptkp = document.getElementById('revPtkp').value;
     const hasNPWP = document.getElementById('revHasNpwp').checked;
 
     if (baseSalary < 100000) {
-        alert('Mohon masukkan gaji pokok yang valid (minimal Rp 100.000)');
+        alert(isEn ? 'Please enter a valid base salary (minimum Rp 100,000)' : 'Mohon masukkan gaji pokok yang valid (minimal Rp 100.000)');
         return;
     }
 
     if (targetNet < baseSalary) {
-        alert('Target take-home harus lebih besar dari gaji pokok');
+        alert(isEn ? 'Target take-home must be greater than base salary' : 'Target take-home harus lebih besar dari gaji pokok');
         return;
     }
 
@@ -2765,10 +2766,12 @@ function calculateReverseOvertime() {
     const restHoursPay = Math.round(restHours * hourlyRate * 2.0);
     const totalOvertimePay = firstHourPay + restHoursPay;
 
-    // Update display
-    document.getElementById('revTotalHours').textContent = hours + ' jam';
-    document.getElementById('revFirstHour').innerHTML = (hours >= 1 ? '1' : hours.toFixed(1)) + ' jam = <span id="revFirstHourAmount">' + formatIDR(firstHourPay) + '</span>';
-    document.getElementById('revRestHours').innerHTML = restHours.toFixed(1) + ' jam = <span id="revRestHoursAmount">' + formatIDR(restHoursPay) + '</span>';
+    // Update display with proper language
+    const hourWord = isEn ? 'hours' : 'jam';
+    const hourWordSingle = isEn ? 'hour' : 'jam';
+    document.getElementById('revTotalHours').textContent = hours + ' ' + hourWord;
+    document.getElementById('revFirstHour').innerHTML = (hours >= 1 ? '1' : hours.toFixed(1)) + ' ' + hourWordSingle + ' = <span id="revFirstHourAmount">' + formatIDR(firstHourPay) + '</span>';
+    document.getElementById('revRestHours').innerHTML = restHours.toFixed(1) + ' ' + hourWord + ' = <span id="revRestHoursAmount">' + formatIDR(restHoursPay) + '</span>';
     document.getElementById('revTotalAmount').textContent = formatIDR(totalOvertimePay);
     document.getElementById('revEstimatedNet').textContent = formatIDR(result.calc.net);
 
@@ -2785,8 +2788,9 @@ function calculateReverseOvertime() {
 
     // Show message if target already achieved
     if (result.message) {
-        document.getElementById('revTotalHours').textContent = '0 jam';
-        alert(result.message);
+        document.getElementById('revTotalHours').textContent = '0 ' + hourWord;
+        const msg = isEn ? 'Target already achieved without overtime' : result.message;
+        alert(msg);
     }
 }
 
@@ -2794,8 +2798,9 @@ function calculateReverseOvertime() {
  * Apply reverse calculation results to the main form
  */
 function applyReverseToForm() {
+    const isEn = currentLang === 'en';
     if (!window.reverseCalcResult) {
-        alert('Silakan hitung jam lembur terlebih dahulu');
+        alert(isEn ? 'Please calculate overtime hours first' : 'Silakan hitung jam lembur terlebih dahulu');
         return;
     }
 
@@ -2814,7 +2819,10 @@ function applyReverseToForm() {
     document.getElementById('formModeContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // Show confirmation
-    alert(`Jam lembur ${result.hours} jam telah diterapkan ke form.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`);
+    const confirmMsg = isEn
+        ? `${result.hours} overtime hours applied to form.\n\nClick "Calculate Salary" to see full results.`
+        : `${result.hours} jam lembur telah diterapkan ke form.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
+    alert(confirmMsg);
 }
 
 /**
@@ -3576,6 +3584,27 @@ function setLang(lang) {
 
     const cfgCheckLabels = document.querySelectorAll('.config-checkbox span');
     if (cfgCheckLabels[0]) cfgCheckLabels[0].textContent = isEn ? 'Calculate THR' : 'Hitung THR';
+
+    // Reverse Engineering block
+    document.getElementById('revTitle').textContent = isEn ? '🔧 Overtime Reverse Engineering' : '🔧 Reverse Engineering Lembur';
+    document.getElementById('revDesc').textContent = isEn ? 'Calculate how many overtime hours needed to reach target take-home pay' : 'Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay';
+    document.getElementById('revLblBaseSalary').textContent = isEn ? 'Base Salary:' : 'Gaji Pokok:';
+    document.getElementById('revLblTargetNet').textContent = isEn ? 'Target Take-Home:' : 'Target Take-Home:';
+    document.getElementById('revLblPtkp').textContent = isEn ? 'PTKP Status:' : 'Status PTKP:';
+    document.getElementById('revPtkpTK0').textContent = isEn ? 'TK/0 - Single, no dependents' : 'TK/0 - Tidak Kawin';
+    document.getElementById('revPtkpK0').textContent = isEn ? 'K/0 - Married, no children' : 'K/0 - Kawin, tanpa anak';
+    document.getElementById('revPtkpK1').textContent = isEn ? 'K/1 - Married, 1 child' : 'K/1 - Kawin, 1 anak';
+    document.getElementById('revPtkpK2').textContent = isEn ? 'K/2 - Married, 2 children' : 'K/2 - Kawin, 2 anak';
+    document.getElementById('revPtkpK3').textContent = isEn ? 'K/3 - Married, 3 children' : 'K/3 - Kawin, 3 anak';
+    document.getElementById('revLblNpwp').textContent = isEn ? 'Has NPWP' : 'Punya NPWP';
+    document.getElementById('revCalcBtnText').textContent = isEn ? 'Calculate Overtime Hours' : 'Hitung Jam Lembur';
+    document.getElementById('revResultsTitle').textContent = isEn ? '📊 Calculation Results:' : '📊 Hasil Perhitungan:';
+    document.getElementById('revLblTotalHours').textContent = isEn ? 'Total Overtime Hours:' : 'Total Jam Lembur:';
+    document.getElementById('revLblFirstHour').textContent = isEn ? '1st Hour (1.5x):' : 'Jam ke-1 (1.5x):';
+    document.getElementById('revLblRestHours').textContent = isEn ? '2nd+ Hours (2.0x):' : 'Jam ke-2+ (2.0x):';
+    document.getElementById('revLblTotalAmount').textContent = isEn ? 'Total Overtime Pay:' : 'Total Lembur:';
+    document.getElementById('revLblEstimatedNet').textContent = isEn ? 'Estimated Take-Home:' : 'Estimasi Take-Home:';
+    document.getElementById('revApplyBtnText').textContent = isEn ? 'Apply to Form' : 'Terapkan ke Form';
 
     // Results section
     document.getElementById('toggleStandard').textContent = isEn ? 'Standard' : 'Standar';
