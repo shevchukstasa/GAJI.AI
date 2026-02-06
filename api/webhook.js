@@ -13,22 +13,48 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ofnsqxyoqjgwuzzpgewx.s
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_HD2TfdfOhKFtuN1Kyt6guQ_rG-FTwcr';
 const FREE_LIMIT = parseInt(process.env.FREE_LIMIT) || 10;
 
-// OpenAI Whisper configuration for audio transcription
+// Deepgram configuration for audio transcription (preferred - faster and cheaper)
+const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
+// OpenAI Whisper as fallback
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // ===================================================================
-// AUDIO TRANSCRIPTION (OpenAI Whisper)
+// AUDIO TRANSCRIPTION (Deepgram primary, OpenAI Whisper fallback)
 // ===================================================================
 
-async function transcribeAudio(audioUrl) {
-    if (!OPENAI_API_KEY) {
-        console.error('OpenAI API key not configured');
+async function transcribeWithDeepgram(audioUrl) {
+    try {
+        console.log('Transcribing with Deepgram:', audioUrl);
+
+        const response = await fetch('https://api.deepgram.com/v1/listen?language=id&model=nova-2&smart_format=true', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Token ${DEEPGRAM_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ url: audioUrl })
+        });
+
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`Deepgram API error: ${error}`);
+        }
+
+        const result = await response.json();
+        const transcript = result.results?.channels?.[0]?.alternatives?.[0]?.transcript;
+        console.log('Deepgram transcription:', transcript);
+        return transcript || null;
+
+    } catch (error) {
+        console.error('Deepgram transcription error:', error);
         return null;
     }
+}
 
+async function transcribeWithWhisper(audioUrl) {
     try {
         // Download audio file from Wablas URL
-        console.log('Downloading audio from:', audioUrl);
+        console.log('Downloading audio for Whisper:', audioUrl);
         const audioResponse = await fetch(audioUrl);
         if (!audioResponse.ok) {
             throw new Error(`Failed to download audio: ${audioResponse.status}`);
@@ -59,13 +85,30 @@ async function transcribeAudio(audioUrl) {
         }
 
         const result = await whisperResponse.json();
-        console.log('Transcription result:', result.text);
+        console.log('Whisper transcription:', result.text);
         return result.text;
 
     } catch (error) {
-        console.error('Transcription error:', error);
+        console.error('Whisper transcription error:', error);
         return null;
     }
+}
+
+async function transcribeAudio(audioUrl) {
+    // Try Deepgram first (faster and cheaper)
+    if (DEEPGRAM_API_KEY) {
+        const deepgramResult = await transcribeWithDeepgram(audioUrl);
+        if (deepgramResult) return deepgramResult;
+        console.log('Deepgram failed, trying Whisper fallback...');
+    }
+
+    // Fallback to OpenAI Whisper
+    if (OPENAI_API_KEY) {
+        return await transcribeWithWhisper(audioUrl);
+    }
+
+    console.error('No transcription API key configured (DEEPGRAM_API_KEY or OPENAI_API_KEY)');
+    return null;
 }
 
 // ===================================================================
