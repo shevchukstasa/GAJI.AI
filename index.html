@@ -635,7 +635,111 @@
 
         .config-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
 
-        /* === 15. AI Agent Widget === */
+        /* === 15. Input Mode Toggle & Form === */
+        .input-mode-toggle {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: #f3f4f6;
+            padding: 4px;
+            border-radius: var(--radius-md);
+        }
+
+        .input-mode-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 13px;
+            font-family: var(--font);
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--color-text-secondary);
+        }
+
+        .input-mode-btn.active {
+            background: white;
+            color: var(--color-text);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .form-input-container {
+            display: none;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .form-input-container.active { display: block; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .form-group .hint {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-top: 2px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: var(--font);
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .form-group.checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group.checkbox-group input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-submit-row {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        /* === 16. AI Agent Widget === */
         .ai-agent-btn {
             position: fixed;
             bottom: 24px;
@@ -920,15 +1024,23 @@
                 </div>
             </div>
 
-            <div class="quick-examples">
-                <span class="quick-label" id="quickLabel">Contoh:</span>
-                <button class="example-btn" onclick="fillExample('Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP')">Budi - Jakarta</button>
-                <button class="example-btn" onclick="fillExample('Siti, gaji 5.5 juta, Surabaya, K/1, NPWP')">Siti - Surabaya</button>
-                <button class="example-btn" onclick="fillExample('Ahmad, gaji 15 jt, Bali, lembur 10 jam, ada NPWP, K/2')">Ahmad - Bali</button>
-                <button class="example-btn" onclick="fillExample('Dewi, gaji 4 jt, Yogyakarta')">Dewi - Yogyakarta</button>
+            <!-- Input Mode Toggle -->
+            <div class="input-mode-toggle">
+                <button class="input-mode-btn active" id="modeChatBtn" onclick="switchInputMode('chat')">💬 Chat / Voice</button>
+                <button class="input-mode-btn" id="modeFormBtn" onclick="switchInputMode('form')">📝 Form</button>
             </div>
 
-            <div class="chat-container" id="chatContainer">
+            <!-- Chat Mode -->
+            <div id="chatModeContainer">
+                <div class="quick-examples">
+                    <span class="quick-label" id="quickLabel">Contoh:</span>
+                    <button class="example-btn" onclick="fillExample('Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP')">Budi - Jakarta</button>
+                    <button class="example-btn" onclick="fillExample('Siti, gaji 5.5 juta, Surabaya, K/1, NPWP')">Siti - Surabaya</button>
+                    <button class="example-btn" onclick="fillExample('Ahmad, gaji 15 jt, Bali, lembur 10 jam, ada NPWP, K/2')">Ahmad - Bali</button>
+                    <button class="example-btn" onclick="fillExample('Dewi, gaji 4 jt, Yogyakarta')">Dewi - Yogyakarta</button>
+                </div>
+
+                <div class="chat-container" id="chatContainer">
                 <div class="message ai">
                     <div class="message-avatar">AI</div>
                     <div class="message-content" id="welcomeMessage">
@@ -956,6 +1068,79 @@
 
             <div class="free-counter" id="freeCounter">
                 <span id="freeCounterText">Perhitungan gratis tersisa: <strong id="freeCountNum">5</strong> / 5</span>
+            </div>
+            </div><!-- End chatModeContainer -->
+
+            <!-- Form Mode -->
+            <div class="form-input-container" id="formModeContainer">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label id="formLblName">Nama Karyawan</label>
+                        <input type="text" id="formName" placeholder="Contoh: Budi">
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblSalary">Gaji Pokok (Rp)</label>
+                        <input type="number" id="formSalary" placeholder="8000000" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblRegion">Provinsi / Kota</label>
+                        <select id="formRegion">
+                            <option value="jakarta">DKI Jakarta - Rp 5.396.760</option>
+                            <option value="bekasi">Bekasi - Rp 5.343.430</option>
+                            <option value="karawang">Karawang - Rp 5.347.837</option>
+                            <option value="surabaya">Surabaya - Rp 4.725.479</option>
+                            <option value="bogor">Bogor - Rp 4.813.988</option>
+                            <option value="tangerang">Tangerang - Rp 4.760.289</option>
+                            <option value="depok">Depok - Rp 4.686.703</option>
+                            <option value="bandung">Bandung - Rp 4.209.309</option>
+                            <option value="bali">Bali - Rp 2.988.000</option>
+                            <option value="semarang">Semarang - Rp 3.243.969</option>
+                            <option value="yogyakarta">Yogyakarta - Rp 2.125.898</option>
+                            <option value="makassar">Makassar - Rp 3.460.410</option>
+                            <option value="medan">Medan - Rp 2.895.587</option>
+                            <option value="palembang">Palembang - Rp 3.456.874</option>
+                            <option value="batam">Batam - Rp 3.526.891</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblPtkp">Status PTKP (untuk PPh 21)</label>
+                        <select id="formPtkp">
+                            <option value="TK/0">TK/0 - Tidak Kawin, tanpa tanggungan</option>
+                            <option value="TK/1">TK/1 - Tidak Kawin, 1 tanggungan</option>
+                            <option value="TK/2">TK/2 - Tidak Kawin, 2 tanggungan</option>
+                            <option value="TK/3">TK/3 - Tidak Kawin, 3 tanggungan</option>
+                            <option value="K/0">K/0 - Kawin, tanpa tanggungan anak</option>
+                            <option value="K/1">K/1 - Kawin, 1 anak</option>
+                            <option value="K/2">K/2 - Kawin, 2 anak</option>
+                            <option value="K/3">K/3 - Kawin, 3 anak</option>
+                        </select>
+                        <span class="hint" id="formPtkpHint">TK = Tidak Kawin, K = Kawin. Angka = jumlah tanggungan.</span>
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblOvertime">Jam Lembur</label>
+                        <input type="number" id="formOvertime" placeholder="0" min="0" value="0">
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="formNpwp" checked>
+                        <label for="formNpwp" id="formLblNpwp">Punya NPWP</label>
+                        <span class="hint" id="formNpwpHint">(Tanpa NPWP = +20% pajak)</span>
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblMeal">Tunjangan Makan (Rp)</label>
+                        <input type="number" id="formMeal" placeholder="0" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblTransport">Tunjangan Transport (Rp)</label>
+                        <input type="number" id="formTransport" placeholder="0" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label id="formLblOther">Tunjangan Lainnya (Rp)</label>
+                        <input type="number" id="formOther" placeholder="0" min="0" value="0">
+                    </div>
+                    <div class="form-submit-row">
+                        <button class="btn btn-primary btn-lg" onclick="submitForm()" id="formSubmitBtn">Hitung Gaji</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Results -->
@@ -2164,6 +2349,115 @@ function fillExample(text) {
     document.getElementById('userInput').focus();
 }
 
+// ===================================================================
+// INPUT MODE SWITCHING
+// ===================================================================
+
+let currentInputMode = 'chat';
+
+function switchInputMode(mode) {
+    currentInputMode = mode;
+    const chatBtn = document.getElementById('modeChatBtn');
+    const formBtn = document.getElementById('modeFormBtn');
+    const chatContainer = document.getElementById('chatModeContainer');
+    const formContainer = document.getElementById('formModeContainer');
+
+    if (mode === 'chat') {
+        chatBtn.classList.add('active');
+        formBtn.classList.remove('active');
+        chatContainer.style.display = 'block';
+        formContainer.classList.remove('active');
+    } else {
+        formBtn.classList.add('active');
+        chatBtn.classList.remove('active');
+        chatContainer.style.display = 'none';
+        formContainer.classList.add('active');
+    }
+}
+
+function submitForm() {
+    const name = document.getElementById('formName').value.trim() || 'Karyawan';
+    const baseSalary = parseInt(document.getElementById('formSalary').value) || 0;
+    const region = document.getElementById('formRegion').value;
+    const ptkp = document.getElementById('formPtkp').value;
+    const overtime = parseInt(document.getElementById('formOvertime').value) || 0;
+    const hasNPWP = document.getElementById('formNpwp').checked;
+    const meal = parseInt(document.getElementById('formMeal').value) || 0;
+    const transport = parseInt(document.getElementById('formTransport').value) || 0;
+    const other = parseInt(document.getElementById('formOther').value) || 0;
+
+    if (baseSalary < 100000) {
+        alert(currentLang === 'en' ? 'Please enter a valid base salary' : 'Mohon masukkan gaji pokok yang valid');
+        return;
+    }
+
+    // Get region info from UMP_DATABASE
+    const regionInfo = UMP_DATABASE[region] || UMP_DATABASE['jakarta'];
+    const totalAllowances = meal + transport + other;
+    const effectiveBaseSalary = baseSalary + totalAllowances;
+
+    const data = {
+        name,
+        baseSalary: effectiveBaseSalary,
+        region,
+        regionLabel: regionInfo.label,
+        regionUMP: regionInfo.ump,
+        ptkp,
+        overtime,
+        hasNPWP
+    };
+
+    // Check UMP
+    let umpWarning = '';
+    if (baseSalary < regionInfo.ump) {
+        umpWarning = currentLang === 'en'
+            ? `Warning: Salary Rp ${baseSalary.toLocaleString('id-ID')} is below minimum wage ${regionInfo.label} (Rp ${regionInfo.ump.toLocaleString('id-ID')})`
+            : `Peringatan: Gaji Rp ${baseSalary.toLocaleString('id-ID')} di bawah UMP ${regionInfo.label} (Rp ${regionInfo.ump.toLocaleString('id-ID')})`;
+    }
+
+    currentCalc = calculatePayroll(data, calcConfig);
+
+    // Store allowances info for display
+    currentCalc.allowances = { meal, transport, other, total: totalAllowances };
+
+    // Update free counter
+    calcCount++;
+    localStorage.setItem('gaji_calc_count', calcCount.toString());
+    updateFreeCounter();
+
+    // Switch to chat mode to show results
+    switchInputMode('chat');
+
+    // Add message to chat
+    const terCat = PTKP_TO_TER[ptkp] || 'A';
+    const terRate = getTERRate(currentCalc.gross, ptkp);
+
+    let response = `✓ Perhitungan untuk <strong>${name}</strong> selesai!<br><br>`;
+    response += `📍 Lokasi: ${regionInfo.label}<br>`;
+    response += `💰 Gaji Pokok: ${formatIDR(baseSalary)}<br>`;
+    if (totalAllowances > 0) {
+        response += `🍽️ Tunjangan Makan: ${formatIDR(meal)}<br>`;
+        response += `🚗 Tunjangan Transport: ${formatIDR(transport)}<br>`;
+        if (other > 0) response += `📦 Tunjangan Lainnya: ${formatIDR(other)}<br>`;
+    }
+    if (overtime > 0) {
+        response += `⏰ Lembur: ${overtime} jam (+${formatIDR(currentCalc.overtime.total)})<br>`;
+    }
+    if (currentCalc.thr > 0) {
+        response += `🎁 THR: ${formatIDR(currentCalc.thr)}<br>`;
+    }
+    response += `📋 PTKP: ${ptkp} (TER Kategori ${terCat}, rate ${(terRate * 100).toFixed(2)}%)<br>`;
+    response += `📋 NPWP: ${hasNPWP ? 'Ada' : 'Tidak ada (+20% pajak)'}<br>`;
+    if (umpWarning) {
+        response += `<br><strong style="color:#ef4444">⚠ ${umpWarning}</strong><br>`;
+    }
+    response += `<br>💵 <strong>Take-Home Pay: ${formatIDR(currentCalc.net)}</strong>`;
+    response += `<br>✨ Harmoni Optimal: ${formatIDR(currentCalc.harmony.net)} (+${formatIDR(currentCalc.harmony.savings)})`;
+
+    addChatMessage(response, false);
+    displayResults(currentCalc);
+}
+
 function updateFreeCounter() {
     const remaining = Math.max(0, FREE_LIMIT - calcCount);
     document.getElementById('freeCountNum').textContent = remaining;
@@ -2355,6 +2649,22 @@ function setLang(lang) {
     document.getElementById('footerPricing').textContent = isEn ? 'Pricing' : 'Harga';
     document.getElementById('footerFeatures').textContent = isEn ? 'Features' : 'Fitur';
     document.getElementById('footerLegal').textContent = isEn ? 'Legal' : 'Legal';
+
+    // Form mode
+    document.getElementById('modeChatBtn').textContent = isEn ? '💬 Chat / Voice' : '💬 Chat / Suara';
+    document.getElementById('modeFormBtn').textContent = isEn ? '📝 Form' : '📝 Form';
+    document.getElementById('formLblName').textContent = isEn ? 'Employee Name' : 'Nama Karyawan';
+    document.getElementById('formLblSalary').textContent = isEn ? 'Base Salary (Rp)' : 'Gaji Pokok (Rp)';
+    document.getElementById('formLblRegion').textContent = isEn ? 'Province / City' : 'Provinsi / Kota';
+    document.getElementById('formLblPtkp').textContent = isEn ? 'PTKP Status (for PPh 21)' : 'Status PTKP (untuk PPh 21)';
+    document.getElementById('formPtkpHint').textContent = isEn ? 'TK = Single, K = Married. Number = dependents.' : 'TK = Tidak Kawin, K = Kawin. Angka = jumlah tanggungan.';
+    document.getElementById('formLblOvertime').textContent = isEn ? 'Overtime Hours' : 'Jam Lembur';
+    document.getElementById('formLblNpwp').textContent = isEn ? 'Has NPWP (Tax ID)' : 'Punya NPWP';
+    document.getElementById('formNpwpHint').textContent = isEn ? '(Without NPWP = +20% tax)' : '(Tanpa NPWP = +20% pajak)';
+    document.getElementById('formLblMeal').textContent = isEn ? 'Meal Allowance (Rp)' : 'Tunjangan Makan (Rp)';
+    document.getElementById('formLblTransport').textContent = isEn ? 'Transport Allowance (Rp)' : 'Tunjangan Transport (Rp)';
+    document.getElementById('formLblOther').textContent = isEn ? 'Other Allowances (Rp)' : 'Tunjangan Lainnya (Rp)';
+    document.getElementById('formSubmitBtn').textContent = isEn ? 'Calculate Salary' : 'Hitung Gaji';
 }
 
 // ===================================================================
