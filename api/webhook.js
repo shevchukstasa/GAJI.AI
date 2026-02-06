@@ -18,6 +18,9 @@ const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '958279e4160c7e0d8e97e6
 // OpenAI Whisper as fallback
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+// Gemini API for AI-powered message parsing
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 // ===================================================================
 // AUDIO TRANSCRIPTION (Deepgram primary, OpenAI Whisper fallback)
 // ===================================================================
@@ -109,6 +112,116 @@ async function transcribeAudio(audioUrl) {
 
     console.error('No transcription API key configured (DEEPGRAM_API_KEY or OPENAI_API_KEY)');
     return null;
+}
+
+// ===================================================================
+// AI-POWERED MESSAGE PARSING (using Gemini)
+// ===================================================================
+
+const AI_EXTRACTION_PROMPT = `Kamu adalah asisten untuk mengekstrak data gaji dari pesan pengguna.
+
+Ekstrak data berikut dari pesan pengguna (dalam format JSON):
+- name: nama karyawan (string, kosong jika tidak ada)
+- position: jabatan/posisi (string, kosong jika tidak ada)
+- company: nama perusahaan (string, kosong jika tidak ada)
+- baseSalary: gaji pokok dalam Rupiah (number, 0 jika tidak ada). Konversi: "juta/jt" = x1.000.000, "ribu/rb/k" = x1.000
+- region: lokasi kerja, salah satu dari: jakarta, bandung, surabaya, semarang, yogyakarta, bali, bekasi, medan, makassar, aceh (string, "jakarta" jika tidak disebutkan)
+- ptkp: status PTKP (TK/0, TK/1, TK/2, TK/3, K/0, K/1, K/2, K/3). Default TK/0. Petunjuk: "kawin"/"menikah" = K, "anak 2" = /2
+- overtime: jam lembur (number, 0 jika tidak ada atau "no extra jam"/"tidak ada lembur")
+- hasNPWP: punya NPWP atau tidak (boolean). True jika disebutkan "NPWP ada"/"punya NPWP"/"ada NPWP"
+- meal: tunjangan makan dalam Rupiah (number, 0 jika tidak ada)
+- transport: tunjangan transport/bensin dalam Rupiah (number, 0 jika tidak ada)
+- otherAllowance: tunjangan lain dalam Rupiah (number, 0 jika tidak ada)
+
+PENTING:
+- Hanya balas dengan JSON, tanpa penjelasan
+- Jika angka kecil tanpa unit (misal "200 ribu makan" atau "200 makan"), asumsikan ribu
+- Kata "kompensasi" biasanya mengikuti jenis tunjangan (makan/transport)
+- "no extra jam" atau "tanpa lembur" berarti overtime = 0
+
+Contoh:
+Input: "Febby, Seller, PT GajiAI Bali, gaji 7 juta, Bali, no extra jam, NPWP ada, 200 ribu makan kompensasi"
+Output: {"name":"Febby","position":"Seller","company":"PT GajiAI Bali","baseSalary":7000000,"region":"bali","ptkp":"TK/0","overtime":0,"hasNPWP":true,"meal":200000,"transport":0,"otherAllowance":0}`;
+
+async function extractDataWithAI(text) {
+    if (!GEMINI_API_KEY) {
+        console.log('No GEMINI_API_KEY configured, falling back to regex parser');
+        return null;
+    }
+
+    try {
+        console.log('Extracting data with Gemini AI:', text);
+
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: `Ekstrak data dari pesan ini:\n"${text}"` }] }],
+                    systemInstruction: { parts: [{ text: AI_EXTRACTION_PROMPT }] },
+                    generationConfig: {
+                        maxOutputTokens: 500,
+                        temperature: 0.1  // Low temperature for consistent JSON output
+                    }
+                })
+            }
+        );
+
+        if (!response.ok) {
+            const err = await response.json();
+            console.error('Gemini API error:', err.error?.message || response.status);
+            return null;
+        }
+
+        const data = await response.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!reply) {
+            console.error('Empty response from Gemini');
+            return null;
+        }
+
+        console.log('Gemini raw response:', reply);
+
+        // Parse JSON from response (handle markdown code blocks)
+        let jsonStr = reply.trim();
+        if (jsonStr.startsWith('```json')) {
+            jsonStr = jsonStr.slice(7);
+        } else if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.slice(3);
+        }
+        if (jsonStr.endsWith('```')) {
+            jsonStr = jsonStr.slice(0, -3);
+        }
+        jsonStr = jsonStr.trim();
+
+        const extracted = JSON.parse(jsonStr);
+        console.log('Extracted data:', extracted);
+
+        // Map region to regionLabel
+        const regionKey = (extracted.region || 'jakarta').toLowerCase();
+        const regionInfo = UMP_DATABASE[regionKey] || UMP_DATABASE['default'];
+
+        return {
+            name: extracted.name || '',
+            position: extracted.position || '',
+            company: extracted.company || '',
+            baseSalary: extracted.baseSalary || 0,
+            region: regionKey,
+            regionLabel: regionInfo.label,
+            ptkp: extracted.ptkp || 'TK/0',
+            overtime: extracted.overtime || 0,
+            hasNPWP: extracted.hasNPWP === true,
+            meal: extracted.meal || 0,
+            transport: extracted.transport || 0,
+            otherAllowance: extracted.otherAllowance || 0
+        };
+
+    } catch (error) {
+        console.error('AI extraction error:', error);
+        return null;
+    }
 }
 
 // ===================================================================
@@ -753,8 +866,14 @@ export default async function handler(req, res) {
                 // Process the transcribed text as normal message
                 console.log('Processing transcribed text:', transcribedText);
 
-                // Parse the transcribed message
-                const data = parseMessage(transcribedText);
+                // Parse the transcribed message - try AI first, fallback to regex
+                let data = await extractDataWithAI(transcribedText);
+                if (!data) {
+                    console.log('AI parsing failed for voice, using regex fallback');
+                    data = parseMessage(transcribedText);
+                } else {
+                    console.log('AI parsing successful for voice:', data);
+                }
 
                 // Check if we have valid salary data
                 if (!data.baseSalary || data.baseSalary < 100000) {
@@ -797,8 +916,14 @@ export default async function handler(req, res) {
                 return res.status(200).send(formatWelcome());
             }
 
-            // Parse the message
-            const data = parseMessage(message);
+            // Parse the message - try AI first, fallback to regex
+            let data = await extractDataWithAI(message);
+            if (!data) {
+                console.log('AI parsing failed, using regex fallback');
+                data = parseMessage(message);
+            } else {
+                console.log('AI parsing successful:', data);
+            }
 
             // Check if we have valid salary data
             if (!data.baseSalary || data.baseSalary < 100000) {
