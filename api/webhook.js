@@ -420,12 +420,28 @@ export default async function handler(req, res) {
     // Handle POST request (incoming messages)
     if (req.method === 'POST') {
         try {
-            const { phone, message, pushName } = req.body;
+            const { phone, message, pushName, messageType, file, media, isMedia } = req.body;
 
-            console.log('Incoming message:', { phone, message, pushName });
+            console.log('Incoming message:', { phone, message, pushName, messageType, isMedia });
 
-            if (!phone || !message) {
-                return res.status(400).json({ error: 'Missing phone or message' });
+            if (!phone) {
+                return res.status(400).json({ error: 'Missing phone' });
+            }
+
+            // Check for audio/voice message
+            if (messageType === 'audio' || messageType === 'ptt' || isMedia === true || file || media) {
+                res.setHeader('Content-Type', 'text/plain');
+                return res.status(200).send(
+                    `🎤 *Pesan Suara Terdeteksi*\n\n` +
+                    `Maaf, saat ini saya belum bisa memproses pesan suara.\n\n` +
+                    `*Mohon kirim dalam format teks*, contoh:\n` +
+                    `"Budi, gaji 8 juta, Jakarta, lembur 10 jam, ada NPWP"\n\n` +
+                    `Fitur voice note akan segera hadir! 🔜`
+                );
+            }
+
+            if (!message) {
+                return res.status(400).json({ error: 'Missing message' });
             }
 
             // Check for greeting or help
