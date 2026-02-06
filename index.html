@@ -2517,7 +2517,8 @@ let calcConfig = {
 };
 
 // AI Agent state
-const GEMINI_API_KEY = 'AIzaSyC6wFKJ3eR6bYGTlQjwx5Nv8o6xwmhK9GI';
+// Gemini API key - users can set their own via ⚙️ button in chat
+const GEMINI_API_KEY = '';
 let agentConversation = [];
 
 const GEMINI_SYSTEM_PROMPT = `Kamu adalah Gaji.AI, asisten payroll AI untuk bisnis Indonesia.
@@ -4318,6 +4319,19 @@ async function sendAgentMessage() {
 
     try {
         const apiKey = localStorage.getItem('gaji_gemini_key') || GEMINI_API_KEY;
+
+        // Check if API key is configured
+        if (!apiKey) {
+            const msgs = document.getElementById('agentMessages');
+            if (msgs.lastChild) msgs.removeChild(msgs.lastChild);
+            addAgentMessage(
+                currentLang === 'en'
+                    ? '⚙️ Please add your Gemini API key first. Click the ⚙️ button above to add your free API key from <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.'
+                    : '⚙️ Silakan tambahkan API key Gemini Anda. Klik tombol ⚙️ di atas untuk menambahkan API key gratis dari <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.',
+                false
+            );
+            return;
+        }
 
         agentConversation.push({ role: 'user', parts: [{ text }] });
 
