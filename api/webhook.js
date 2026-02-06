@@ -396,7 +396,6 @@ function parseMessage(text) {
     if (otMatch) data.overtime = parseInt(otMatch[1]);
 
     // Position detection
-    const textLower = text.toLowerCase();
     const positionKeywords = {
         'c-level': 'c_level', 'ceo': 'c_level', 'cfo': 'c_level', 'cto': 'c_level', 'coo': 'c_level',
         'direktur': 'director', 'director': 'director',
