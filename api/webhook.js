@@ -254,9 +254,19 @@ function parseMessage(text) {
         hasNPWP: false
     };
 
-    // Extract name
-    const nameMatch = text.match(/^([A-Za-z][A-Za-z]+)/i);
-    if (nameMatch) data.name = nameMatch[1];
+    // Extract name (multiple patterns)
+    const namePatterns = [
+        /(?:untuk|nama|name|karyawan|employee)\s+([A-Za-z][A-Za-z]+)/i,
+        /^([A-Za-z][A-Za-z]+)(?:\s*,|\s+gaji|\s+salary|\s+dari|\s+lokasi)/i,
+        /^([A-Za-z][A-Za-z]+)/i
+    ];
+    for (const pattern of namePatterns) {
+        const match = text.match(pattern);
+        if (match && match[1] && !['halo', 'hai', 'hi', 'hello', 'saya', 'mau', 'tolong', 'please', 'gaji', 'salary'].includes(match[1].toLowerCase())) {
+            data.name = match[1];
+            break;
+        }
+    }
 
     // Extract salary
     const salaryPatterns = [
@@ -275,6 +285,24 @@ function parseMessage(text) {
                 data.baseSalary = amount * 1000;
             }
             break;
+        }
+    }
+
+    // Try plain number if no unit-based salary found (e.g., "gaji 8500000" or just "8500000")
+    if (!data.baseSalary) {
+        const plainSalaryPatterns = [
+            /(?:gaji|salary|gajipokok)\s*(?:pokok\s*)?(\d{6,})/i,
+            /\b(\d{6,})\b/
+        ];
+        for (const pattern of plainSalaryPatterns) {
+            const match = text.match(pattern);
+            if (match) {
+                const amount = parseInt(match[1]);
+                if (amount >= 100000 && amount <= 1000000000) {
+                    data.baseSalary = amount;
+                    break;
+                }
+            }
         }
     }
 
@@ -399,21 +427,38 @@ _"Budi, gaji 8 juta, Jakarta, lembur 20 jam, ada NPWP"_
 Kirim data gaji Anda sekarang 👇`;
 }
 
-function formatError() {
-    return `Maaf, saya tidak mendeteksi data gaji.
+function formatError(data) {
+    let msg = `⚠️ *Data Gaji Tidak Terdeteksi*\n\n`;
 
-*Mohon sertakan minimal:*
-- Nominal gaji (contoh: "8 juta" atau "5.5 jt")
+    // Show what was detected
+    let detectedItems = [];
+    if (data && data.name) detectedItems.push(`✓ Nama: ${data.name}`);
+    if (data && data.regionLabel && data.region !== 'default') detectedItems.push(`✓ Lokasi: ${data.regionLabel}`);
+    if (data && data.hasNPWP) detectedItems.push(`✓ NPWP: Ada`);
+    if (data && data.ptkp && data.ptkp !== 'TK/0') detectedItems.push(`✓ PTKP: ${data.ptkp}`);
+    if (data && data.overtime > 0) detectedItems.push(`✓ Lembur: ${data.overtime} jam`);
 
-*Contoh lengkap:*
-"Budi, gaji 8 jt, Jakarta, lembur 10 jam, NPWP"
+    if (detectedItems.length > 0) {
+        msg += `*Yang terdeteksi:*\n`;
+        msg += detectedItems.join('\n') + '\n\n';
+    }
 
-*Opsional:*
-- Nama karyawan
-- Kota/Provinsi
-- Jam lembur
-- Status PTKP (TK/0, K/1, dll)
-- Ada NPWP atau tidak`;
+    msg += `*❌ Yang kurang:*\n`;
+    msg += `• Nominal gaji (wajib)\n\n`;
+
+    msg += `*📝 Cara tulis gaji:*\n`;
+    msg += `• "8 juta" atau "8 jt"\n`;
+    msg += `• "5.5 juta" atau "5,5 jt"\n`;
+    msg += `• "3500000" (angka penuh)\n\n`;
+
+    msg += `*Contoh lengkap:*\n`;
+    if (data && data.name) {
+        msg += `"${data.name}, gaji 8 jt${data.regionLabel && data.region !== 'default' ? ', ' + data.regionLabel : ''}${data.hasNPWP ? ', NPWP' : ''}"`;
+    } else {
+        msg += `"Budi, gaji 8 jt, Jakarta, NPWP"`;
+    }
+
+    return msg;
 }
 
 // ===================================================================
@@ -484,7 +529,7 @@ export default async function handler(req, res) {
             // Check if we have valid salary data
             if (!data.baseSalary || data.baseSalary < 100000) {
                 res.setHeader('Content-Type', 'text/plain');
-                return res.status(200).send(formatError());
+                return res.status(200).send(formatError(data));
             }
 
             // Check usage limit before calculating

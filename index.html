@@ -2302,9 +2302,19 @@ function parseInput(text) {
         hasNPWP: false
     };
 
-    // Extract name (first word that looks like a name)
-    const nameMatch = text.match(/^([A-Za-z][A-Za-z]+)/i);
-    if (nameMatch) data.name = nameMatch[1];
+    // Extract name (multiple patterns)
+    const namePatterns = [
+        /(?:untuk|nama|name|karyawan|employee)\s+([A-Za-z][A-Za-z]+)/i,  // "untuk Budi", "nama Ani"
+        /^([A-Za-z][A-Za-z]+)(?:\s*,|\s+gaji|\s+salary|\s+dari|\s+lokasi)/i,  // "Budi, gaji..." or "Budi gaji..."
+        /^([A-Za-z][A-Za-z]+)/i  // First word as fallback
+    ];
+    for (const pattern of namePatterns) {
+        const match = text.match(pattern);
+        if (match && match[1] && !['halo', 'hai', 'hi', 'hello', 'saya', 'mau', 'tolong', 'please', 'gaji', 'salary'].includes(match[1].toLowerCase())) {
+            data.name = match[1];
+            break;
+        }
+    }
 
     // Extract salary
     const salaryPatterns = [
@@ -2486,7 +2496,17 @@ async function sendMessage() {
         const parsed = parseInput(text);
 
         if (!parsed.baseSalary || parsed.baseSalary < 100_000) {
-            addChatMessage('Maaf, saya tidak mendeteksi jumlah gaji. Mohon sertakan nominal gaji, misalnya: <em>"gaji 8 juta"</em> atau <em>"5.5 jt"</em>.', false);
+            let detectedInfo = '';
+            if (parsed.name) detectedInfo += `<br>✓ Nama: ${parsed.name}`;
+            if (parsed.regionLabel) detectedInfo += `<br>✓ Lokasi: ${parsed.regionLabel}`;
+            if (parsed.hasNPWP) detectedInfo += `<br>✓ NPWP: Ada`;
+            if (parsed.overtime > 0) detectedInfo += `<br>✓ Lembur: ${parsed.overtime} jam`;
+
+            let helpMsg = currentLang === 'en'
+                ? `I couldn't detect the salary amount.${detectedInfo ? '<br><br><strong>Detected:</strong>' + detectedInfo : ''}<br><br><strong>Please add salary</strong>, example:<br><em>"salary 8 million"</em> or <em>"gaji 5.5 jt"</em>`
+                : `Maaf, saya tidak mendeteksi jumlah gaji.${detectedInfo ? '<br><br><strong>Terdeteksi:</strong>' + detectedInfo : ''}<br><br><strong>Mohon tambahkan gaji</strong>, contoh:<br><em>"gaji 8 juta"</em> atau <em>"5.5 jt"</em>`;
+
+            addChatMessage(helpMsg, false);
             showSendBtn();
             return;
         }
