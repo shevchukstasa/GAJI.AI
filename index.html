@@ -2976,6 +2976,47 @@ async function submitForm() {
     calcConfig.ownBpjs = ownBpjs;
     calcConfig.bpjsCompensation = bpjsCompensation;
 
+    // Handle reverse engineering mode (calculate overtime from target net)
+    if (calcConfig.reverseMode && calcConfig.targetNet > 0) {
+        const result = reverseEngineerOvertime(
+            calcConfig.targetNet,
+            effectiveBaseSalary,
+            ptkp,
+            hasNPWP
+        );
+
+        // Update data with calculated overtime hours
+        data.overtime = result.hours;
+        currentCalc = result.calc;
+        currentCalc.input = data;
+
+        // Store allowances info for display
+        currentCalc.allowances = { meal, transport, other, total: totalAllowances };
+
+        // Update usage counter
+        await incrementSupabaseUsage();
+        updateFreeCounter();
+
+        // Switch to chat mode to show results
+        switchInputMode('chat');
+
+        let response = `🔧 <strong>Reverse Engineering Selesai!</strong><br><br>`;
+        response += `🎯 Target Take-Home: ${formatIDR(calcConfig.targetNet)}<br>`;
+        response += `💰 Gaji Pokok: ${formatIDR(effectiveBaseSalary)}<br><br>`;
+
+        if (result.message) {
+            response += `ℹ️ ${result.message}<br>`;
+        } else {
+            response += `⏰ <strong>Jam lembur diperlukan: ${result.hours} jam</strong><br>`;
+            response += `💵 Nilai lembur: ${formatIDR(result.calc.overtime.total)}<br>`;
+            response += `✅ Hasil Take-Home: ${formatIDR(result.calc.net)}<br>`;
+        }
+
+        addChatMessage(response, false);
+        displayResults(currentCalc);
+        return;
+    }
+
     currentCalc = calculatePayroll(data, calcConfig);
 
     // Store allowances info for display
