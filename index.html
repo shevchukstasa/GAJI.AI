@@ -479,7 +479,103 @@
         .feature-card h4 { font-size: 15px; margin-bottom: 6px; }
         .feature-card p { font-size: 13px; color: var(--color-text-secondary); }
 
-        /* === 10. Footer === */
+        /* === 10. Custom Solutions Section === */
+        .custom-solutions {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            padding: 60px 0;
+            color: white;
+        }
+
+        .solutions-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        .solutions-text h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .solutions-text p {
+            color: #94a3b8;
+            font-size: 1rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .solutions-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .solutions-list li {
+            padding: 8px 0;
+            font-size: 15px;
+            color: #e2e8f0;
+        }
+
+        .solutions-form {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .solutions-form h3 {
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .solutions-form input,
+        .solutions-form textarea {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .solutions-form input::placeholder,
+        .solutions-form textarea::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .solutions-form input:focus,
+        .solutions-form textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .solutions-form button {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .form-note {
+            font-size: 12px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .solutions-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            .solutions-text h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* === 11. Footer === */
         .footer {
             background: #111827;
             color: #d1d5db;
@@ -501,12 +597,35 @@
         .footer-links a { display: block; color: #9ca3af; text-decoration: none; font-size: 14px; padding: 3px 0; transition: color 0.2s; }
         .footer-links a:hover { color: white; }
 
+        .partner-link {
+            display: flex !important;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .partner-logo {
+            font-size: 18px;
+        }
+
         .footer-bottom {
             border-top: 1px solid #374151;
             padding-top: 20px;
             text-align: center;
             font-size: 13px;
             color: #6b7280;
+        }
+
+        .footer-bottom p {
+            margin: 4px 0;
+        }
+
+        .powered-by a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .powered-by a:hover {
+            text-decoration: underline;
         }
 
         /* === 11. Utilities === */
@@ -1170,6 +1289,23 @@
                         <input type="text" id="formName" placeholder="Contoh: Budi">
                     </div>
                     <div class="form-group">
+                        <label id="formLblPosition">Jabatan</label>
+                        <select id="formPosition">
+                            <option value="" id="posSelect">-- Pilih Jabatan --</option>
+                            <option value="staff" id="posStaff">Staff</option>
+                            <option value="supervisor" id="posSupervisor">Supervisor</option>
+                            <option value="manager" id="posManager">Manager</option>
+                            <option value="senior_manager" id="posSeniorManager">Senior Manager</option>
+                            <option value="director" id="posDirector">Direktur</option>
+                            <option value="vp" id="posVP">Vice President</option>
+                            <option value="c_level" id="posCLevel">C-Level (CEO/CFO/CTO)</option>
+                            <option value="intern" id="posIntern">Magang / Intern</option>
+                            <option value="contract" id="posContract">Kontrak / Outsource</option>
+                            <option value="freelance" id="posFreelance">Freelance</option>
+                            <option value="other" id="posOther">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label id="formLblSalary">Gaji Pokok (Rp)</label>
                         <input type="number" id="formSalary" placeholder="8000000" min="0">
                     </div>
@@ -1464,6 +1600,35 @@
     </div>
 </section>
 
+<!-- ============ CUSTOM SOLUTIONS SECTION ============ -->
+<section class="custom-solutions" id="customSolutions">
+    <div class="container">
+        <div class="solutions-content">
+            <div class="solutions-text">
+                <h2 id="solutionsTitle">Butuh Solusi Otomatis untuk Bisnis Anda?</h2>
+                <p id="solutionsDesc">Kami merancang solusi otomatisasi khusus untuk UMKM dan bisnis berkembang. Dari manajemen inventory, payroll, hingga sistem akuntansi terintegrasi.</p>
+                <ul class="solutions-list">
+                    <li id="sol1">✓ Sistem inventory & warehouse management</li>
+                    <li id="sol2">✓ Otomatisasi payroll & HR</li>
+                    <li id="sol3">✓ Integrasi WhatsApp Business</li>
+                    <li id="sol4">✓ Dashboard analytics real-time</li>
+                </ul>
+            </div>
+            <div class="solutions-form">
+                <h3 id="formContactTitle">Hubungi Kami</h3>
+                <form id="contactForm" onsubmit="submitContactForm(event)">
+                    <input type="text" id="contactName" placeholder="Nama Anda" required>
+                    <input type="email" id="contactEmail" placeholder="Email Anda" required>
+                    <input type="text" id="contactCompany" placeholder="Nama Perusahaan">
+                    <textarea id="contactMessage" placeholder="Jelaskan kebutuhan bisnis Anda..." rows="4" required></textarea>
+                    <button type="submit" class="btn btn-primary" id="contactSubmitBtn">Kirim Pesan</button>
+                </form>
+                <p class="form-note" id="contactNote">Kami akan merespons dalam 1x24 jam kerja.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- ============ FOOTER ============ -->
 <footer class="footer">
     <div class="container">
@@ -1484,9 +1649,16 @@
                 <a href="#">BPJS 2025</a>
                 <a href="#">UMP/UMK 2025</a>
             </div>
+            <div class="footer-links">
+                <h4 id="footerPartners">Solusi Lainnya</h4>
+                <a href="https://poki.ai" target="_blank" class="partner-link">
+                    <span class="partner-logo">🤖</span> Poki AI - Warehouse Automation
+                </a>
+            </div>
         </div>
         <div class="footer-bottom">
-            &copy; 2025 Gaji.AI. All rights reserved.
+            <p>&copy; 2025 Gaji.AI. All rights reserved.</p>
+            <p class="powered-by">Powered by <a href="https://poki.ai" target="_blank">Poki AI</a> - Intelligent Business Automation</p>
         </div>
     </div>
 </footer>
@@ -1499,6 +1671,7 @@
     </div>
     <table class="slip-table">
         <tr><td class="label-col">Nama Karyawan</td><td id="slipName">-</td></tr>
+        <tr><td class="label-col">Jabatan</td><td id="slipPosition">-</td></tr>
         <tr><td class="label-col">Lokasi / Provinsi</td><td id="slipRegion">-</td></tr>
         <tr><td class="label-col">Status PTKP</td><td id="slipPTKP">-</td></tr>
         <tr><td class="label-col">NPWP</td><td id="slipNPWP">-</td></tr>
@@ -2293,6 +2466,7 @@ function calculatePayroll(data, config = calcConfig) {
 function parseInput(text) {
     const data = {
         name: '',
+        position: '',
         baseSalary: 0,
         region: '',
         regionLabel: '',
@@ -2374,6 +2548,26 @@ function parseInput(text) {
     const otMatch = text.match(/(?:lembur|overtime|ot)\s*(\d+)\s*(?:jam|hours|h)?/i);
     if (otMatch) data.overtime = parseInt(otMatch[1]);
 
+    // Position detection
+    const positionKeywords = {
+        'c-level': 'c_level', 'ceo': 'c_level', 'cfo': 'c_level', 'cto': 'c_level', 'coo': 'c_level',
+        'direktur': 'director', 'director': 'director',
+        'vice president': 'vp', 'vp': 'vp',
+        'senior manager': 'senior_manager',
+        'manager': 'manager', 'manajer': 'manager',
+        'supervisor': 'supervisor', 'spv': 'supervisor',
+        'staff': 'staff', 'staf': 'staff',
+        'magang': 'intern', 'intern': 'intern',
+        'kontrak': 'contract', 'contract': 'contract', 'outsource': 'contract',
+        'freelance': 'freelance', 'freelancer': 'freelance'
+    };
+    for (const [keyword, position] of Object.entries(positionKeywords)) {
+        if (textLower.includes(keyword)) {
+            data.position = position;
+            break;
+        }
+    }
+
     return data;
 }
 
@@ -2383,6 +2577,26 @@ function parseInput(text) {
 
 function formatIDR(amount) {
     return 'Rp ' + Math.round(amount).toLocaleString('id-ID');
+}
+
+const POSITION_LABELS = {
+    'staff': { id: 'Staff', en: 'Staff' },
+    'supervisor': { id: 'Supervisor', en: 'Supervisor' },
+    'manager': { id: 'Manager', en: 'Manager' },
+    'senior_manager': { id: 'Senior Manager', en: 'Senior Manager' },
+    'director': { id: 'Direktur', en: 'Director' },
+    'vp': { id: 'Vice President', en: 'Vice President' },
+    'c_level': { id: 'C-Level', en: 'C-Level' },
+    'intern': { id: 'Magang', en: 'Intern' },
+    'contract': { id: 'Kontrak', en: 'Contract' },
+    'freelance': { id: 'Freelance', en: 'Freelance' },
+    'other': { id: 'Lainnya', en: 'Other' }
+};
+
+function getPositionLabel(position, isEn = false) {
+    if (!position) return '';
+    const labels = POSITION_LABELS[position];
+    return labels ? (isEn ? labels.en : labels.id) : position;
 }
 
 function addChatMessage(html, isUser) {
@@ -2651,6 +2865,7 @@ async function submitForm() {
     if (!canCalculate) return;
 
     const name = document.getElementById('formName').value.trim() || 'Karyawan';
+    const position = document.getElementById('formPosition').value || '';
     const baseSalary = parseInt(document.getElementById('formSalary').value) || 0;
     const region = document.getElementById('formRegion').value;
     const ptkp = document.getElementById('formPtkp').value;
@@ -2676,6 +2891,7 @@ async function submitForm() {
 
     const data = {
         name,
+        position,
         baseSalary: effectiveBaseSalary,
         region,
         regionLabel: regionInfo.label,
@@ -2789,6 +3005,7 @@ function generateSlipGaji() {
 
     document.getElementById('slipPeriod').textContent = (isEn ? 'Period: ' : 'Periode: ') + monthNames[now.getMonth()] + ' ' + now.getFullYear();
     document.getElementById('slipName').textContent = c.input.name || (isEn ? 'Employee' : 'Karyawan');
+    document.getElementById('slipPosition').textContent = getPositionLabel(c.input.position, isEn) || '-';
     document.getElementById('slipRegion').textContent = c.input.regionLabel;
     document.getElementById('slipPTKP').textContent = c.input.ptkp;
     document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? (isEn ? 'Yes' : 'Ada') : (isEn ? 'No' : 'Tidak Ada');
@@ -2818,6 +3035,56 @@ function generateSlipGaji() {
     document.getElementById('slipDate').textContent = now.toLocaleDateString(isEn ? 'en-US' : 'id-ID');
 
     window.print();
+}
+
+// ===================================================================
+// 8b. CONTACT FORM
+// ===================================================================
+
+async function submitContactForm(event) {
+    event.preventDefault();
+
+    const btn = document.getElementById('contactSubmitBtn');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Mengirim...';
+
+    const formData = {
+        name: document.getElementById('contactName').value,
+        email: document.getElementById('contactEmail').value,
+        company: document.getElementById('contactCompany').value,
+        message: document.getElementById('contactMessage').value
+    };
+
+    try {
+        const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            btn.textContent = '✓ Terkirim!';
+            btn.style.background = '#10b981';
+            document.getElementById('contactForm').reset();
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+                btn.disabled = false;
+            }, 3000);
+        } else {
+            throw new Error('Failed to send');
+        }
+    } catch (error) {
+        console.error('Contact form error:', error);
+        btn.textContent = '✗ Gagal, coba lagi';
+        btn.style.background = '#ef4444';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+            btn.disabled = false;
+        }, 3000);
+    }
 }
 
 function copyResult() {
@@ -2976,6 +3243,7 @@ function setLang(lang) {
     document.getElementById('modeChatBtn').textContent = isEn ? '💬 Chat / Voice' : '💬 Chat / Suara';
     document.getElementById('modeFormBtn').textContent = isEn ? '📝 Form' : '📝 Form';
     document.getElementById('formLblName').textContent = isEn ? 'Employee Name' : 'Nama Karyawan';
+    document.getElementById('formLblPosition').textContent = isEn ? 'Position' : 'Jabatan';
     document.getElementById('formLblSalary').textContent = isEn ? 'Base Salary (Rp)' : 'Gaji Pokok (Rp)';
     document.getElementById('formLblRegion').textContent = isEn ? 'Province / City' : 'Provinsi / Kota';
     document.getElementById('formLblPtkp').textContent = isEn ? 'PTKP Status (for PPh 21)' : 'Status PTKP (untuk PPh 21)';
@@ -3005,6 +3273,20 @@ function setLang(lang) {
     document.getElementById('ptkpK1').textContent = isEn ? 'K/1 - Married, 1 child' : 'K/1 - Kawin, 1 anak';
     document.getElementById('ptkpK2').textContent = isEn ? 'K/2 - Married, 2 children' : 'K/2 - Kawin, 2 anak';
     document.getElementById('ptkpK3').textContent = isEn ? 'K/3 - Married, 3 children' : 'K/3 - Kawin, 3 anak';
+
+    // Position dropdown options
+    document.getElementById('posSelect').textContent = isEn ? '-- Select Position --' : '-- Pilih Jabatan --';
+    document.getElementById('posStaff').textContent = 'Staff';
+    document.getElementById('posSupervisor').textContent = 'Supervisor';
+    document.getElementById('posManager').textContent = 'Manager';
+    document.getElementById('posSeniorManager').textContent = 'Senior Manager';
+    document.getElementById('posDirector').textContent = isEn ? 'Director' : 'Direktur';
+    document.getElementById('posVP').textContent = 'Vice President';
+    document.getElementById('posCLevel').textContent = 'C-Level (CEO/CFO/CTO)';
+    document.getElementById('posIntern').textContent = isEn ? 'Intern' : 'Magang / Intern';
+    document.getElementById('posContract').textContent = isEn ? 'Contract / Outsource' : 'Kontrak / Outsource';
+    document.getElementById('posFreelance').textContent = 'Freelance';
+    document.getElementById('posOther').textContent = isEn ? 'Other' : 'Lainnya';
 
     // Welcome message
     document.getElementById('welcomeMessage').innerHTML = isEn

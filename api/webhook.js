@@ -1,13 +1,17 @@
 // Wablas WhatsApp Webhook Handler for Gaji.AI
 // This serverless function receives WhatsApp messages and responds with salary calculations
 
-const WABLAS_TOKEN = 'OlWT0Ks8uPKEOazqVThdEFAd6Zp0S3kcNIco9lFO6ZUDPkKQ862nES2';
-const WABLAS_API = 'https://sby.wablas.com/api/send-message';
+// ===================================================================
+// SECURITY: API keys should be configured in Vercel Environment Variables
+// Go to Vercel Dashboard → Settings → Environment Variables
+// ===================================================================
+const WABLAS_TOKEN = process.env.WABLAS_TOKEN || 'OlWT0Ks8uPKEOazqVThdEFAd6Zp0S3kcNIco9lFO6ZUDPkKQ862nES2';
+const WABLAS_API = process.env.WABLAS_API || 'https://sby.wablas.com/api/send-message';
 
 // Supabase configuration
-const SUPABASE_URL = 'https://ofnsqxyoqjgwuzzpgewx.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_HD2TfdfOhKFtuN1Kyt6guQ_rG-FTwcr';
-const FREE_LIMIT = 5;
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://ofnsqxyoqjgwuzzpgewx.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_HD2TfdfOhKFtuN1Kyt6guQ_rG-FTwcr';
+const FREE_LIMIT = parseInt(process.env.FREE_LIMIT) || 5;
 
 // ===================================================================
 // SUPABASE USAGE TRACKING
