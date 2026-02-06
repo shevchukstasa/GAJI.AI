@@ -331,14 +331,15 @@ function calcOvertime(baseSalary, hours) {
 
 function calculatePayroll(data) {
     const ot = calcOvertime(data.baseSalary, data.overtime);
-    const gross = data.baseSalary + ot.total;
-    const bpjs = calcBPJS(data.baseSalary);
+    const allowances = (data.meal || 0) + (data.transport || 0) + (data.otherAllowance || 0);
+    const gross = data.baseSalary + ot.total + allowances;
+    const bpjs = calcBPJS(data.baseSalary); // BPJS based on base salary only
     const pph21 = calcPPh21(gross, data.ptkp, data.hasNPWP);
     const totalEmpDeductions = pph21 + bpjs.empKesehatan + bpjs.empJHT + bpjs.empJP;
     const net = gross - totalEmpDeductions;
     const companyCost = gross + bpjs.coKesehatan + bpjs.coJHT + bpjs.coJP + bpjs.coJKK + bpjs.coJKM;
 
-    return { gross, pph21, bpjs, totalDeductions: totalEmpDeductions, net, companyCost, overtime: ot };
+    return { gross, pph21, bpjs, totalDeductions: totalEmpDeductions, net, companyCost, overtime: ot, allowances };
 }
 
 // ===================================================================
@@ -349,12 +350,16 @@ function parseMessage(text) {
     const data = {
         name: '',
         position: '',
+        company: '',
         baseSalary: 0,
         region: 'jakarta',
         regionLabel: 'DKI Jakarta',
         ptkp: 'TK/0',
         overtime: 0,
-        hasNPWP: false
+        hasNPWP: false,
+        meal: 0,
+        transport: 0,
+        otherAllowance: 0
     };
 
     // Extract name (multiple patterns)
@@ -438,24 +443,85 @@ function parseMessage(text) {
     const otMatch = text.match(/(?:lembur|overtime|ot)\s*(\d+)\s*(?:jam|hours|h)?/i);
     if (otMatch) data.overtime = parseInt(otMatch[1]);
 
-    // Position detection
+    // Position detection (expanded list)
     const positionKeywords = {
-        'c-level': 'c_level', 'ceo': 'c_level', 'cfo': 'c_level', 'cto': 'c_level', 'coo': 'c_level',
-        'direktur': 'director', 'director': 'director',
-        'vice president': 'vp', 'vp': 'vp',
-        'senior manager': 'senior_manager',
-        'manager': 'manager', 'manajer': 'manager',
-        'supervisor': 'supervisor', 'spv': 'supervisor',
-        'staff': 'staff', 'staf': 'staff',
-        'magang': 'intern', 'intern': 'intern',
-        'kontrak': 'contract', 'contract': 'contract', 'outsource': 'contract',
-        'freelance': 'freelance', 'freelancer': 'freelance'
+        'c-level': 'C-Level', 'ceo': 'CEO', 'cfo': 'CFO', 'cto': 'CTO', 'coo': 'COO',
+        'direktur': 'Direktur', 'director': 'Director',
+        'vice president': 'VP', 'vp': 'VP',
+        'senior manager': 'Senior Manager',
+        'manager': 'Manager', 'manajer': 'Manager',
+        'supervisor': 'Supervisor', 'spv': 'Supervisor',
+        'coordinator': 'Coordinator', 'koordinator': 'Koordinator',
+        'team lead': 'Team Lead', 'lead': 'Lead',
+        'senior': 'Senior',
+        'staff': 'Staff', 'staf': 'Staff',
+        'admin': 'Admin', 'administrator': 'Administrator', 'administrasi': 'Administrasi',
+        'secretary': 'Secretary', 'sekretaris': 'Sekretaris',
+        'accountant': 'Accountant', 'akuntan': 'Akuntan',
+        'finance': 'Finance', 'keuangan': 'Keuangan',
+        'hr': 'HR', 'hrd': 'HRD', 'human resource': 'HR',
+        'marketing': 'Marketing', 'pemasaran': 'Marketing',
+        'sales': 'Sales', 'seller': 'Seller', 'penjual': 'Sales',
+        'driver': 'Driver', 'sopir': 'Driver', 'pengemudi': 'Driver',
+        'security': 'Security', 'satpam': 'Security', 'keamanan': 'Security',
+        'cleaner': 'Cleaner', 'cleaning': 'Cleaning', 'ob': 'Office Boy',
+        'technician': 'Technician', 'teknisi': 'Teknisi',
+        'engineer': 'Engineer', 'insinyur': 'Engineer',
+        'developer': 'Developer', 'programmer': 'Programmer',
+        'designer': 'Designer', 'desainer': 'Designer',
+        'chef': 'Chef', 'cook': 'Cook', 'koki': 'Koki',
+        'waiter': 'Waiter', 'waitress': 'Waitress', 'pelayan': 'Pelayan',
+        'receptionist': 'Receptionist', 'resepsionis': 'Resepsionis',
+        'magang': 'Intern', 'intern': 'Intern',
+        'kontrak': 'Kontrak', 'contract': 'Contract', 'outsource': 'Outsource',
+        'freelance': 'Freelance', 'freelancer': 'Freelancer'
     };
     for (const [keyword, position] of Object.entries(positionKeywords)) {
         if (textLower.includes(keyword)) {
             data.position = position;
             break;
         }
+    }
+
+    // Company name detection (PT, CV, UD, etc.)
+    const companyMatch = text.match(/(?:PT|CV|UD|Yayasan|Koperasi|Firma)[\s\.]+([A-Za-z0-9\s]+?)(?:,|\s+gaji|\s+salary|\s+lokasi|\s+bali|\s+jakarta|\s+surabaya|$)/i);
+    if (companyMatch) {
+        data.company = companyMatch[0].replace(/,\s*$/, '').trim();
+    }
+
+    // Allowance detection (makan, transport, tunjangan, kompensasi)
+    const mealMatch = text.match(/(\d+[\.,]?\d*)\s*(jt|juta|ribu|rb|k)?\s*(?:makan|meal|lunch|uang makan)/i) ||
+                      text.match(/(?:makan|meal|lunch|uang makan)\s*(?:kompensasi\s*)?(\d+[\.,]?\d*)\s*(jt|juta|ribu|rb|k)?/i);
+    if (mealMatch) {
+        let amount = parseFloat(mealMatch[1]?.replace(',', '.') || mealMatch[2]?.replace(',', '.') || 0);
+        const unit = (mealMatch[2] || mealMatch[3] || '').toLowerCase();
+        if (['jt', 'juta'].includes(unit)) amount *= 1000000;
+        else if (['ribu', 'rb', 'k'].includes(unit)) amount *= 1000;
+        else if (amount > 0 && amount < 1000) amount *= 1000; // assume ribu if small number
+        data.meal = Math.round(amount);
+    }
+
+    const transportMatch = text.match(/(\d+[\.,]?\d*)\s*(jt|juta|ribu|rb|k)?\s*(?:transport|bensin|bbm|ongkos)/i) ||
+                           text.match(/(?:transport|bensin|bbm|ongkos)\s*(\d+[\.,]?\d*)\s*(jt|juta|ribu|rb|k)?/i);
+    if (transportMatch) {
+        let amount = parseFloat(transportMatch[1]?.replace(',', '.') || 0);
+        const unit = (transportMatch[2] || '').toLowerCase();
+        if (['jt', 'juta'].includes(unit)) amount *= 1000000;
+        else if (['ribu', 'rb', 'k'].includes(unit)) amount *= 1000;
+        else if (amount > 0 && amount < 1000) amount *= 1000;
+        data.transport = Math.round(amount);
+    }
+
+    // Other allowances (kompensasi, tunjangan, bonus)
+    const otherMatch = text.match(/(\d+[\.,]?\d*)\s*(jt|juta|ribu|rb|k)?\s*(?:kompensasi|tunjangan|bonus|insentif)/i) ||
+                       text.match(/(?:kompensasi|tunjangan|bonus|insentif)\s*(\d+[\.,]?\d*)\s*(jt|juta|ribu|rb|k)?/i);
+    if (otherMatch && !mealMatch) { // Don't double count if it was meal kompensasi
+        let amount = parseFloat(otherMatch[1]?.replace(',', '.') || 0);
+        const unit = (otherMatch[2] || '').toLowerCase();
+        if (['jt', 'juta'].includes(unit)) amount *= 1000000;
+        else if (['ribu', 'rb', 'k'].includes(unit)) amount *= 1000;
+        else if (amount > 0 && amount < 1000) amount *= 1000;
+        data.otherAllowance = Math.round(amount);
     }
 
     return data;
@@ -476,6 +542,8 @@ function formatResponse(data, calc) {
     // Create PDF slip link with encoded data
     const slipData = {
         n: data.name || 'Karyawan',
+        pos: data.position || '',
+        co: data.company || '',
         s: data.baseSalary,
         r: data.regionLabel,
         p: data.ptkp,
@@ -489,15 +557,24 @@ function formatResponse(data, calc) {
         td: calc.totalDeductions,
         net: calc.net,
         cc: calc.companyCost,
-        ot: calc.overtime.total
+        ot: calc.overtime.total,
+        meal: data.meal || 0,
+        trans: data.transport || 0,
+        other: data.otherAllowance || 0
     };
     const encodedData = Buffer.from(JSON.stringify(slipData)).toString('base64');
     const pdfLink = `https://gaji-ai-beta.vercel.app/?slip=${encodedData}`;
 
     let msg = `*✅ GAJI.AI - Hasil Perhitungan*\n\n`;
     msg += `👤 Nama: ${data.name || 'Karyawan'}\n`;
+    if (data.position) msg += `💼 Jabatan: ${data.position}\n`;
+    if (data.company) msg += `🏢 Perusahaan: ${data.company}\n`;
     msg += `📍 Lokasi: ${data.regionLabel}\n`;
     msg += `💰 Gaji Pokok: ${formatIDR(data.baseSalary)}\n`;
+
+    if (data.meal > 0) msg += `🍽️ Tunjangan Makan: ${formatIDR(data.meal)}\n`;
+    if (data.transport > 0) msg += `🚗 Tunjangan Transport: ${formatIDR(data.transport)}\n`;
+    if (data.otherAllowance > 0) msg += `📦 Tunjangan Lain: ${formatIDR(data.otherAllowance)}\n`;
 
     if (data.overtime > 0) {
         msg += `⏰ Lembur: ${data.overtime} jam (+${formatIDR(calc.overtime.total)})\n`;
@@ -556,10 +633,15 @@ function formatError(data) {
     // Show what was detected
     let detectedItems = [];
     if (data && data.name) detectedItems.push(`✓ Nama: ${data.name}`);
+    if (data && data.position) detectedItems.push(`✓ Jabatan: ${data.position}`);
+    if (data && data.company) detectedItems.push(`✓ Perusahaan: ${data.company}`);
     if (data && data.regionLabel && data.region !== 'default') detectedItems.push(`✓ Lokasi: ${data.regionLabel}`);
     if (data && data.hasNPWP) detectedItems.push(`✓ NPWP: Ada`);
     if (data && data.ptkp && data.ptkp !== 'TK/0') detectedItems.push(`✓ PTKP: ${data.ptkp}`);
     if (data && data.overtime > 0) detectedItems.push(`✓ Lembur: ${data.overtime} jam`);
+    if (data && data.meal > 0) detectedItems.push(`✓ Tunjangan Makan: Rp ${data.meal.toLocaleString('id-ID')}`);
+    if (data && data.transport > 0) detectedItems.push(`✓ Tunjangan Transport: Rp ${data.transport.toLocaleString('id-ID')}`);
+    if (data && data.otherAllowance > 0) detectedItems.push(`✓ Tunjangan Lain: Rp ${data.otherAllowance.toLocaleString('id-ID')}`);
 
     if (detectedItems.length > 0) {
         msg += `*Yang terdeteksi:*\n`;
