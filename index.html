@@ -1736,6 +1736,14 @@
                         </div>
                     </div>
 
+                    <div class="breakdown" id="incomeBreakdown">
+                        <h3 id="brkIncomeTitle">Rincian Pendapatan</h3>
+                        <div class="breakdown-item"><span class="label" id="brkBaseSalaryLabel">Gaji Pokok</span><span class="amount" id="brkBaseSalary">-</span></div>
+                        <div class="breakdown-item" id="brkLemburRow"><span class="label">Lembur</span><span class="amount" id="brkLembur">-</span></div>
+                        <div class="breakdown-item" id="brkBpjsCompRow" style="display:none"><span class="label">Kompensasi BPJS</span><span class="amount" id="brkBpjsComp">-</span></div>
+                        <div class="breakdown-item"><span class="label"><strong id="brkGrossTotalLabel">Total Pendapatan Bruto</strong></span><span class="amount" id="brkGrossTotal"><strong>-</strong></span></div>
+                    </div>
+
                     <div class="breakdown">
                         <h3 id="brkDeductTitle">Rincian Potongan Karyawan</h3>
                         <div class="breakdown-item"><span class="label">PPh 21 (TER)</span><span class="amount" id="brkPPh21">-</span><span class="note" id="notePPh21">Dibayar Perusahaan</span></div>
@@ -2008,6 +2016,7 @@
     <table class="slip-table">
         <tr><td class="label-col">Gaji Pokok</td><td id="slipGajiPokok">-</td></tr>
         <tr><td class="label-col">Lembur</td><td id="slipLembur">-</td></tr>
+        <tr id="slipBpjsCompRow" style="display:none"><td class="label-col">Kompensasi BPJS</td><td id="slipBpjsComp">-</td></tr>
         <tr><td class="label-col"><strong>Total Pendapatan Bruto</strong></td><td id="slipGross"><strong>-</strong></td></tr>
     </table>
     <h3 style="margin:16px 0 8px">Potongan</h3>
@@ -3206,6 +3215,20 @@ function displayResults(calc) {
     s('valNet', calc.net);
     s('valCost', calc.companyCost);
 
+    // Income breakdown
+    s('brkBaseSalary', calc.input.baseSalary);
+    s('brkLembur', calc.overtime.total);
+    s('brkGrossTotal', calc.gross);
+
+    // BPJS Compensation (if employee has own BPJS)
+    const bpjsCompRow = document.getElementById('brkBpjsCompRow');
+    if (cfg.ownBpjs && cfg.bpjsCompensation > 0) {
+        bpjsCompRow.style.display = '';
+        s('brkBpjsComp', cfg.bpjsCompensation);
+    } else {
+        bpjsCompRow.style.display = 'none';
+    }
+
     // PPh 21 - always show actual amount, note indicates who pays
     const isEn = currentLang === 'en';
     const paidByCompanyText = isEn ? 'Paid by Employer' : 'Dibayar Perusahaan';
@@ -3615,6 +3638,16 @@ function generateSlipGaji() {
     document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? (isEn ? 'Yes' : 'Ada') : (isEn ? 'No' : 'Tidak Ada');
     document.getElementById('slipGajiPokok').textContent = formatIDR(c.input.baseSalary);
     document.getElementById('slipLembur').textContent = formatIDR(c.overtime.total);
+
+    // BPJS Compensation (if employee has own BPJS)
+    const bpjsCompRow = document.getElementById('slipBpjsCompRow');
+    if (cfg.ownBpjs && cfg.bpjsCompensation > 0) {
+        bpjsCompRow.style.display = '';
+        document.getElementById('slipBpjsComp').textContent = formatIDR(cfg.bpjsCompensation);
+    } else {
+        bpjsCompRow.style.display = 'none';
+    }
+
     document.getElementById('slipGross').textContent = formatIDR(c.gross);
 
     // Note texts
