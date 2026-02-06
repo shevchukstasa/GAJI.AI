@@ -873,22 +873,73 @@
             border-radius: var(--radius-lg);
             padding: 24px;
             margin-top: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .reverse-engineering-block.collapsed {
+            padding: 16px 24px;
+        }
+
+        .reverse-engineering-block.collapsed .reverse-eng-content {
+            display: none;
+        }
+
+        .reverse-engineering-block.collapsed .rev-toggle-icon {
+            transform: rotate(0deg);
         }
 
         .reverse-eng-header {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .reverse-engineering-block:not(.collapsed) .reverse-eng-header {
             margin-bottom: 20px;
+            border-bottom: 1px solid #bae6fd;
+            padding-bottom: 16px;
         }
 
         .reverse-eng-header h3 {
             color: #0369a1;
-            margin-bottom: 8px;
-            font-size: 1.25rem;
+            margin: 0;
+            font-size: 1.1rem;
         }
 
-        .reverse-eng-header p {
+        .rev-toggle-hint {
+            color: #0ea5e9;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .reverse-engineering-block:not(.collapsed) .rev-toggle-hint {
+            display: none;
+        }
+
+        .rev-toggle-icon {
+            color: #0ea5e9;
+            font-size: 12px;
+            transition: transform 0.3s ease;
+            transform: rotate(180deg);
+        }
+
+        .reverse-eng-content {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .rev-desc {
+            text-align: center;
             color: var(--color-text-secondary);
             font-size: 14px;
+            margin-bottom: 20px;
         }
 
         .reverse-eng-inputs {
@@ -1370,13 +1421,16 @@
                 </div>
             </div>
 
-            <!-- Reverse Engineering Block -->
-            <div class="reverse-engineering-block" id="reverseEngBlock">
-                <div class="reverse-eng-header">
+            <!-- Reverse Engineering Block (Collapsible) -->
+            <div class="reverse-engineering-block collapsed" id="reverseEngBlock">
+                <div class="reverse-eng-header" onclick="toggleReverseEngBlock()">
                     <h3 id="revTitle">🔧 Reverse Engineering Lembur</h3>
-                    <p id="revDesc">Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay</p>
+                    <span class="rev-toggle-hint" id="revToggleHint">Klik untuk membuka</span>
+                    <span class="rev-toggle-icon">▼</span>
                 </div>
-                <div class="reverse-eng-inputs">
+                <div class="reverse-eng-content" id="revContent">
+                    <p class="rev-desc" id="revDesc">Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay</p>
+                    <div class="reverse-eng-inputs">
                     <div class="reverse-eng-row">
                         <label id="revLblBaseSalary">Gaji Pokok:</label>
                         <div class="input-with-prefix">
@@ -1463,6 +1517,7 @@
                     <button class="btn btn-primary" onclick="applyReverseToForm()" id="revApplyBtn">
                         ✅ <span id="revApplyBtnText">Terapkan ke Form</span>
                     </button>
+                    </div>
                 </div>
             </div>
 
@@ -2758,6 +2813,14 @@ function reverseEngineerOvertime(targetNet, baseSalary, ptkpStatus, hasNPWP) {
 }
 
 /**
+ * Toggle reverse engineering block expand/collapse
+ */
+function toggleReverseEngBlock() {
+    const block = document.getElementById('reverseEngBlock');
+    block.classList.toggle('collapsed');
+}
+
+/**
  * UI function: Calculate reverse overtime and display results
  */
 function calculateReverseOvertime() {
@@ -3648,6 +3711,7 @@ function setLang(lang) {
 
     // Reverse Engineering block
     document.getElementById('revTitle').textContent = isEn ? '🔧 Overtime Reverse Engineering' : '🔧 Reverse Engineering Lembur';
+    document.getElementById('revToggleHint').textContent = isEn ? 'Click to expand' : 'Klik untuk membuka';
     document.getElementById('revDesc').textContent = isEn ? 'Calculate how many overtime hours needed to reach target take-home pay' : 'Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay';
     document.getElementById('revLblBaseSalary').textContent = isEn ? 'Base Salary:' : 'Gaji Pokok:';
     document.getElementById('revLblMeal').textContent = isEn ? 'Meal Allowance:' : 'Tunjangan Makan:';
