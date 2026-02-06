@@ -1827,25 +1827,27 @@ UMP terendah: Jawa Tengah (Rp 2.109.635)
 function getCalcContext() {
     if (!currentCalc) return '';
     const c = currentCalc;
-    return \`
-
-## KONTEKS PERHITUNGAN TERKINI
-Pengguna baru saja menghitung gaji dengan data berikut:
-- Nama: \${c.input.name || 'Tidak disebutkan'}
-- Lokasi: \${c.input.regionLabel || 'Tidak disebutkan'}
-- Gaji Pokok: Rp \${c.input.baseSalary?.toLocaleString('id-ID') || 0}
-- Lembur: \${c.input.overtime || 0} jam = Rp \${c.overtime?.total?.toLocaleString('id-ID') || 0}
-- THR: Rp \${c.thr?.toLocaleString('id-ID') || 0}
-- Status PTKP: \${c.input.ptkp || 'TK/0'}
-- NPWP: \${c.input.hasNPWP ? 'Ada' : 'Tidak ada'}
-- Gross: Rp \${c.gross?.toLocaleString('id-ID') || 0}
-- PPh 21: Rp \${c.pph21?.toLocaleString('id-ID') || 0}
-- Total Potongan: Rp \${c.totalDeductions?.toLocaleString('id-ID') || 0}
-- Take-Home Pay: Rp \${c.net?.toLocaleString('id-ID') || 0}
-- Biaya Perusahaan: Rp \${c.companyCost?.toLocaleString('id-ID') || 0}
-- Potensi Harmoni: +Rp \${c.harmony?.savings?.toLocaleString('id-ID') || 0} (jika dioptimasi)
-
-Gunakan konteks ini untuk memberikan analisis atau saran yang relevan jika pengguna bertanya tentang perhitungan mereka.\`;
+    const lines = [
+        '',
+        '## KONTEKS PERHITUNGAN TERKINI',
+        'Pengguna baru saja menghitung gaji dengan data berikut:',
+        '- Nama: ' + (c.input.name || 'Tidak disebutkan'),
+        '- Lokasi: ' + (c.input.regionLabel || 'Tidak disebutkan'),
+        '- Gaji Pokok: Rp ' + (c.input.baseSalary ? c.input.baseSalary.toLocaleString('id-ID') : '0'),
+        '- Lembur: ' + (c.input.overtime || 0) + ' jam = Rp ' + (c.overtime && c.overtime.total ? c.overtime.total.toLocaleString('id-ID') : '0'),
+        '- THR: Rp ' + (c.thr ? c.thr.toLocaleString('id-ID') : '0'),
+        '- Status PTKP: ' + (c.input.ptkp || 'TK/0'),
+        '- NPWP: ' + (c.input.hasNPWP ? 'Ada' : 'Tidak ada'),
+        '- Gross: Rp ' + (c.gross ? c.gross.toLocaleString('id-ID') : '0'),
+        '- PPh 21: Rp ' + (c.pph21 ? c.pph21.toLocaleString('id-ID') : '0'),
+        '- Total Potongan: Rp ' + (c.totalDeductions ? c.totalDeductions.toLocaleString('id-ID') : '0'),
+        '- Take-Home Pay: Rp ' + (c.net ? c.net.toLocaleString('id-ID') : '0'),
+        '- Biaya Perusahaan: Rp ' + (c.companyCost ? c.companyCost.toLocaleString('id-ID') : '0'),
+        '- Potensi Harmoni: +Rp ' + (c.harmony && c.harmony.savings ? c.harmony.savings.toLocaleString('id-ID') : '0') + ' (jika dioptimasi)',
+        '',
+        'Gunakan konteks ini untuk memberikan analisis atau saran yang relevan jika pengguna bertanya tentang perhitungan mereka.'
+    ];
+    return lines.join('\n');
 }
 
 // ===================================================================
