@@ -2187,6 +2187,13 @@ async function getClientIP() {
 }
 
 async function checkSupabaseUsage() {
+    // Dev mode bypass - check URL param or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('dev') === 'true' || localStorage.getItem('gaji_dev_mode') === 'true') {
+        localStorage.setItem('gaji_dev_mode', 'true');
+        return { allowed: true, count: 0, devMode: true };
+    }
+
     if (!userIP) {
         userIP = await getClientIP();
         if (!userIP) {
