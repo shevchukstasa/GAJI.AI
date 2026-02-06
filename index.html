@@ -2930,12 +2930,13 @@ function toggleBpjsCompensation() {
 }
 
 async function submitForm() {
-    // Ensure config is up-to-date (in case onchange didn't fire)
-    updateConfig();
+    try {
+        // Ensure config is up-to-date (in case onchange didn't fire)
+        updateConfig();
 
-    // Check usage limit before calculating
-    const canCalculate = await checkLimitBeforeCalc();
-    if (!canCalculate) return;
+        // Check usage limit before calculating
+        const canCalculate = await checkLimitBeforeCalc();
+        if (!canCalculate) return;
 
     const name = document.getElementById('formName').value.trim() || 'Karyawan';
     const position = document.getElementById('formPosition').value || '';
@@ -3071,6 +3072,10 @@ async function submitForm() {
 
     addChatMessage(response, false);
     displayResults(currentCalc);
+    } catch (error) {
+        console.error('submitForm error:', error);
+        alert('Error: ' + error.message);
+    }
 }
 
 function updateFreeCounter() {
