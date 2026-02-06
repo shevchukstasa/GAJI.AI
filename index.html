@@ -11,11 +11,11 @@
     <style>
         /* === 1. CSS Variables === */
         :root {
-            --color-primary: #10b981;
-            --color-primary-hover: #059669;
-            --color-primary-light: rgba(16, 185, 129, 0.1);
-            --color-accent: #6366f1;
-            --color-accent-hover: #4f46e5;
+            --color-primary: #1B3A6B;
+            --color-primary-hover: #152D54;
+            --color-primary-light: rgba(27, 58, 107, 0.1);
+            --color-accent: #D4AF37;
+            --color-accent-hover: #B8941E;
             --color-bg: #f9fafb;
             --color-surface: #ffffff;
             --color-text: #1f2937;
@@ -25,7 +25,7 @@
             --color-error: #ef4444;
             --color-warning: #f59e0b;
             --color-success: #10b981;
-            --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-hero: linear-gradient(135deg, #1B3A6B 0%, #0D2240 100%);
             --gradient-card: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
             --radius-sm: 8px;
             --radius-md: 12px;
@@ -174,7 +174,7 @@
         }
 
         .btn-primary { background: var(--color-primary); color: white; }
-        .btn-primary:hover { background: var(--color-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+        .btn-primary:hover { background: var(--color-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(27,58,107,0.3); }
 
         .btn-white { background: white; color: var(--color-text); }
         .btn-white:hover { background: #f3f4f6; transform: translateY(-1px); }
@@ -357,7 +357,7 @@
         .result-card .value { font-size: 20px; font-weight: 700; }
 
         .result-card.highlight {
-            background: linear-gradient(135deg, var(--color-primary) 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, #0D2240 100%);
             border: none;
         }
 
@@ -551,6 +551,247 @@
             font-family: var(--font);
         }
 
+        /* === 14. Config Panel === */
+        .config-panel {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--color-text);
+        }
+
+        .config-header:hover { background: #f3f4f6; }
+
+        .config-body {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .config-body.open { display: block; }
+
+        .config-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .config-row:last-child { border-bottom: none; }
+
+        .config-label { font-size: 14px; color: var(--color-text); }
+
+        .config-select {
+            padding: 6px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: var(--font);
+            background: white;
+            cursor: pointer;
+        }
+
+        .config-input {
+            padding: 6px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: var(--font);
+            width: 100px;
+            text-align: right;
+        }
+
+        .config-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-checkbox input { width: 16px; height: 16px; cursor: pointer; }
+
+        .config-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 16px 0 8px;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .config-section-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+        /* === 15. AI Agent Widget === */
+        .ai-agent-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+            z-index: 1000;
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .ai-agent-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .ai-agent-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 380px;
+            max-height: 500px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .ai-agent-panel.open { display: flex; }
+
+        .ai-agent-header {
+            background: var(--gradient-hero);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-agent-header h4 { font-size: 15px; font-weight: 700; }
+
+        .ai-agent-header-btns { display: flex; gap: 8px; }
+
+        .ai-agent-header-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .ai-agent-header-btn:hover { background: rgba(255,255,255,0.3); }
+
+        .ai-agent-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            min-height: 280px;
+            max-height: 320px;
+            background: var(--color-bg);
+        }
+
+        .ai-agent-msg {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .ai-agent-msg.user { flex-direction: row-reverse; }
+
+        .ai-agent-msg-content {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .ai-agent-msg.ai .ai-agent-msg-content {
+            background: white;
+            border: 1px solid var(--color-border);
+        }
+
+        .ai-agent-msg.user .ai-agent-msg-content {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .ai-agent-input-area {
+            padding: 12px;
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 8px;
+            background: white;
+        }
+
+        .ai-agent-input-area input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-family: var(--font);
+        }
+
+        .ai-agent-input-area input:focus { outline: none; border-color: var(--color-primary); }
+
+        .ai-agent-input-area button {
+            padding: 10px 16px;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .ai-agent-input-area button:hover { background: var(--color-accent-hover); }
+
+        .api-key-prompt {
+            padding: 20px;
+            text-align: center;
+            color: var(--color-text-secondary);
+            font-size: 13px;
+        }
+
+        .api-key-prompt input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+            .ai-agent-panel { width: calc(100% - 32px); right: 16px; bottom: 90px; }
+            .ai-agent-btn { width: 52px; height: 52px; font-size: 22px; right: 16px; bottom: 16px; }
+        }
+
         .slip-header { text-align: center; border-bottom: 3px solid var(--color-text); padding-bottom: 16px; margin-bottom: 20px; }
         .slip-header h1 { font-size: 18px; }
         .slip-header p { font-size: 13px; color: var(--color-text-secondary); }
@@ -612,6 +853,73 @@
         </div>
 
         <div class="calc-card">
+            <!-- Config Panel -->
+            <div class="config-panel">
+                <div class="config-header" onclick="toggleConfig()">
+                    <span>⚙ Pengaturan Perhitungan</span>
+                    <span id="configArrow">▼</span>
+                </div>
+                <div class="config-body" id="configBody">
+                    <div class="config-section-title">Siapa Bayar?</div>
+                    <div class="config-row">
+                        <span class="config-label">PPh 21</span>
+                        <select class="config-select" id="cfgPph21Payer" onchange="updateConfig()">
+                            <option value="employee">Karyawan</option>
+                            <option value="company">Perusahaan (Gross-up)</option>
+                        </select>
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">BPJS Kesehatan</span>
+                        <select class="config-select" id="cfgBpjsKesPayer" onchange="updateConfig()">
+                            <option value="employee">Karyawan</option>
+                            <option value="company">Perusahaan</option>
+                        </select>
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">BPJS JHT</span>
+                        <select class="config-select" id="cfgBpjsJhtPayer" onchange="updateConfig()">
+                            <option value="employee">Karyawan</option>
+                            <option value="company">Perusahaan</option>
+                        </select>
+                    </div>
+                    <div class="config-row">
+                        <span class="config-label">BPJS JP</span>
+                        <select class="config-select" id="cfgBpjsJpPayer" onchange="updateConfig()">
+                            <option value="employee">Karyawan</option>
+                            <option value="company">Perusahaan</option>
+                        </select>
+                    </div>
+
+                    <div class="config-section-title">THR (Tunjangan Hari Raya)</div>
+                    <div class="config-row">
+                        <label class="config-checkbox">
+                            <input type="checkbox" id="cfgIncludeTHR" onchange="updateConfig()">
+                            <span>Hitung THR</span>
+                        </label>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:13px;color:var(--color-text-secondary)">Masa kerja:</span>
+                            <input type="number" class="config-input" id="cfgTenureMonths" value="12" min="1" max="120" onchange="updateConfig()">
+                            <span style="font-size:13px">bln</span>
+                        </div>
+                    </div>
+
+                    <div class="config-section-title">Reverse Engineering</div>
+                    <div class="config-row">
+                        <label class="config-checkbox">
+                            <input type="checkbox" id="cfgReverseMode" onchange="updateConfig()">
+                            <span>Hitung jam lembur dari target net</span>
+                        </label>
+                    </div>
+                    <div class="config-row" id="targetNetRow" style="display:none">
+                        <span class="config-label">Target Take-Home:</span>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:13px">Rp</span>
+                            <input type="number" class="config-input" id="cfgTargetNet" value="10000000" style="width:140px" onchange="updateConfig()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="quick-examples">
                 <span class="quick-label" id="quickLabel">Contoh:</span>
                 <button class="example-btn" onclick="fillExample('Budi, gaji 8 jt, Jakarta, lembur 20 jam, ada NPWP')">Budi - Jakarta</button>
@@ -934,6 +1242,30 @@
     </div>
 </div>
 
+<!-- ============ AI AGENT WIDGET ============ -->
+<button class="ai-agent-btn" onclick="toggleAgentPanel()" title="Tanya AI Assistant">💬</button>
+
+<div class="ai-agent-panel" id="agentPanel">
+    <div class="ai-agent-header">
+        <h4>🤖 Gaji.AI Assistant</h4>
+        <div class="ai-agent-header-btns">
+            <button class="ai-agent-header-btn" onclick="showApiKeyPrompt()" title="API Key Settings">⚙</button>
+            <button class="ai-agent-header-btn" onclick="toggleAgentPanel()" title="Tutup">✕</button>
+        </div>
+    </div>
+    <div class="ai-agent-messages" id="agentMessages">
+        <div class="ai-agent-msg ai">
+            <div class="ai-agent-msg-content">
+                Halo! Saya AI Assistant Gaji.AI. Tanya apa saja tentang payroll Indonesia: PPh 21, BPJS, lembur, THR, atau fitur Gaji.AI. 🇮🇩
+            </div>
+        </div>
+    </div>
+    <div class="ai-agent-input-area">
+        <input type="text" id="agentInput" placeholder="Tanya tentang payroll..." onkeydown="if(event.key==='Enter')sendAgentMessage()">
+        <button onclick="sendAgentMessage()">Kirim</button>
+    </div>
+</div>
+
 <!-- ============ JAVASCRIPT ============ -->
 <script>
 'use strict';
@@ -1174,6 +1506,50 @@ let calcCount = parseInt(localStorage.getItem('gaji_calc_count') || '0');
 let currentCalc = null;
 let currentLang = 'id';
 
+// Config state
+let calcConfig = {
+    pph21Payer: 'employee',
+    bpjsKesPayer: 'employee',
+    bpjsJhtPayer: 'employee',
+    bpjsJpPayer: 'employee',
+    includeTHR: false,
+    tenureMonths: 12,
+    reverseMode: false,
+    targetNet: 10000000
+};
+
+// AI Agent state
+const GEMINI_API_KEY = 'AIzaSyC6wFKJ3eR6bYGTlQjwx5Nv8o6xwmhK9GI';
+let agentConversation = [];
+
+const GEMINI_SYSTEM_PROMPT = `Kamu adalah Gaji.AI, asisten payroll AI untuk bisnis Indonesia.
+
+Peranmu:
+1. Menjawab pertanyaan tentang hukum penggajian Indonesia (PPh 21, BPJS, lembur, THR, UMP/UMK)
+2. Membantu pengguna memahami perhitungan gaji
+3. Merekomendasikan paket Gaji.AI yang sesuai kebutuhan
+4. Ramah, profesional, dan membantu
+
+Pengetahuan utama:
+- PPh 21 menggunakan sistem TER sejak Januari 2024 (PP 58/2023, PMK 168/2023)
+- BPJS Kesehatan: 1% karyawan, 4% perusahaan (cap Rp 12 juta)
+- BPJS JHT: 2% karyawan, 3.7% perusahaan
+- BPJS JP: 1% karyawan, 2% perusahaan (cap Rp 10.547.400)
+- JKK: 0.24%-1.74% perusahaan (tergantung risiko)
+- JKM: 0.3% perusahaan
+- Lembur: formula 1/173, jam ke-1 = 1.5x, jam ke-2+ = 2.0x
+- THR: 1 bulan gaji jika masa kerja >= 12 bulan, proporsional jika kurang
+- UMP berbeda per provinsi (38 provinsi di Indonesia)
+- Gross-up: perusahaan menanggung pajak karyawan
+
+Paket harga Gaji.AI:
+1. Sobat Gaji: Rp 3.000/perhitungan (5 gratis)
+2. Gaji Pro: Rp 150.000/bulan (dashboard, unlimited)
+3. Harmony: Rp 300.000/bulan (optimasi pajak, gross-up)
+4. Architect: Rp 500.000/bulan (HRIS, reverse engineering)
+
+Jawab singkat tapi membantu. Gunakan bahasa yang sama dengan pengguna.`;
+
 // ===================================================================
 // 5. COMPLIANCE ENGINE — CORE CALCULATIONS
 // ===================================================================
@@ -1241,35 +1617,124 @@ function calcOvertime(baseSalary, hours) {
 }
 
 /**
- * Full payroll calculation
+ * Calculate THR (Tunjangan Hari Raya / 13th month salary)
+ * Full salary if tenure >= 12 months, proportional otherwise
  */
-function calculatePayroll(data) {
+function calcTHR(baseSalary, tenureMonths) {
+    if (tenureMonths < 1) return 0;
+    if (tenureMonths >= 12) return baseSalary;
+    return Math.round(baseSalary * tenureMonths / 12);
+}
+
+/**
+ * Gross-up calculation: find gross salary for desired net
+ * Uses iterative approach
+ */
+function calcGrossUp(desiredNet, ptkpStatus, hasNPWP) {
+    let gross = desiredNet;
+    for (let i = 0; i < 100; i++) {
+        const bpjs = calcBPJS(gross);
+        const empBPJS = bpjs.empKesehatan + bpjs.empJHT + bpjs.empJP;
+        const pph21 = calcPPh21(gross, ptkpStatus, hasNPWP);
+        const actualNet = gross - pph21 - empBPJS;
+        const diff = desiredNet - actualNet;
+        if (Math.abs(diff) < 100) break;
+        gross += diff * 0.9;
+    }
+    return Math.round(gross);
+}
+
+/**
+ * Reverse engineer: find overtime hours needed for target net
+ */
+function reverseEngineerOvertime(targetNet, baseSalary, ptkpStatus, hasNPWP) {
+    // Check if achievable with no overtime
+    const baseCalc = calculatePayroll({
+        baseSalary, overtime: 0, ptkp: ptkpStatus, hasNPWP,
+        name: '', region: '', regionLabel: '', regionUMP: 0
+    });
+
+    if (baseCalc.net >= targetNet) {
+        return { hours: 0, message: 'Target sudah tercapai tanpa lembur', calc: baseCalc };
+    }
+
+    // Binary search for overtime hours
+    let low = 0, high = 200;
+    let bestCalc = baseCalc;
+
+    for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2;
+        const calc = calculatePayroll({
+            baseSalary, overtime: mid, ptkp: ptkpStatus, hasNPWP,
+            name: '', region: '', regionLabel: '', regionUMP: 0
+        });
+        bestCalc = calc;
+
+        if (Math.abs(calc.net - targetNet) < 5000) {
+            return { hours: Math.round(mid * 10) / 10, message: null, calc };
+        }
+
+        if (calc.net < targetNet) low = mid;
+        else high = mid;
+    }
+
+    return { hours: Math.round(high * 10) / 10, message: null, calc: bestCalc };
+}
+
+/**
+ * Full payroll calculation with config support
+ */
+function calculatePayroll(data, config = calcConfig) {
     const ot = calcOvertime(data.baseSalary, data.overtime);
-    const gross = data.baseSalary + ot.total;
+    let gross = data.baseSalary + ot.total;
     const bpjs = calcBPJS(data.baseSalary);
+
+    // THR calculation
+    let thr = 0;
+    if (config.includeTHR) {
+        thr = calcTHR(data.baseSalary, config.tenureMonths);
+        gross += thr;
+    }
+
     const pph21 = calcPPh21(gross, data.ptkp, data.hasNPWP);
 
-    const totalEmpDeductions = pph21 + bpjs.empKesehatan + bpjs.empJHT + bpjs.empJP;
+    // Calculate employee deductions based on who-pays config
+    let empPPh21 = config.pph21Payer === 'employee' ? pph21 : 0;
+    let empKes = config.bpjsKesPayer === 'employee' ? bpjs.empKesehatan : 0;
+    let empJHT = config.bpjsJhtPayer === 'employee' ? bpjs.empJHT : 0;
+    let empJP = config.bpjsJpPayer === 'employee' ? bpjs.empJP : 0;
+
+    const totalEmpDeductions = empPPh21 + empKes + empJHT + empJP;
     const net = gross - totalEmpDeductions;
-    const companyCost = gross + bpjs.coKesehatan + bpjs.coJHT + bpjs.coJP + bpjs.coJKK + bpjs.coJKM;
+
+    // Company cost includes their portion + anything they cover for employee
+    let companyCost = gross + bpjs.coKesehatan + bpjs.coJHT + bpjs.coJP + bpjs.coJKK + bpjs.coJKM;
+    if (config.pph21Payer === 'company') companyCost += pph21;
+    if (config.bpjsKesPayer === 'company') companyCost += bpjs.empKesehatan;
+    if (config.bpjsJhtPayer === 'company') companyCost += bpjs.empJHT;
+    if (config.bpjsJpPayer === 'company') companyCost += bpjs.empJP;
 
     // Harmony calculation: restructure to 70% base + 30% allowances
-    const harmBase = Math.round(gross * 0.70);
-    const harmAllow = gross - harmBase;
+    const harmBase = Math.round((data.baseSalary + ot.total) * 0.70);
+    const harmAllow = (data.baseSalary + ot.total) - harmBase;
     const harmBPJS = calcBPJS(harmBase);
-    const harmPPh21 = calcPPh21(harmBase, data.ptkp, data.hasNPWP);
+    const harmPPh21 = calcPPh21(harmBase + thr, data.ptkp, data.hasNPWP);
     const harmTotalDeductions = harmPPh21 + harmBPJS.empKesehatan + harmBPJS.empJHT + harmBPJS.empJP;
     const harmNet = gross - harmTotalDeductions;
 
     return {
         input: data,
         overtime: ot,
+        thr,
         gross,
         pph21,
+        pph21Employee: empPPh21,
         bpjs,
+        bpjsEmployee: { kesehatan: empKes, jht: empJHT, jp: empJP },
         totalDeductions: totalEmpDeductions,
         net,
         companyCost,
+        config,
         harmony: {
             baseSalary: harmBase,
             allowances: harmAllow,
@@ -1388,21 +1853,51 @@ function addChatMessage(html, isUser) {
 
 function displayResults(calc) {
     const s = (id, val) => { document.getElementById(id).textContent = formatIDR(val); };
+    const cfg = calc.config || calcConfig;
 
     // Standard
     s('valGross', calc.gross);
     s('valDeductions', calc.totalDeductions);
     s('valNet', calc.net);
     s('valCost', calc.companyCost);
-    s('brkPPh21', calc.pph21);
-    s('brkBpjsKes', calc.bpjs.empKesehatan);
-    s('brkJHT', calc.bpjs.empJHT);
-    s('brkJP', calc.bpjs.empJP);
+
+    // PPh 21 with who-pays indicator
+    const pph21Label = cfg.pph21Payer === 'company' ? 'PPh 21 (TER) - Ditanggung Perusahaan' : 'PPh 21 (TER)';
+    document.getElementById('brkPPh21').parentElement.querySelector('.label').textContent = pph21Label;
+    s('brkPPh21', calc.pph21Employee !== undefined ? calc.pph21Employee : calc.pph21);
+
+    // BPJS with who-pays indicators
+    const kesLabel = cfg.bpjsKesPayer === 'company' ? 'BPJS Kesehatan - Ditanggung Perusahaan' : 'BPJS Kesehatan (1%)';
+    document.getElementById('brkBpjsKes').parentElement.querySelector('.label').textContent = kesLabel;
+    s('brkBpjsKes', calc.bpjsEmployee ? calc.bpjsEmployee.kesehatan : calc.bpjs.empKesehatan);
+
+    const jhtLabel = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT - Ditanggung Perusahaan' : 'BPJS TK - JHT (2%)';
+    document.getElementById('brkJHT').parentElement.querySelector('.label').textContent = jhtLabel;
+    s('brkJHT', calc.bpjsEmployee ? calc.bpjsEmployee.jht : calc.bpjs.empJHT);
+
+    const jpLabel = cfg.bpjsJpPayer === 'company' ? 'BPJS JP - Ditanggung Perusahaan' : 'BPJS TK - JP (1%)';
+    document.getElementById('brkJP').parentElement.querySelector('.label').textContent = jpLabel;
+    s('brkJP', calc.bpjsEmployee ? calc.bpjsEmployee.jp : calc.bpjs.empJP);
+
     s('brkCKes', calc.bpjs.coKesehatan);
     s('brkCJHT', calc.bpjs.coJHT);
     s('brkCJP', calc.bpjs.coJP);
     s('brkCJKK', calc.bpjs.coJKK);
     s('brkCJKM', calc.bpjs.coJKM);
+
+    // THR breakdown (add if exists)
+    if (calc.thr > 0) {
+        let thrRow = document.getElementById('brkTHR');
+        if (!thrRow) {
+            const deductBreakdown = document.getElementById('brkPPh21').closest('.breakdown');
+            const thrDiv = document.createElement('div');
+            thrDiv.className = 'breakdown-item';
+            thrDiv.innerHTML = '<span class="label">THR (Tunjangan Hari Raya)</span><span class="amount" id="brkTHR">-</span>';
+            deductBreakdown.insertBefore(thrDiv, deductBreakdown.querySelector('h3').nextSibling);
+            thrRow = document.getElementById('brkTHR');
+        }
+        s('brkTHR', calc.thr);
+    }
 
     // Overtime breakdown
     const otBlock = document.getElementById('overtimeBreakdown');
@@ -1454,13 +1949,42 @@ function sendMessage() {
             return;
         }
 
+        // Handle reverse engineering mode
+        if (calcConfig.reverseMode) {
+            const result = reverseEngineerOvertime(
+                calcConfig.targetNet,
+                parsed.baseSalary,
+                parsed.ptkp,
+                parsed.hasNPWP
+            );
+
+            currentCalc = result.calc;
+            currentCalc.input = { ...parsed, overtime: result.hours };
+
+            let response = `&#128736; <strong>Reverse Engineering Selesai!</strong><br><br>`;
+            response += `&#127919; Target Take-Home: ${formatIDR(calcConfig.targetNet)}<br>`;
+            response += `&#128176; Gaji Pokok: ${formatIDR(parsed.baseSalary)}<br><br>`;
+
+            if (result.message) {
+                response += `&#10003; ${result.message}<br>`;
+            } else {
+                response += `&#9200; <strong>Jam lembur diperlukan: ${result.hours} jam</strong><br>`;
+                response += `&#128181; Hasil Take-Home: ${formatIDR(result.calc.net)}<br>`;
+            }
+
+            addChatMessage(response, false);
+            displayResults(currentCalc);
+            showSendBtn();
+            return;
+        }
+
         // Check UMP
         let umpWarning = '';
         if (parsed.regionUMP && parsed.baseSalary < parsed.regionUMP) {
             umpWarning = `<br><br><strong style="color:#ef4444">&#9888; Peringatan:</strong> Gaji ${formatIDR(parsed.baseSalary)} di bawah UMP ${parsed.regionLabel} (${formatIDR(parsed.regionUMP)}). Ini melanggar ketentuan upah minimum.`;
         }
 
-        currentCalc = calculatePayroll(parsed);
+        currentCalc = calculatePayroll(parsed, calcConfig);
 
         // Update free counter
         calcCount++;
@@ -1476,8 +2000,17 @@ function sendMessage() {
         if (parsed.overtime > 0) {
             response += `&#9200; Lembur: ${parsed.overtime} jam (+${formatIDR(currentCalc.overtime.total)})<br>`;
         }
+        if (currentCalc.thr > 0) {
+            response += `&#127873; THR: ${formatIDR(currentCalc.thr)} (masa kerja ${calcConfig.tenureMonths} bulan)<br>`;
+        }
         response += `&#128203; PTKP: ${parsed.ptkp} (TER Kategori ${terCat}, rate ${(terRate * 100).toFixed(2)}%)<br>`;
         response += `&#128203; NPWP: ${parsed.hasNPWP ? 'Ada' : 'Tidak ada (+20% pajak)'}<br>`;
+
+        // Show who-pays config if not default
+        if (calcConfig.pph21Payer === 'company') {
+            response += `&#127974; PPh 21 ditanggung perusahaan (Gross-up)<br>`;
+        }
+
         response += `<br>&#128181; <strong>Take-Home Pay: ${formatIDR(currentCalc.net)}</strong>`;
         response += `<br>&#10024; Harmoni Optimal: ${formatIDR(currentCalc.harmony.net)} (+${formatIDR(currentCalc.harmony.savings)})`;
         response += umpWarning;
@@ -1640,7 +2173,111 @@ function setLang(lang) {
 }
 
 // ===================================================================
-// 10. INITIALIZATION
+// 10. CONFIG PANEL
+// ===================================================================
+
+function toggleConfig() {
+    const body = document.getElementById('configBody');
+    const arrow = document.getElementById('configArrow');
+    body.classList.toggle('open');
+    arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function updateConfig() {
+    calcConfig.pph21Payer = document.getElementById('cfgPph21Payer').value;
+    calcConfig.bpjsKesPayer = document.getElementById('cfgBpjsKesPayer').value;
+    calcConfig.bpjsJhtPayer = document.getElementById('cfgBpjsJhtPayer').value;
+    calcConfig.bpjsJpPayer = document.getElementById('cfgBpjsJpPayer').value;
+    calcConfig.includeTHR = document.getElementById('cfgIncludeTHR').checked;
+    calcConfig.tenureMonths = parseInt(document.getElementById('cfgTenureMonths').value) || 12;
+    calcConfig.reverseMode = document.getElementById('cfgReverseMode').checked;
+    calcConfig.targetNet = parseInt(document.getElementById('cfgTargetNet').value) || 10000000;
+
+    // Show/hide target net input
+    document.getElementById('targetNetRow').style.display = calcConfig.reverseMode ? 'flex' : 'none';
+}
+
+// ===================================================================
+// 11. AI AGENT
+// ===================================================================
+
+function toggleAgentPanel() {
+    const panel = document.getElementById('agentPanel');
+    panel.classList.toggle('open');
+}
+
+function showApiKeyPrompt() {
+    const currentKey = localStorage.getItem('gaji_gemini_key') || GEMINI_API_KEY;
+    const newKey = prompt('Masukkan Google AI Studio API Key:', currentKey);
+    if (newKey) {
+        localStorage.setItem('gaji_gemini_key', newKey);
+        alert('API Key tersimpan!');
+    }
+}
+
+function addAgentMessage(text, isUser) {
+    const container = document.getElementById('agentMessages');
+    const div = document.createElement('div');
+    div.className = 'ai-agent-msg ' + (isUser ? 'user' : 'ai');
+    div.innerHTML = `<div class="ai-agent-msg-content">${text}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+async function sendAgentMessage() {
+    const input = document.getElementById('agentInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addAgentMessage(text, true);
+    input.value = '';
+
+    // Show typing indicator
+    addAgentMessage('<em>Mengetik...</em>', false);
+
+    try {
+        const apiKey = localStorage.getItem('gaji_gemini_key') || GEMINI_API_KEY;
+
+        agentConversation.push({ role: 'user', parts: [{ text }] });
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: agentConversation,
+                systemInstruction: { parts: [{ text: GEMINI_SYSTEM_PROMPT }] },
+                generationConfig: { maxOutputTokens: 800, temperature: 0.7 }
+            })
+        });
+
+        // Remove typing indicator
+        const msgs = document.getElementById('agentMessages');
+        msgs.removeChild(msgs.lastChild);
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error?.message || 'API error');
+        }
+
+        const data = await response.json();
+        const reply = data.candidates[0].content.parts[0].text;
+        agentConversation.push({ role: 'model', parts: [{ text: reply }] });
+
+        // Format markdown-like text
+        const formatted = reply
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        addAgentMessage(formatted, false);
+    } catch (error) {
+        const msgs = document.getElementById('agentMessages');
+        if (msgs.lastChild) msgs.removeChild(msgs.lastChild);
+        agentConversation.pop();
+        addAgentMessage(`Error: ${error.message}`, false);
+    }
+}
+
+// ===================================================================
+// 12. INITIALIZATION
 // ===================================================================
 
 document.getElementById('userInput').addEventListener('keydown', function(e) {
@@ -1648,6 +2285,7 @@ document.getElementById('userInput').addEventListener('keydown', function(e) {
 });
 
 updateFreeCounter();
+updateConfig();
 </script>
 
 </body>
