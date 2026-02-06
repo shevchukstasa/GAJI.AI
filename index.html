@@ -374,8 +374,10 @@
         .breakdown h3 { margin-bottom: 12px; font-size: 15px; }
 
         .breakdown-item {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 12px;
+            align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid var(--color-border);
             font-size: 14px;
@@ -383,7 +385,20 @@
 
         .breakdown-item:last-child { border-bottom: none; }
         .breakdown-item .label { color: var(--color-text-secondary); }
-        .breakdown-item .amount { font-weight: 600; }
+        .breakdown-item .amount { font-weight: 600; min-width: 100px; text-align: right; }
+        .breakdown-item .note {
+            font-size: 12px;
+            color: #059669;
+            background: #d1fae5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            min-width: 120px;
+            text-align: center;
+        }
+        .breakdown-item .note.employee {
+            color: #dc2626;
+            background: #fee2e2;
+        }
 
         .hint-box {
             margin-top: 16px;
@@ -1718,19 +1733,19 @@
 
                     <div class="breakdown">
                         <h3 id="brkDeductTitle">Rincian Potongan Karyawan</h3>
-                        <div class="breakdown-item"><span class="label">PPh 21 (TER)</span><span class="amount" id="brkPPh21">-</span></div>
-                        <div class="breakdown-item"><span class="label">BPJS Kesehatan (1%)</span><span class="amount" id="brkBpjsKes">-</span></div>
-                        <div class="breakdown-item"><span class="label">BPJS TK - JHT (2%)</span><span class="amount" id="brkJHT">-</span></div>
-                        <div class="breakdown-item"><span class="label">BPJS TK - JP (1%)</span><span class="amount" id="brkJP">-</span></div>
+                        <div class="breakdown-item"><span class="label">PPh 21 (TER)</span><span class="amount" id="brkPPh21">-</span><span class="note" id="notePPh21">Dibayar Perusahaan</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS Kesehatan (1%)</span><span class="amount" id="brkBpjsKes">-</span><span class="note employee" id="noteBpjsKes">Potong Gaji</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JHT (2%)</span><span class="amount" id="brkJHT">-</span><span class="note employee" id="noteJHT">Potong Gaji</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JP (1%)</span><span class="amount" id="brkJP">-</span><span class="note employee" id="noteJP">Potong Gaji</span></div>
                     </div>
 
                     <div class="breakdown">
                         <h3 id="brkCompanyTitle">Kontribusi Perusahaan</h3>
-                        <div class="breakdown-item"><span class="label">BPJS Kesehatan (4%)</span><span class="amount" id="brkCKes">-</span></div>
-                        <div class="breakdown-item"><span class="label">BPJS TK - JHT (3.7%)</span><span class="amount" id="brkCJHT">-</span></div>
-                        <div class="breakdown-item"><span class="label">BPJS TK - JP (2%)</span><span class="amount" id="brkCJP">-</span></div>
-                        <div class="breakdown-item"><span class="label">JKK (0.54%)</span><span class="amount" id="brkCJKK">-</span></div>
-                        <div class="breakdown-item"><span class="label">JKM (0.3%)</span><span class="amount" id="brkCJKM">-</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS Kesehatan (4%)</span><span class="amount" id="brkCKes">-</span><span class="note" id="noteCKes">Dibayar Perusahaan</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JHT (3.7%)</span><span class="amount" id="brkCJHT">-</span><span class="note" id="noteCJHT">Dibayar Perusahaan</span></div>
+                        <div class="breakdown-item"><span class="label">BPJS TK - JP (2%)</span><span class="amount" id="brkCJP">-</span><span class="note" id="noteCJP">Dibayar Perusahaan</span></div>
+                        <div class="breakdown-item"><span class="label">JKK (0.54%)</span><span class="amount" id="brkCJKK">-</span><span class="note" id="noteCJKK">Dibayar Perusahaan</span></div>
+                        <div class="breakdown-item"><span class="label">JKM (0.3%)</span><span class="amount" id="brkCJKM">-</span><span class="note" id="noteCJKM">Dibayar Perusahaan</span></div>
                     </div>
 
                     <div class="breakdown" id="overtimeBreakdown" style="display:none">
@@ -2559,6 +2574,9 @@ async function incrementSupabaseUsage() {
         localStorage.setItem('gaji_calc_count', calcCount.toString());
         supabaseUsage.count = calcCount;
         supabaseUsage.existing = true;
+
+        // Refresh global stats display
+        fetchGlobalStats();
     } catch (error) {
         console.error('Supabase increment error:', error);
     }
