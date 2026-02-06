@@ -2930,6 +2930,9 @@ function toggleBpjsCompensation() {
 }
 
 async function submitForm() {
+    // Ensure config is up-to-date (in case onchange didn't fire)
+    updateConfig();
+
     // Check usage limit before calculating
     const canCalculate = await checkLimitBeforeCalc();
     if (!canCalculate) return;
@@ -2994,8 +2997,12 @@ async function submitForm() {
 
         // Update data with calculated overtime hours
         data.overtime = result.hours;
-        currentCalc = result.calc;
-        currentCalc.input = data;
+
+        // Update the form field to show calculated overtime
+        document.getElementById('formOvertime').value = result.hours;
+
+        // Recalculate with full data and config (the result.calc uses minimal data)
+        currentCalc = calculatePayroll(data, calcConfig);
 
         // Store allowances info for display
         currentCalc.allowances = { meal, transport, other, total: totalAllowances };
@@ -3015,8 +3022,8 @@ async function submitForm() {
             response += `ℹ️ ${result.message}<br>`;
         } else {
             response += `⏰ <strong>Jam lembur diperlukan: ${result.hours} jam</strong><br>`;
-            response += `💵 Nilai lembur: ${formatIDR(result.calc.overtime.total)}<br>`;
-            response += `✅ Hasil Take-Home: ${formatIDR(result.calc.net)}<br>`;
+            response += `💵 Nilai lembur: ${formatIDR(currentCalc.overtime.total)}<br>`;
+            response += `✅ Hasil Take-Home: ${formatIDR(currentCalc.net)}<br>`;
         }
 
         addChatMessage(response, false);
