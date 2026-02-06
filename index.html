@@ -1075,6 +1075,10 @@
             <div class="form-input-container" id="formModeContainer">
                 <div class="form-grid">
                     <div class="form-group">
+                        <label id="formLblCompany">Nama Perusahaan</label>
+                        <input type="text" id="formCompany" placeholder="PT Example Indonesia">
+                    </div>
+                    <div class="form-group">
                         <label id="formLblName">Nama Karyawan</label>
                         <input type="text" id="formName" placeholder="Contoh: Budi">
                     </div>
@@ -1105,14 +1109,14 @@
                     <div class="form-group">
                         <label id="formLblPtkp">Status PTKP (untuk PPh 21)</label>
                         <select id="formPtkp">
-                            <option value="TK/0">TK/0 - Tidak Kawin, tanpa tanggungan</option>
-                            <option value="TK/1">TK/1 - Tidak Kawin, 1 tanggungan</option>
-                            <option value="TK/2">TK/2 - Tidak Kawin, 2 tanggungan</option>
-                            <option value="TK/3">TK/3 - Tidak Kawin, 3 tanggungan</option>
-                            <option value="K/0">K/0 - Kawin, tanpa tanggungan anak</option>
-                            <option value="K/1">K/1 - Kawin, 1 anak</option>
-                            <option value="K/2">K/2 - Kawin, 2 anak</option>
-                            <option value="K/3">K/3 - Kawin, 3 anak</option>
+                            <option value="TK/0" id="ptkpTK0">TK/0 - Tidak Kawin, tanpa tanggungan</option>
+                            <option value="TK/1" id="ptkpTK1">TK/1 - Tidak Kawin, 1 tanggungan</option>
+                            <option value="TK/2" id="ptkpTK2">TK/2 - Tidak Kawin, 2 tanggungan</option>
+                            <option value="TK/3" id="ptkpTK3">TK/3 - Tidak Kawin, 3 tanggungan</option>
+                            <option value="K/0" id="ptkpK0">K/0 - Kawin, tanpa tanggungan anak</option>
+                            <option value="K/1" id="ptkpK1">K/1 - Kawin, 1 anak</option>
+                            <option value="K/2" id="ptkpK2">K/2 - Kawin, 2 anak</option>
+                            <option value="K/3" id="ptkpK3">K/3 - Kawin, 3 anak</option>
                         </select>
                         <span class="hint" id="formPtkpHint">TK = Tidak Kawin, K = Kawin. Angka = jumlah tanggungan.</span>
                     </div>
@@ -1124,6 +1128,16 @@
                         <input type="checkbox" id="formNpwp" checked>
                         <label for="formNpwp" id="formLblNpwp">Punya NPWP</label>
                         <span class="hint" id="formNpwpHint">(Tanpa NPWP = +20% pajak)</span>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="formOwnBpjs" onchange="toggleBpjsCompensation()">
+                        <label for="formOwnBpjs" id="formLblOwnBpjs">BPJS Mandiri (punya sendiri)</label>
+                        <span class="hint" id="formOwnBpjsHint">(Tidak ikut BPJS perusahaan)</span>
+                    </div>
+                    <div class="form-group" id="bpjsCompensationGroup" style="display:none">
+                        <label id="formLblBpjsComp">Kompensasi BPJS ke Karyawan (Rp)</label>
+                        <input type="number" id="formBpjsCompensation" placeholder="0" min="0" value="0">
+                        <span class="hint" id="formBpjsCompHint">Tunjangan pengganti BPJS</span>
                     </div>
                     <div class="form-group">
                         <label id="formLblMeal">Tunjangan Makan (Rp)</label>
@@ -1410,10 +1424,10 @@
     </table>
     <h3 style="margin:16px 0 8px">Potongan</h3>
     <table class="slip-table">
-        <tr><td class="label-col">PPh 21</td><td id="slipPPh21">-</td></tr>
-        <tr><td class="label-col">BPJS Kesehatan (1%)</td><td id="slipBpjsKes">-</td></tr>
-        <tr><td class="label-col">BPJS JHT (2%)</td><td id="slipJHT">-</td></tr>
-        <tr><td class="label-col">BPJS JP (1%)</td><td id="slipJP">-</td></tr>
+        <tr><td class="label-col" id="slipPPh21Label">PPh 21</td><td id="slipPPh21">-</td></tr>
+        <tr><td class="label-col" id="slipBpjsKesLabel">BPJS Kesehatan (1%)</td><td id="slipBpjsKes">-</td></tr>
+        <tr><td class="label-col" id="slipJHTLabel">BPJS JHT (2%)</td><td id="slipJHT">-</td></tr>
+        <tr><td class="label-col" id="slipJPLabel">BPJS JP (1%)</td><td id="slipJP">-</td></tr>
         <tr><td class="label-col"><strong>Total Potongan</strong></td><td id="slipTotalPot"><strong>-</strong></td></tr>
     </table>
     <div class="slip-total" id="slipNetTotal">TAKE HOME PAY: -</div>
@@ -1700,7 +1714,9 @@ let calcConfig = {
     includeTHR: false,
     tenureMonths: 12,
     reverseMode: false,
-    targetNet: 10000000
+    targetNet: 10000000,
+    ownBpjs: false,
+    bpjsCompensation: 0
 };
 
 // AI Agent state
@@ -1987,7 +2003,19 @@ function reverseEngineerOvertime(targetNet, baseSalary, ptkpStatus, hasNPWP) {
 function calculatePayroll(data, config = calcConfig) {
     const ot = calcOvertime(data.baseSalary, data.overtime);
     let gross = data.baseSalary + ot.total;
-    const bpjs = calcBPJS(data.baseSalary);
+
+    // BPJS: either calculate or use zero if employee has own BPJS
+    let bpjs;
+    if (config.ownBpjs) {
+        // Employee has personal BPJS - no company BPJS calculation
+        bpjs = { empKesehatan: 0, empJHT: 0, empJP: 0, coKesehatan: 0, coJHT: 0, coJP: 0, coJKK: 0, coJKM: 0 };
+        // Add compensation to gross
+        if (config.bpjsCompensation > 0) {
+            gross += config.bpjsCompensation;
+        }
+    } else {
+        bpjs = calcBPJS(data.baseSalary);
+    }
 
     // THR calculation
     let thr = 0;
@@ -2162,20 +2190,22 @@ function displayResults(calc) {
     s('valCost', calc.companyCost);
 
     // PPh 21 with who-pays indicator
-    const pph21Label = cfg.pph21Payer === 'company' ? 'PPh 21 (TER) - Ditanggung Perusahaan' : 'PPh 21 (TER)';
+    const isEn = currentLang === 'en';
+    const paidByCompany = isEn ? ' (Paid by Employer)' : ' (Ditanggung Perusahaan)';
+    const pph21Label = cfg.pph21Payer === 'company' ? 'PPh 21 (TER)' + paidByCompany : 'PPh 21 (TER)';
     document.getElementById('brkPPh21').parentElement.querySelector('.label').textContent = pph21Label;
     s('brkPPh21', calc.pph21Employee !== undefined ? calc.pph21Employee : calc.pph21);
 
     // BPJS with who-pays indicators
-    const kesLabel = cfg.bpjsKesPayer === 'company' ? 'BPJS Kesehatan - Ditanggung Perusahaan' : 'BPJS Kesehatan (1%)';
+    const kesLabel = cfg.bpjsKesPayer === 'company' ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompany : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)');
     document.getElementById('brkBpjsKes').parentElement.querySelector('.label').textContent = kesLabel;
     s('brkBpjsKes', calc.bpjsEmployee ? calc.bpjsEmployee.kesehatan : calc.bpjs.empKesehatan);
 
-    const jhtLabel = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT - Ditanggung Perusahaan' : 'BPJS TK - JHT (2%)';
+    const jhtLabel = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompany : 'BPJS TK - JHT (2%)';
     document.getElementById('brkJHT').parentElement.querySelector('.label').textContent = jhtLabel;
     s('brkJHT', calc.bpjsEmployee ? calc.bpjsEmployee.jht : calc.bpjs.empJHT);
 
-    const jpLabel = cfg.bpjsJpPayer === 'company' ? 'BPJS JP - Ditanggung Perusahaan' : 'BPJS TK - JP (1%)';
+    const jpLabel = cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompany : 'BPJS TK - JP (1%)';
     document.getElementById('brkJP').parentElement.querySelector('.label').textContent = jpLabel;
     s('brkJP', calc.bpjsEmployee ? calc.bpjsEmployee.jp : calc.bpjs.empJP);
 
@@ -2377,6 +2407,12 @@ function switchInputMode(mode) {
     }
 }
 
+function toggleBpjsCompensation() {
+    const checkbox = document.getElementById('formOwnBpjs');
+    const compGroup = document.getElementById('bpjsCompensationGroup');
+    compGroup.style.display = checkbox.checked ? 'block' : 'none';
+}
+
 function submitForm() {
     const name = document.getElementById('formName').value.trim() || 'Karyawan';
     const baseSalary = parseInt(document.getElementById('formSalary').value) || 0;
@@ -2387,6 +2423,10 @@ function submitForm() {
     const meal = parseInt(document.getElementById('formMeal').value) || 0;
     const transport = parseInt(document.getElementById('formTransport').value) || 0;
     const other = parseInt(document.getElementById('formOther').value) || 0;
+
+    // BPJS Mandiri options
+    const ownBpjs = document.getElementById('formOwnBpjs').checked;
+    const bpjsCompensation = parseInt(document.getElementById('formBpjsCompensation').value) || 0;
 
     if (baseSalary < 100000) {
         alert(currentLang === 'en' ? 'Please enter a valid base salary' : 'Mohon masukkan gaji pokok yang valid');
@@ -2416,6 +2456,10 @@ function submitForm() {
             ? `Warning: Salary Rp ${baseSalary.toLocaleString('id-ID')} is below minimum wage ${regionInfo.label} (Rp ${regionInfo.ump.toLocaleString('id-ID')})`
             : `Peringatan: Gaji Rp ${baseSalary.toLocaleString('id-ID')} di bawah UMP ${regionInfo.label} (Rp ${regionInfo.ump.toLocaleString('id-ID')})`;
     }
+
+    // Update calcConfig with BPJS Mandiri settings
+    calcConfig.ownBpjs = ownBpjs;
+    calcConfig.bpjsCompensation = bpjsCompensation;
 
     currentCalc = calculatePayroll(data, calcConfig);
 
@@ -2477,25 +2521,49 @@ function generateSlipGaji() {
     if (!currentCalc) return alert('Belum ada perhitungan. Hitung gaji dulu!');
 
     const c = currentCalc;
+    const cfg = c.config || calcConfig;
     const now = new Date();
-    const monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const isEn = currentLang === 'en';
+    const monthNames = isEn
+        ? ['January','February','March','April','May','June','July','August','September','October','November','December']
+        : ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
-    document.getElementById('slipCompany').textContent = 'SLIP GAJI KARYAWAN';
-    document.getElementById('slipPeriod').textContent = `Periode: ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-    document.getElementById('slipName').textContent = c.input.name || 'Karyawan';
+    // Company name from form or default
+    const companyName = document.getElementById('formCompany').value.trim();
+    const slipTitle = companyName
+        ? companyName + (isEn ? ' - PAYSLIP' : ' - SLIP GAJI')
+        : (isEn ? 'EMPLOYEE PAYSLIP' : 'SLIP GAJI KARYAWAN');
+    document.getElementById('slipCompany').textContent = slipTitle;
+
+    document.getElementById('slipPeriod').textContent = (isEn ? 'Period: ' : 'Periode: ') + monthNames[now.getMonth()] + ' ' + now.getFullYear();
+    document.getElementById('slipName').textContent = c.input.name || (isEn ? 'Employee' : 'Karyawan');
     document.getElementById('slipRegion').textContent = c.input.regionLabel;
     document.getElementById('slipPTKP').textContent = c.input.ptkp;
-    document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? 'Ada' : 'Tidak Ada';
+    document.getElementById('slipNPWP').textContent = c.input.hasNPWP ? (isEn ? 'Yes' : 'Ada') : (isEn ? 'No' : 'Tidak Ada');
     document.getElementById('slipGajiPokok').textContent = formatIDR(c.input.baseSalary);
     document.getElementById('slipLembur').textContent = formatIDR(c.overtime.total);
     document.getElementById('slipGross').textContent = formatIDR(c.gross);
+
+    // Add "(paid by employer)" indicators
+    const paidByCompany = isEn ? ' (Paid by Employer)' : ' (Ditanggung Perusahaan)';
+
+    document.getElementById('slipPPh21Label').textContent = cfg.pph21Payer === 'company' ? 'PPh 21' + paidByCompany : 'PPh 21';
     document.getElementById('slipPPh21').textContent = formatIDR(c.pph21);
+
+    document.getElementById('slipBpjsKesLabel').textContent = cfg.bpjsKesPayer === 'company'
+        ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompany
+        : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)');
     document.getElementById('slipBpjsKes').textContent = formatIDR(c.bpjs.empKesehatan);
+
+    document.getElementById('slipJHTLabel').textContent = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompany : 'BPJS JHT (2%)';
     document.getElementById('slipJHT').textContent = formatIDR(c.bpjs.empJHT);
+
+    document.getElementById('slipJPLabel').textContent = cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompany : 'BPJS JP (1%)';
     document.getElementById('slipJP').textContent = formatIDR(c.bpjs.empJP);
+
     document.getElementById('slipTotalPot').textContent = formatIDR(c.totalDeductions);
     document.getElementById('slipNetTotal').textContent = 'TAKE HOME PAY: ' + formatIDR(c.net);
-    document.getElementById('slipDate').textContent = now.toLocaleDateString('id-ID');
+    document.getElementById('slipDate').textContent = now.toLocaleDateString(isEn ? 'en-US' : 'id-ID');
 
     window.print();
 }
@@ -2667,6 +2735,29 @@ function setLang(lang) {
     document.getElementById('formLblTransport').textContent = isEn ? 'Transport Allowance (Rp)' : 'Tunjangan Transport (Rp)';
     document.getElementById('formLblOther').textContent = isEn ? 'Other Allowances (Rp)' : 'Tunjangan Lainnya (Rp)';
     document.getElementById('formSubmitBtn').textContent = isEn ? 'Calculate Salary' : 'Hitung Gaji';
+
+    // Company name and BPJS Mandiri fields
+    document.getElementById('formLblCompany').textContent = isEn ? 'Company Name' : 'Nama Perusahaan';
+    document.getElementById('formCompany').placeholder = isEn ? 'PT Example Indonesia' : 'PT Example Indonesia';
+    document.getElementById('formLblOwnBpjs').textContent = isEn ? 'Personal BPJS (own insurance)' : 'BPJS Mandiri (punya sendiri)';
+    document.getElementById('formOwnBpjsHint').textContent = isEn ? '(Not enrolled in company BPJS)' : '(Tidak ikut BPJS perusahaan)';
+    document.getElementById('formLblBpjsComp').textContent = isEn ? 'BPJS Compensation to Employee (Rp)' : 'Kompensasi BPJS ke Karyawan (Rp)';
+    document.getElementById('formBpjsCompHint').textContent = isEn ? 'BPJS substitute allowance' : 'Tunjangan pengganti BPJS';
+
+    // PTKP dropdown options
+    document.getElementById('ptkpTK0').textContent = isEn ? 'TK/0 - Single, no dependents' : 'TK/0 - Tidak Kawin, tanpa tanggungan';
+    document.getElementById('ptkpTK1').textContent = isEn ? 'TK/1 - Single, 1 dependent' : 'TK/1 - Tidak Kawin, 1 tanggungan';
+    document.getElementById('ptkpTK2').textContent = isEn ? 'TK/2 - Single, 2 dependents' : 'TK/2 - Tidak Kawin, 2 tanggungan';
+    document.getElementById('ptkpTK3').textContent = isEn ? 'TK/3 - Single, 3 dependents' : 'TK/3 - Tidak Kawin, 3 tanggungan';
+    document.getElementById('ptkpK0').textContent = isEn ? 'K/0 - Married, no children' : 'K/0 - Kawin, tanpa tanggungan anak';
+    document.getElementById('ptkpK1').textContent = isEn ? 'K/1 - Married, 1 child' : 'K/1 - Kawin, 1 anak';
+    document.getElementById('ptkpK2').textContent = isEn ? 'K/2 - Married, 2 children' : 'K/2 - Kawin, 2 anak';
+    document.getElementById('ptkpK3').textContent = isEn ? 'K/3 - Married, 3 children' : 'K/3 - Kawin, 3 anak';
+
+    // Welcome message
+    document.getElementById('welcomeMessage').innerHTML = isEn
+        ? 'Hello! I am <strong>Gaji.AI</strong>, your payroll assistant.<br><br>Type employee data, for example:<br><em>"Budi, salary 8 million, Jakarta, overtime 20 hours, has NPWP"</em><br><br>I automatically calculate:<br>&#10003; PPh 21 (TER 2024)<br>&#10003; Complete BPJS<br>&#10003; Overtime (1/173)<br>&#10003; Net salary &amp; company cost'
+        : 'Halo! Saya <strong>Gaji.AI</strong>, asisten payroll Anda.<br><br>Ketik data karyawan, misalnya:<br><em>"Budi, gaji 8 juta, Jakarta, lembur 20 jam, ada NPWP"</em><br><br>Saya hitung otomatis:<br>&#10003; PPh 21 (TER 2024)<br>&#10003; BPJS lengkap<br>&#10003; Lembur (1/173)<br>&#10003; Gaji bersih &amp; biaya perusahaan';
 }
 
 // ===================================================================
