@@ -3233,8 +3233,10 @@ function displayResults(calc) {
     const isEn = currentLang === 'en';
     const paidByCompanyText = isEn ? 'Paid by Employer' : 'Dibayar Perusahaan';
     const deductedText = isEn ? 'Deducted' : 'Potong Gaji';
+    const ownBpjsText = isEn ? 'Own BPJS' : 'BPJS Mandiri';
 
     const paidByCompanyLabel = isEn ? ' (Paid by Employer)' : ' (Ditanggung Perusahaan)';
+    const ownBpjsLabel = isEn ? ' (Own BPJS)' : ' (BPJS Mandiri)';
     const pph21Label = cfg.pph21Payer === 'company' ? 'PPh 21 (TER)' + paidByCompanyLabel : 'PPh 21 (TER)';
     document.getElementById('brkPPh21').parentElement.querySelector('.label').textContent = pph21Label;
     s('brkPPh21', calc.pph21);  // Always show actual PPh 21 amount
@@ -3247,34 +3249,65 @@ function displayResults(calc) {
     }
 
     // BPJS with who-pays indicators - always show actual amounts
-    const kesLabel = cfg.bpjsKesPayer === 'company' ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompanyLabel : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)');
+    // If ownBpjs, show "BPJS Mandiri" note
+    const kesLabel = cfg.ownBpjs ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + ownBpjsLabel
+        : (cfg.bpjsKesPayer === 'company' ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompanyLabel : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)'));
     document.getElementById('brkBpjsKes').parentElement.querySelector('.label').textContent = kesLabel;
     s('brkBpjsKes', calc.bpjs.empKesehatan);  // Always show actual amount
 
     const noteBpjsKes = document.getElementById('noteBpjsKes');
     if (noteBpjsKes) {
-        noteBpjsKes.textContent = cfg.bpjsKesPayer === 'company' ? paidByCompanyText : deductedText;
-        noteBpjsKes.className = cfg.bpjsKesPayer === 'company' ? 'note' : 'note employee';
+        if (cfg.ownBpjs) {
+            noteBpjsKes.textContent = ownBpjsText;
+            noteBpjsKes.className = 'note';
+            noteBpjsKes.style.background = '#e0e7ff';
+            noteBpjsKes.style.color = '#4338ca';
+        } else {
+            noteBpjsKes.textContent = cfg.bpjsKesPayer === 'company' ? paidByCompanyText : deductedText;
+            noteBpjsKes.className = cfg.bpjsKesPayer === 'company' ? 'note' : 'note employee';
+            noteBpjsKes.style.background = '';
+            noteBpjsKes.style.color = '';
+        }
     }
 
-    const jhtLabel = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompanyLabel : 'BPJS TK - JHT (2%)';
+    const jhtLabel = cfg.ownBpjs ? 'BPJS JHT' + ownBpjsLabel
+        : (cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompanyLabel : 'BPJS TK - JHT (2%)');
     document.getElementById('brkJHT').parentElement.querySelector('.label').textContent = jhtLabel;
     s('brkJHT', calc.bpjs.empJHT);  // Always show actual amount
 
     const noteJHT = document.getElementById('noteJHT');
     if (noteJHT) {
-        noteJHT.textContent = cfg.bpjsJhtPayer === 'company' ? paidByCompanyText : deductedText;
-        noteJHT.className = cfg.bpjsJhtPayer === 'company' ? 'note' : 'note employee';
+        if (cfg.ownBpjs) {
+            noteJHT.textContent = ownBpjsText;
+            noteJHT.className = 'note';
+            noteJHT.style.background = '#e0e7ff';
+            noteJHT.style.color = '#4338ca';
+        } else {
+            noteJHT.textContent = cfg.bpjsJhtPayer === 'company' ? paidByCompanyText : deductedText;
+            noteJHT.className = cfg.bpjsJhtPayer === 'company' ? 'note' : 'note employee';
+            noteJHT.style.background = '';
+            noteJHT.style.color = '';
+        }
     }
 
-    const jpLabel = cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompanyLabel : 'BPJS TK - JP (1%)';
+    const jpLabel = cfg.ownBpjs ? 'BPJS JP' + ownBpjsLabel
+        : (cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompanyLabel : 'BPJS TK - JP (1%)');
     document.getElementById('brkJP').parentElement.querySelector('.label').textContent = jpLabel;
     s('brkJP', calc.bpjs.empJP);  // Always show actual amount
 
     const noteJP = document.getElementById('noteJP');
     if (noteJP) {
-        noteJP.textContent = cfg.bpjsJpPayer === 'company' ? paidByCompanyText : deductedText;
-        noteJP.className = cfg.bpjsJpPayer === 'company' ? 'note' : 'note employee';
+        if (cfg.ownBpjs) {
+            noteJP.textContent = ownBpjsText;
+            noteJP.className = 'note';
+            noteJP.style.background = '#e0e7ff';
+            noteJP.style.color = '#4338ca';
+        } else {
+            noteJP.textContent = cfg.bpjsJpPayer === 'company' ? paidByCompanyText : deductedText;
+            noteJP.className = cfg.bpjsJpPayer === 'company' ? 'note' : 'note employee';
+            noteJP.style.background = '';
+            noteJP.style.color = '';
+        }
     }
 
     s('brkCKes', calc.bpjs.coKesehatan);
@@ -3653,6 +3686,7 @@ function generateSlipGaji() {
     // Note texts
     const paidByCompanyText = isEn ? 'Paid by Employer' : 'Dibayar Perusahaan';
     const deductedText = isEn ? 'Deducted' : 'Potong Gaji';
+    const ownBpjsText = isEn ? 'Own BPJS' : 'BPJS Mandiri';
 
     // PPh 21
     document.getElementById('slipPPh21Label').textContent = 'PPh 21 (TER)';
@@ -3665,22 +3699,49 @@ function generateSlipGaji() {
     document.getElementById('slipBpjsKesLabel').textContent = isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)';
     document.getElementById('slipBpjsKes').textContent = formatIDR(c.bpjs.empKesehatan);
     const kesNoteEl = document.getElementById('slipBpjsKesNote');
-    kesNoteEl.textContent = cfg.bpjsKesPayer === 'company' ? paidByCompanyText : deductedText;
-    kesNoteEl.className = 'note-col ' + (cfg.bpjsKesPayer === 'company' ? 'company' : 'employee');
+    if (cfg.ownBpjs) {
+        kesNoteEl.textContent = ownBpjsText;
+        kesNoteEl.className = 'note-col';
+        kesNoteEl.style.background = '#e0e7ff';
+        kesNoteEl.style.color = '#4338ca';
+    } else {
+        kesNoteEl.textContent = cfg.bpjsKesPayer === 'company' ? paidByCompanyText : deductedText;
+        kesNoteEl.className = 'note-col ' + (cfg.bpjsKesPayer === 'company' ? 'company' : 'employee');
+        kesNoteEl.style.background = '';
+        kesNoteEl.style.color = '';
+    }
 
     // BPJS JHT
     document.getElementById('slipJHTLabel').textContent = 'BPJS JHT (2%)';
     document.getElementById('slipJHT').textContent = formatIDR(c.bpjs.empJHT);
     const jhtNoteEl = document.getElementById('slipJHTNote');
-    jhtNoteEl.textContent = cfg.bpjsJhtPayer === 'company' ? paidByCompanyText : deductedText;
-    jhtNoteEl.className = 'note-col ' + (cfg.bpjsJhtPayer === 'company' ? 'company' : 'employee');
+    if (cfg.ownBpjs) {
+        jhtNoteEl.textContent = ownBpjsText;
+        jhtNoteEl.className = 'note-col';
+        jhtNoteEl.style.background = '#e0e7ff';
+        jhtNoteEl.style.color = '#4338ca';
+    } else {
+        jhtNoteEl.textContent = cfg.bpjsJhtPayer === 'company' ? paidByCompanyText : deductedText;
+        jhtNoteEl.className = 'note-col ' + (cfg.bpjsJhtPayer === 'company' ? 'company' : 'employee');
+        jhtNoteEl.style.background = '';
+        jhtNoteEl.style.color = '';
+    }
 
     // BPJS JP
     document.getElementById('slipJPLabel').textContent = 'BPJS JP (1%)';
     document.getElementById('slipJP').textContent = formatIDR(c.bpjs.empJP);
     const jpNoteEl = document.getElementById('slipJPNote');
-    jpNoteEl.textContent = cfg.bpjsJpPayer === 'company' ? paidByCompanyText : deductedText;
-    jpNoteEl.className = 'note-col ' + (cfg.bpjsJpPayer === 'company' ? 'company' : 'employee');
+    if (cfg.ownBpjs) {
+        jpNoteEl.textContent = ownBpjsText;
+        jpNoteEl.className = 'note-col';
+        jpNoteEl.style.background = '#e0e7ff';
+        jpNoteEl.style.color = '#4338ca';
+    } else {
+        jpNoteEl.textContent = cfg.bpjsJpPayer === 'company' ? paidByCompanyText : deductedText;
+        jpNoteEl.className = 'note-col ' + (cfg.bpjsJpPayer === 'company' ? 'company' : 'employee');
+        jpNoteEl.style.background = '';
+        jpNoteEl.style.color = '';
+    }
 
     document.getElementById('slipTotalPot').textContent = formatIDR(c.totalDeductions);
     document.getElementById('slipNetTotal').textContent = 'TAKE HOME PAY: ' + formatIDR(c.net);
