@@ -322,54 +322,81 @@ function formatResponse(data, calc) {
     const terCat = PTKP_TO_TER[data.ptkp] || 'A';
     const terRate = getTERRate(calc.gross, data.ptkp);
 
-    let msg = `*GAJI.AI - Hasil Perhitungan*\n\n`;
-    msg += `Nama: ${data.name || 'Karyawan'}\n`;
-    msg += `Lokasi: ${data.regionLabel}\n`;
-    msg += `Gaji Pokok: ${formatIDR(data.baseSalary)}\n`;
+    // Create PDF slip link with encoded data
+    const slipData = {
+        n: data.name || 'Karyawan',
+        s: data.baseSalary,
+        r: data.regionLabel,
+        p: data.ptkp,
+        o: data.overtime || 0,
+        np: data.hasNPWP ? 1 : 0,
+        g: calc.gross,
+        t: calc.pph21,
+        bk: calc.bpjs.empKesehatan,
+        bj: calc.bpjs.empJHT,
+        bp: calc.bpjs.empJP,
+        td: calc.totalDeductions,
+        net: calc.net,
+        cc: calc.companyCost,
+        ot: calc.overtime.total
+    };
+    const encodedData = Buffer.from(JSON.stringify(slipData)).toString('base64');
+    const pdfLink = `https://gaji-ai-beta.vercel.app/?slip=${encodedData}`;
+
+    let msg = `*✅ GAJI.AI - Hasil Perhitungan*\n\n`;
+    msg += `👤 Nama: ${data.name || 'Karyawan'}\n`;
+    msg += `📍 Lokasi: ${data.regionLabel}\n`;
+    msg += `💰 Gaji Pokok: ${formatIDR(data.baseSalary)}\n`;
 
     if (data.overtime > 0) {
-        msg += `Lembur: ${data.overtime} jam (+${formatIDR(calc.overtime.total)})\n`;
+        msg += `⏰ Lembur: ${data.overtime} jam (+${formatIDR(calc.overtime.total)})\n`;
     }
 
-    msg += `PTKP: ${data.ptkp} (TER ${terCat}, ${(terRate * 100).toFixed(2)}%)\n`;
-    msg += `NPWP: ${data.hasNPWP ? 'Ada' : 'Tidak ada (+20%)'}\n\n`;
+    msg += `📋 PTKP: ${data.ptkp} (TER ${terCat}, ${(terRate * 100).toFixed(2)}%)\n`;
+    msg += `🆔 NPWP: ${data.hasNPWP ? 'Ada' : 'Tidak ada (+20%)'}\n\n`;
 
-    msg += `*POTONGAN:*\n`;
-    msg += `PPh 21: ${formatIDR(calc.pph21)}\n`;
-    msg += `BPJS Kes (1%): ${formatIDR(calc.bpjs.empKesehatan)}\n`;
-    msg += `BPJS JHT (2%): ${formatIDR(calc.bpjs.empJHT)}\n`;
-    msg += `BPJS JP (1%): ${formatIDR(calc.bpjs.empJP)}\n`;
-    msg += `Total Potongan: ${formatIDR(calc.totalDeductions)}\n\n`;
+    msg += `*📉 POTONGAN:*\n`;
+    msg += `• PPh 21: ${formatIDR(calc.pph21)}\n`;
+    msg += `• BPJS Kes (1%): ${formatIDR(calc.bpjs.empKesehatan)}\n`;
+    msg += `• BPJS JHT (2%): ${formatIDR(calc.bpjs.empJHT)}\n`;
+    msg += `• BPJS JP (1%): ${formatIDR(calc.bpjs.empJP)}\n`;
+    msg += `• Total Potongan: ${formatIDR(calc.totalDeductions)}\n\n`;
 
-    msg += `*HASIL:*\n`;
+    msg += `*💵 HASIL:*\n`;
     msg += `Gross: ${formatIDR(calc.gross)}\n`;
-    msg += `*Take-Home Pay: ${formatIDR(calc.net)}*\n\n`;
+    msg += `*🎯 Take-Home Pay: ${formatIDR(calc.net)}*\n\n`;
 
-    msg += `Biaya Perusahaan: ${formatIDR(calc.companyCost)}\n\n`;
+    msg += `🏢 Biaya Perusahaan: ${formatIDR(calc.companyCost)}\n\n`;
+
+    msg += `📄 *SLIP GAJI PDF:*\n`;
+    msg += `${pdfLink}\n\n`;
+
     msg += `---\n`;
-    msg += `Hitung lagi? Kirim data gaji.\n`;
-    msg += `Contoh: "Budi, gaji 8 jt, Jakarta, lembur 10 jam, ada NPWP"\n\n`;
+    msg += `Hitung lagi? Kirim data gaji baru.\n`;
     msg += `Web: gaji.ai`;
 
     return msg;
 }
 
 function formatWelcome() {
-    return `*Selamat datang di GAJI.AI!* 🇮🇩
+    return `*🎉 Selamat datang di GAJI.AI!*
 
-Saya adalah asisten perhitungan gaji karyawan Indonesia.
+Hitung gaji karyawan Indonesia *GRATIS* dalam hitungan detik! 🚀
 
-*Cara pakai:*
-Kirim data gaji dalam format bebas, contoh:
-"Budi, gaji 8 juta, Jakarta, lembur 20 jam, ada NPWP"
+*📝 Cara pakai:*
+Balas pesan ini dengan data gaji, contoh:
+_"Budi, gaji 8 juta, Jakarta, lembur 20 jam, ada NPWP"_
 
-*Yang saya hitung:*
-✓ PPh 21 (TER 2024)
+*✨ Yang saya hitung otomatis:*
+✓ PPh 21 TER 2024 (terbaru!)
 ✓ BPJS Kesehatan & Ketenagakerjaan
-✓ Lembur (1/173, 1.5x & 2x)
-✓ Take-Home Pay
+✓ Lembur (rumus resmi 1/173)
+✓ Take-Home Pay & Biaya Perusahaan
+✓ *BONUS: Slip Gaji PDF!* 📄
 
-*Kirim data gaji Anda sekarang!*`;
+*🎁 5 perhitungan GRATIS!*
+
+Kirim data gaji Anda sekarang 👇`;
 }
 
 function formatError() {
