@@ -2758,22 +2758,30 @@ function calculateReverseOvertime() {
     // Show results section
     document.getElementById('revResults').style.display = 'block';
 
-    // Calculate detailed breakdown
-    const hours = result.hours;
+    // Round hours to nearest whole number (hours cannot be fractional)
+    const hours = Math.round(result.hours);
+
+    // Recalculate overtime based on rounded whole hours
     const hourlyRate = baseSalary / 173;
-    const firstHourPay = hours >= 1 ? Math.round(hourlyRate * 1.5) : Math.round(hours * hourlyRate * 1.5);
+    const firstHourPay = hours >= 1 ? Math.round(hourlyRate * 1.5) : 0;
     const restHours = Math.max(0, hours - 1);
     const restHoursPay = Math.round(restHours * hourlyRate * 2.0);
     const totalOvertimePay = firstHourPay + restHoursPay;
+
+    // Recalculate estimated take-home with rounded hours
+    const recalc = calculatePayroll({
+        baseSalary, overtime: hours, ptkp: ptkp, hasNPWP,
+        name: '', region: '', regionLabel: '', regionUMP: 0
+    });
 
     // Update display with proper language
     const hourWord = isEn ? 'hours' : 'jam';
     const hourWordSingle = isEn ? 'hour' : 'jam';
     document.getElementById('revTotalHours').textContent = hours + ' ' + hourWord;
-    document.getElementById('revFirstHour').innerHTML = (hours >= 1 ? '1' : hours.toFixed(1)) + ' ' + hourWordSingle + ' = <span id="revFirstHourAmount">' + formatIDR(firstHourPay) + '</span>';
-    document.getElementById('revRestHours').innerHTML = restHours.toFixed(1) + ' ' + hourWord + ' = <span id="revRestHoursAmount">' + formatIDR(restHoursPay) + '</span>';
+    document.getElementById('revFirstHour').innerHTML = (hours >= 1 ? '1' : '0') + ' ' + hourWordSingle + ' = <span id="revFirstHourAmount">' + formatIDR(firstHourPay) + '</span>';
+    document.getElementById('revRestHours').innerHTML = restHours + ' ' + hourWord + ' = <span id="revRestHoursAmount">' + formatIDR(restHoursPay) + '</span>';
     document.getElementById('revTotalAmount').textContent = formatIDR(totalOvertimePay);
-    document.getElementById('revEstimatedNet').textContent = formatIDR(result.calc.net);
+    document.getElementById('revEstimatedNet').textContent = formatIDR(recalc.net);
 
     // Store result for apply function
     window.reverseCalcResult = {
@@ -2783,7 +2791,7 @@ function calculateReverseOvertime() {
         ptkp: ptkp,
         hasNPWP: hasNPWP,
         overtimeAmount: totalOvertimePay,
-        estimatedNet: result.calc.net
+        estimatedNet: recalc.net
     };
 
     // Show message if target already achieved
