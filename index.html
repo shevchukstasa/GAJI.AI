@@ -1545,10 +1545,10 @@
                 </div>
                 <div class="reverse-eng-inputs">
                     <div class="reverse-eng-row">
-                        <label id="revLblBaseSalary">Gaji Pokok:</label>
+                        <label id="revLblBaseSalary">Total Gaji (+ Tunjangan):</label>
                         <div class="input-with-prefix">
                             <span>Rp</span>
-                            <input type="number" id="revBaseSalary" placeholder="4500000" value="">
+                            <input type="number" id="revBaseSalary" placeholder="4750000" value="">
                         </div>
                     </div>
                     <div class="reverse-eng-row">
@@ -2817,33 +2817,26 @@ function applyReverseToForm() {
     // Switch to form mode
     switchInputMode('form');
 
-    // Fill in the form fields - only salary, overtime, ptkp, npwp
-    // Do NOT touch allowances (meal, transport, other) - they stay as user entered
+    // Fill in the form fields
+    // Total salary (including allowances) goes to base salary field
+    // Clear all allowances since they're already included in the total
     document.getElementById('formSalary').value = result.baseSalary;
     document.getElementById('formOvertime').value = result.hours;
     document.getElementById('formPtkp').value = result.ptkp;
     document.getElementById('formNpwp').checked = result.hasNPWP;
 
-    // Get current allowances from form to show in message
-    const meal = parseInt(document.getElementById('formMeal').value) || 0;
-    const transport = parseInt(document.getElementById('formTransport').value) || 0;
-    const other = parseInt(document.getElementById('formOther').value) || 0;
-    const totalAllowances = meal + transport + other;
+    // Clear allowances - they're already included in the total salary
+    document.getElementById('formMeal').value = '0';
+    document.getElementById('formTransport').value = '0';
+    document.getElementById('formOther').value = '0';
 
     // Scroll to form
     document.getElementById('formModeContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Show confirmation with allowance info
-    let confirmMsg;
-    if (totalAllowances > 0) {
-        confirmMsg = isEn
-            ? `${result.hours} overtime hours applied to form.\n\nAllowances (${formatIDR(totalAllowances)}) will be added on top.\n\nClick "Calculate Salary" to see full results.`
-            : `${result.hours} jam lembur telah diterapkan ke form.\n\nTunjangan (${formatIDR(totalAllowances)}) akan ditambahkan.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
-    } else {
-        confirmMsg = isEn
-            ? `${result.hours} overtime hours applied to form.\n\nClick "Calculate Salary" to see full results.`
-            : `${result.hours} jam lembur telah diterapkan ke form.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
-    }
+    // Show confirmation
+    const confirmMsg = isEn
+        ? `${result.hours} overtime hours applied to form.\n\nTotal salary ${formatIDR(result.baseSalary)} already includes allowances.\n\nClick "Calculate Salary" to see full results.`
+        : `${result.hours} jam lembur telah diterapkan ke form.\n\nTotal gaji ${formatIDR(result.baseSalary)} sudah termasuk tunjangan.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
     alert(confirmMsg);
 }
 
@@ -3623,7 +3616,7 @@ function setLang(lang) {
     // Reverse Engineering block
     document.getElementById('revTitle').textContent = isEn ? '🔧 Overtime Reverse Engineering' : '🔧 Reverse Engineering Lembur';
     document.getElementById('revDesc').textContent = isEn ? 'Calculate how many overtime hours needed to reach target take-home pay' : 'Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay';
-    document.getElementById('revLblBaseSalary').textContent = isEn ? 'Base Salary:' : 'Gaji Pokok:';
+    document.getElementById('revLblBaseSalary').textContent = isEn ? 'Total Salary (+ Allowances):' : 'Total Gaji (+ Tunjangan):';
     document.getElementById('revLblTargetNet').textContent = isEn ? 'Target Take-Home:' : 'Target Take-Home:';
     document.getElementById('revLblPtkp').textContent = isEn ? 'PTKP Status:' : 'Status PTKP:';
     document.getElementById('revPtkpTK0').textContent = isEn ? 'TK/0 - Single, no dependents' : 'TK/0 - Tidak Kawin';
