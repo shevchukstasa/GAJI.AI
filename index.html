@@ -1325,6 +1325,11 @@
         .slip-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
         .slip-table td { padding: 8px 12px; border: 1px solid #ddd; font-size: 14px; }
         .slip-table .label-col { background: #f9fafb; font-weight: 500; width: 50%; }
+        .slip-table-3col .label-col { width: 40%; }
+        .slip-table-3col .amount-col { width: 30%; text-align: right; }
+        .slip-table-3col .note-col { width: 30%; font-size: 12px; text-align: center; }
+        .slip-table-3col .note-col.company { background: #d1fae5; color: #059669; }
+        .slip-table-3col .note-col.employee { background: #fee2e2; color: #dc2626; }
         .slip-total { font-size: 18px; font-weight: 700; text-align: center; padding: 16px; background: #f0fdf4; border-radius: var(--radius-sm); margin: 20px 0; }
         .slip-footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; }
         .slip-signature { text-align: center; margin-top: 60px; }
@@ -2006,12 +2011,32 @@
         <tr><td class="label-col"><strong>Total Pendapatan Bruto</strong></td><td id="slipGross"><strong>-</strong></td></tr>
     </table>
     <h3 style="margin:16px 0 8px">Potongan</h3>
-    <table class="slip-table">
-        <tr><td class="label-col" id="slipPPh21Label">PPh 21</td><td id="slipPPh21">-</td></tr>
-        <tr><td class="label-col" id="slipBpjsKesLabel">BPJS Kesehatan (1%)</td><td id="slipBpjsKes">-</td></tr>
-        <tr><td class="label-col" id="slipJHTLabel">BPJS JHT (2%)</td><td id="slipJHT">-</td></tr>
-        <tr><td class="label-col" id="slipJPLabel">BPJS JP (1%)</td><td id="slipJP">-</td></tr>
-        <tr><td class="label-col"><strong>Total Potongan</strong></td><td id="slipTotalPot"><strong>-</strong></td></tr>
+    <table class="slip-table slip-table-3col">
+        <tr>
+            <td class="label-col" id="slipPPh21Label">PPh 21</td>
+            <td class="amount-col" id="slipPPh21">-</td>
+            <td class="note-col" id="slipPPh21Note">-</td>
+        </tr>
+        <tr>
+            <td class="label-col" id="slipBpjsKesLabel">BPJS Kesehatan (1%)</td>
+            <td class="amount-col" id="slipBpjsKes">-</td>
+            <td class="note-col" id="slipBpjsKesNote">-</td>
+        </tr>
+        <tr>
+            <td class="label-col" id="slipJHTLabel">BPJS JHT (2%)</td>
+            <td class="amount-col" id="slipJHT">-</td>
+            <td class="note-col" id="slipJHTNote">-</td>
+        </tr>
+        <tr>
+            <td class="label-col" id="slipJPLabel">BPJS JP (1%)</td>
+            <td class="amount-col" id="slipJP">-</td>
+            <td class="note-col" id="slipJPNote">-</td>
+        </tr>
+        <tr>
+            <td class="label-col"><strong>Total Potongan</strong></td>
+            <td class="amount-col" id="slipTotalPot"><strong>-</strong></td>
+            <td class="note-col"></td>
+        </tr>
     </table>
     <div class="slip-total" id="slipNetTotal">TAKE HOME PAY: -</div>
     <div class="slip-footer">
@@ -3592,22 +3617,37 @@ function generateSlipGaji() {
     document.getElementById('slipLembur').textContent = formatIDR(c.overtime.total);
     document.getElementById('slipGross').textContent = formatIDR(c.gross);
 
-    // Add "(paid by employer)" indicators
-    const paidByCompany = isEn ? ' (Paid by Employer)' : ' (Ditanggung Perusahaan)';
+    // Note texts
+    const paidByCompanyText = isEn ? 'Paid by Employer' : 'Dibayar Perusahaan';
+    const deductedText = isEn ? 'Deducted' : 'Potong Gaji';
 
-    document.getElementById('slipPPh21Label').textContent = cfg.pph21Payer === 'company' ? 'PPh 21' + paidByCompany : 'PPh 21';
+    // PPh 21
+    document.getElementById('slipPPh21Label').textContent = 'PPh 21 (TER)';
     document.getElementById('slipPPh21').textContent = formatIDR(c.pph21);
+    const pph21NoteEl = document.getElementById('slipPPh21Note');
+    pph21NoteEl.textContent = cfg.pph21Payer === 'company' ? paidByCompanyText : deductedText;
+    pph21NoteEl.className = 'note-col ' + (cfg.pph21Payer === 'company' ? 'company' : 'employee');
 
-    document.getElementById('slipBpjsKesLabel').textContent = cfg.bpjsKesPayer === 'company'
-        ? (isEn ? 'BPJS Health' : 'BPJS Kesehatan') + paidByCompany
-        : (isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)');
+    // BPJS Kesehatan
+    document.getElementById('slipBpjsKesLabel').textContent = isEn ? 'BPJS Health (1%)' : 'BPJS Kesehatan (1%)';
     document.getElementById('slipBpjsKes').textContent = formatIDR(c.bpjs.empKesehatan);
+    const kesNoteEl = document.getElementById('slipBpjsKesNote');
+    kesNoteEl.textContent = cfg.bpjsKesPayer === 'company' ? paidByCompanyText : deductedText;
+    kesNoteEl.className = 'note-col ' + (cfg.bpjsKesPayer === 'company' ? 'company' : 'employee');
 
-    document.getElementById('slipJHTLabel').textContent = cfg.bpjsJhtPayer === 'company' ? 'BPJS JHT' + paidByCompany : 'BPJS JHT (2%)';
+    // BPJS JHT
+    document.getElementById('slipJHTLabel').textContent = 'BPJS JHT (2%)';
     document.getElementById('slipJHT').textContent = formatIDR(c.bpjs.empJHT);
+    const jhtNoteEl = document.getElementById('slipJHTNote');
+    jhtNoteEl.textContent = cfg.bpjsJhtPayer === 'company' ? paidByCompanyText : deductedText;
+    jhtNoteEl.className = 'note-col ' + (cfg.bpjsJhtPayer === 'company' ? 'company' : 'employee');
 
-    document.getElementById('slipJPLabel').textContent = cfg.bpjsJpPayer === 'company' ? 'BPJS JP' + paidByCompany : 'BPJS JP (1%)';
+    // BPJS JP
+    document.getElementById('slipJPLabel').textContent = 'BPJS JP (1%)';
     document.getElementById('slipJP').textContent = formatIDR(c.bpjs.empJP);
+    const jpNoteEl = document.getElementById('slipJPNote');
+    jpNoteEl.textContent = cfg.bpjsJpPayer === 'company' ? paidByCompanyText : deductedText;
+    jpNoteEl.className = 'note-col ' + (cfg.bpjsJpPayer === 'company' ? 'company' : 'employee');
 
     document.getElementById('slipTotalPot').textContent = formatIDR(c.totalDeductions);
     document.getElementById('slipNetTotal').textContent = 'TAKE HOME PAY: ' + formatIDR(c.net);
