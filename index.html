@@ -866,6 +866,149 @@
             margin-top: 8px;
         }
 
+        /* === Reverse Engineering Block === */
+        .reverse-engineering-block {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #0ea5e9;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .reverse-eng-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .reverse-eng-header h3 {
+            color: #0369a1;
+            margin-bottom: 8px;
+            font-size: 1.25rem;
+        }
+
+        .reverse-eng-header p {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .reverse-eng-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .reverse-eng-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reverse-eng-row label {
+            min-width: 130px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .reverse-eng-row .input-with-prefix {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .reverse-eng-row .input-with-prefix span {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .reverse-eng-row input[type="number"],
+        .reverse-eng-row select {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+        }
+
+        .reverse-eng-row.checkbox-row {
+            justify-content: flex-start;
+            padding-left: 142px;
+        }
+
+        .reverse-eng-inputs > button {
+            margin-top: 8px;
+        }
+
+        .reverse-eng-results {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px dashed #0ea5e9;
+        }
+
+        .reverse-eng-results h4 {
+            text-align: center;
+            color: #0369a1;
+            margin-bottom: 16px;
+        }
+
+        .rev-result-grid {
+            display: grid;
+            gap: 12px;
+            max-width: 450px;
+            margin: 0 auto 20px;
+        }
+
+        .rev-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+        }
+
+        .rev-result-item.highlight {
+            background: #0369a1;
+            color: white;
+            font-weight: 600;
+        }
+
+        .rev-result-item.total {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+
+        .rev-label {
+            font-size: 14px;
+        }
+
+        .rev-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .reverse-eng-results > button {
+            display: block;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 600px) {
+            .reverse-eng-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .reverse-eng-row label {
+                min-width: auto;
+                margin-bottom: 4px;
+            }
+            .reverse-eng-row.checkbox-row {
+                padding-left: 0;
+            }
+        }
+
         /* === 16. AI Agent Widget === */
         .ai-agent-btn {
             position: fixed;
@@ -1224,20 +1367,6 @@
                         </div>
                     </div>
 
-                    <div class="config-section-title">Reverse Engineering</div>
-                    <div class="config-row">
-                        <label class="config-checkbox">
-                            <input type="checkbox" id="cfgReverseMode" onchange="updateConfig()">
-                            <span>Hitung jam lembur dari target net</span>
-                        </label>
-                    </div>
-                    <div class="config-row" id="targetNetRow" style="display:none">
-                        <span class="config-label">Target Take-Home:</span>
-                        <div style="display:flex;align-items:center;gap:8px">
-                            <span style="font-size:13px">Rp</span>
-                            <input type="number" class="config-input" id="cfgTargetNet" value="10000000" style="width:140px" onchange="updateConfig()">
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -1405,6 +1534,77 @@
                     <div class="form-submit-row">
                         <button class="btn btn-primary btn-lg" onclick="submitForm()" id="formSubmitBtn">Hitung Gaji</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Reverse Engineering Block -->
+            <div class="reverse-engineering-block" id="reverseEngBlock">
+                <div class="reverse-eng-header">
+                    <h3>🔧 Reverse Engineering Lembur</h3>
+                    <p>Hitung berapa jam lembur yang dibutuhkan untuk mencapai target take-home pay</p>
+                </div>
+                <div class="reverse-eng-inputs">
+                    <div class="reverse-eng-row">
+                        <label>Gaji Pokok:</label>
+                        <div class="input-with-prefix">
+                            <span>Rp</span>
+                            <input type="number" id="revBaseSalary" placeholder="4500000" value="">
+                        </div>
+                    </div>
+                    <div class="reverse-eng-row">
+                        <label>Target Take-Home:</label>
+                        <div class="input-with-prefix">
+                            <span>Rp</span>
+                            <input type="number" id="revTargetNet" placeholder="6000000" value="">
+                        </div>
+                    </div>
+                    <div class="reverse-eng-row">
+                        <label>Status PTKP:</label>
+                        <select id="revPtkp">
+                            <option value="TK/0">TK/0 - Tidak Kawin</option>
+                            <option value="K/0">K/0 - Kawin, tanpa anak</option>
+                            <option value="K/1">K/1 - Kawin, 1 anak</option>
+                            <option value="K/2">K/2 - Kawin, 2 anak</option>
+                            <option value="K/3">K/3 - Kawin, 3 anak</option>
+                        </select>
+                    </div>
+                    <div class="reverse-eng-row checkbox-row">
+                        <label class="config-checkbox">
+                            <input type="checkbox" id="revHasNpwp" checked>
+                            <span>Punya NPWP</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-accent" onclick="calculateReverseOvertime()" id="revCalcBtn">
+                        🧮 Hitung Jam Lembur
+                    </button>
+                </div>
+                <div class="reverse-eng-results" id="revResults" style="display:none">
+                    <h4>📊 Hasil Perhitungan:</h4>
+                    <div class="rev-result-grid">
+                        <div class="rev-result-item highlight">
+                            <span class="rev-label">Total Jam Lembur:</span>
+                            <span class="rev-value" id="revTotalHours">0 jam</span>
+                        </div>
+                        <div class="rev-result-item">
+                            <span class="rev-label">Jam ke-1 (1.5x):</span>
+                            <span class="rev-value" id="revFirstHour">1 jam = <span id="revFirstHourAmount">Rp 0</span></span>
+                        </div>
+                        <div class="rev-result-item">
+                            <span class="rev-label">Jam ke-2+ (2.0x):</span>
+                            <span class="rev-value" id="revRestHours">0 jam = <span id="revRestHoursAmount">Rp 0</span></span>
+                        </div>
+                        <div class="rev-result-item total">
+                            <span class="rev-label">Total Lembur:</span>
+                            <span class="rev-value" id="revTotalAmount">Rp 0</span>
+                        </div>
+                        <div class="rev-result-item total">
+                            <span class="rev-label">Estimasi Take-Home:</span>
+                            <span class="rev-value" id="revEstimatedNet">Rp 0</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="applyReverseToForm()" id="revApplyBtn">
+                        ✅ Terapkan ke Form
+                    </button>
                 </div>
             </div>
 
@@ -2022,8 +2222,6 @@ let calcConfig = {
     bpjsJpPayer: 'employee',
     includeTHR: false,
     tenureMonths: 12,
-    reverseMode: false,
-    targetNet: 10000000,
     ownBpjs: false,
     bpjsCompensation: 0
 };
@@ -2535,6 +2733,91 @@ function reverseEngineerOvertime(targetNet, baseSalary, ptkpStatus, hasNPWP) {
 }
 
 /**
+ * UI function: Calculate reverse overtime and display results
+ */
+function calculateReverseOvertime() {
+    const baseSalary = parseInt(document.getElementById('revBaseSalary').value) || 0;
+    const targetNet = parseInt(document.getElementById('revTargetNet').value) || 0;
+    const ptkp = document.getElementById('revPtkp').value;
+    const hasNPWP = document.getElementById('revHasNpwp').checked;
+
+    if (baseSalary < 100000) {
+        alert('Mohon masukkan gaji pokok yang valid (minimal Rp 100.000)');
+        return;
+    }
+
+    if (targetNet < baseSalary) {
+        alert('Target take-home harus lebih besar dari gaji pokok');
+        return;
+    }
+
+    // Calculate using reverse engineering
+    const result = reverseEngineerOvertime(targetNet, baseSalary, ptkp, hasNPWP);
+
+    // Show results section
+    document.getElementById('revResults').style.display = 'block';
+
+    // Calculate detailed breakdown
+    const hours = result.hours;
+    const hourlyRate = baseSalary / 173;
+    const firstHourPay = hours >= 1 ? Math.round(hourlyRate * 1.5) : Math.round(hours * hourlyRate * 1.5);
+    const restHours = Math.max(0, hours - 1);
+    const restHoursPay = Math.round(restHours * hourlyRate * 2.0);
+    const totalOvertimePay = firstHourPay + restHoursPay;
+
+    // Update display
+    document.getElementById('revTotalHours').textContent = hours + ' jam';
+    document.getElementById('revFirstHour').innerHTML = (hours >= 1 ? '1' : hours.toFixed(1)) + ' jam = <span id="revFirstHourAmount">' + formatIDR(firstHourPay) + '</span>';
+    document.getElementById('revRestHours').innerHTML = restHours.toFixed(1) + ' jam = <span id="revRestHoursAmount">' + formatIDR(restHoursPay) + '</span>';
+    document.getElementById('revTotalAmount').textContent = formatIDR(totalOvertimePay);
+    document.getElementById('revEstimatedNet').textContent = formatIDR(result.calc.net);
+
+    // Store result for apply function
+    window.reverseCalcResult = {
+        hours: hours,
+        baseSalary: baseSalary,
+        targetNet: targetNet,
+        ptkp: ptkp,
+        hasNPWP: hasNPWP,
+        overtimeAmount: totalOvertimePay,
+        estimatedNet: result.calc.net
+    };
+
+    // Show message if target already achieved
+    if (result.message) {
+        document.getElementById('revTotalHours').textContent = '0 jam';
+        alert(result.message);
+    }
+}
+
+/**
+ * Apply reverse calculation results to the main form
+ */
+function applyReverseToForm() {
+    if (!window.reverseCalcResult) {
+        alert('Silakan hitung jam lembur terlebih dahulu');
+        return;
+    }
+
+    const result = window.reverseCalcResult;
+
+    // Switch to form mode
+    switchInputMode('form');
+
+    // Fill in the form fields
+    document.getElementById('formSalary').value = result.baseSalary;
+    document.getElementById('formOvertime').value = result.hours;
+    document.getElementById('formPtkp').value = result.ptkp;
+    document.getElementById('formNpwp').checked = result.hasNPWP;
+
+    // Scroll to form
+    document.getElementById('formModeContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Show confirmation
+    alert(`Jam lembur ${result.hours} jam telah diterapkan ke form.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`);
+}
+
+/**
  * Full payroll calculation with config support
  */
 function calculatePayroll(data, config = calcConfig) {
@@ -2865,35 +3148,6 @@ async function sendMessage() {
             return;
         }
 
-        // Handle reverse engineering mode
-        if (calcConfig.reverseMode) {
-            const result = reverseEngineerOvertime(
-                calcConfig.targetNet,
-                parsed.baseSalary,
-                parsed.ptkp,
-                parsed.hasNPWP
-            );
-
-            currentCalc = result.calc;
-            currentCalc.input = { ...parsed, overtime: result.hours };
-
-            let response = `&#128736; <strong>Reverse Engineering Selesai!</strong><br><br>`;
-            response += `&#127919; Target Take-Home: ${formatIDR(calcConfig.targetNet)}<br>`;
-            response += `&#128176; Gaji Pokok: ${formatIDR(parsed.baseSalary)}<br><br>`;
-
-            if (result.message) {
-                response += `&#10003; ${result.message}<br>`;
-            } else {
-                response += `&#9200; <strong>Jam lembur diperlukan: ${result.hours} jam</strong><br>`;
-                response += `&#128181; Hasil Take-Home: ${formatIDR(result.calc.net)}<br>`;
-            }
-
-            addChatMessage(response, false);
-            displayResults(currentCalc);
-            showSendBtn();
-            return;
-        }
-
         // Check UMP
         let umpWarning = '';
         if (parsed.regionUMP && parsed.baseSalary < parsed.regionUMP) {
@@ -3056,51 +3310,6 @@ async function submitForm() {
     // Update calcConfig with BPJS Mandiri settings
     calcConfig.ownBpjs = ownBpjs;
     calcConfig.bpjsCompensation = bpjsCompensation;
-
-    // Handle reverse engineering mode (calculate overtime from target net)
-    if (calcConfig.reverseMode && calcConfig.targetNet > 0) {
-        const result = reverseEngineerOvertime(
-            calcConfig.targetNet,
-            effectiveBaseSalary,
-            ptkp,
-            hasNPWP
-        );
-
-        // Update data with calculated overtime hours
-        data.overtime = result.hours;
-
-        // Update the form field to show calculated overtime
-        document.getElementById('formOvertime').value = result.hours;
-
-        // Recalculate with full data and config (the result.calc uses minimal data)
-        currentCalc = calculatePayroll(data, calcConfig);
-
-        // Store allowances info for display
-        currentCalc.allowances = { meal, transport, other, total: totalAllowances };
-
-        // Update usage counter
-        await incrementSupabaseUsage();
-        updateFreeCounter();
-
-        // Switch to chat mode to show results
-        switchInputMode('chat');
-
-        let response = `🔧 <strong>Reverse Engineering Selesai!</strong><br><br>`;
-        response += `🎯 Target Take-Home: ${formatIDR(calcConfig.targetNet)}<br>`;
-        response += `💰 Gaji Pokok: ${formatIDR(effectiveBaseSalary)}<br><br>`;
-
-        if (result.message) {
-            response += `ℹ️ ${result.message}<br>`;
-        } else {
-            response += `⏰ <strong>Jam lembur diperlukan: ${result.hours} jam</strong><br>`;
-            response += `💵 Nilai lembur: ${formatIDR(currentCalc.overtime.total)}<br>`;
-            response += `✅ Hasil Take-Home: ${formatIDR(currentCalc.net)}<br>`;
-        }
-
-        addChatMessage(response, false);
-        displayResults(currentCalc);
-        return;
-    }
 
     currentCalc = calculatePayroll(data, calcConfig);
 
@@ -3351,14 +3560,12 @@ function setLang(lang) {
     const cfgSections = document.querySelectorAll('.config-section-title');
     if (cfgSections[0]) cfgSections[0].textContent = isEn ? 'Who Pays?' : 'Siapa Bayar?';
     if (cfgSections[1]) cfgSections[1].textContent = isEn ? 'THR (Holiday Bonus)' : 'THR (Tunjangan Hari Raya)';
-    if (cfgSections[2]) cfgSections[2].textContent = isEn ? 'Reverse Engineering' : 'Reverse Engineering';
 
     const cfgLabels = document.querySelectorAll('.config-row .config-label');
     if (cfgLabels[0]) cfgLabels[0].textContent = 'PPh 21';
     if (cfgLabels[1]) cfgLabels[1].textContent = isEn ? 'BPJS Health' : 'BPJS Kesehatan';
     if (cfgLabels[2]) cfgLabels[2].textContent = 'BPJS JHT';
     if (cfgLabels[3]) cfgLabels[3].textContent = 'BPJS JP';
-    if (cfgLabels[4]) cfgLabels[4].textContent = isEn ? 'Target Take-Home:' : 'Target Take-Home:';
 
     document.querySelectorAll('.config-select').forEach(sel => {
         if (sel.options[0]) sel.options[0].text = isEn ? 'Employee' : 'Karyawan';
@@ -3369,7 +3576,6 @@ function setLang(lang) {
 
     const cfgCheckLabels = document.querySelectorAll('.config-checkbox span');
     if (cfgCheckLabels[0]) cfgCheckLabels[0].textContent = isEn ? 'Calculate THR' : 'Hitung THR';
-    if (cfgCheckLabels[1]) cfgCheckLabels[1].textContent = isEn ? 'Calculate overtime from target net' : 'Hitung jam lembur dari target net';
 
     // Results section
     document.getElementById('toggleStandard').textContent = isEn ? 'Standard' : 'Standar';
@@ -3513,11 +3719,6 @@ function updateConfig() {
     calcConfig.bpjsJpPayer = document.getElementById('cfgBpjsJpPayer').value;
     calcConfig.includeTHR = document.getElementById('cfgIncludeTHR').checked;
     calcConfig.tenureMonths = parseInt(document.getElementById('cfgTenureMonths').value) || 12;
-    calcConfig.reverseMode = document.getElementById('cfgReverseMode').checked;
-    calcConfig.targetNet = parseInt(document.getElementById('cfgTargetNet').value) || 10000000;
-
-    // Show/hide target net input
-    document.getElementById('targetNetRow').style.display = calcConfig.reverseMode ? 'flex' : 'none';
 }
 
 // ===================================================================
