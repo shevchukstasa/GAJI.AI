@@ -4,6 +4,103 @@
 const WABLAS_TOKEN = 'OlWT0Ks8uPKEOazqVThdEFAd6Zp0S3kcNIco9lFO6ZUDPkKQ862nES2';
 const WABLAS_API = 'https://sby.wablas.com/api/send-message';
 
+// Supabase configuration
+const SUPABASE_URL = 'https://ofnsqxyoqjgwuzzpgewx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9mbnNxeHlvcWpnd3V6enBnZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg4NTIwMDAsImV4cCI6MjA1NDQyODAwMH0.placeholder';
+const FREE_LIMIT = 5;
+
+// ===================================================================
+// SUPABASE USAGE TRACKING
+// ===================================================================
+
+async function checkUsageLimit(phoneNumber) {
+    try {
+        // Check if phone number exists
+        const checkUrl = `${SUPABASE_URL}/rest/v1/usage_tracking?phone_number=eq.${encodeURIComponent(phoneNumber)}&select=*`;
+        const checkResponse = await fetch(checkUrl, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        const records = await checkResponse.json();
+
+        if (records && records.length > 0) {
+            const record = records[0];
+            if (record.calc_count >= FREE_LIMIT) {
+                return { allowed: false, count: record.calc_count };
+            }
+            return { allowed: true, count: record.calc_count, existing: true, id: record.id };
+        }
+
+        return { allowed: true, count: 0, existing: false };
+    } catch (error) {
+        console.error('Supabase check error:', error);
+        // On error, allow the calculation (fail open)
+        return { allowed: true, count: 0, error: true };
+    }
+}
+
+async function incrementUsage(phoneNumber, existing, recordId, currentCount) {
+    try {
+        if (existing) {
+            // Update existing record - increment count
+            const updateUrl = `${SUPABASE_URL}/rest/v1/usage_tracking?id=eq.${recordId}`;
+            await fetch(updateUrl, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    calc_count: currentCount + 1,
+                    last_calc: new Date().toISOString()
+                })
+            });
+        } else {
+            // Insert new record
+            const insertUrl = `${SUPABASE_URL}/rest/v1/usage_tracking`;
+            await fetch(insertUrl, {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    phone_number: phoneNumber,
+                    calc_count: 1
+                })
+            });
+        }
+    } catch (error) {
+        console.error('Supabase increment error:', error);
+    }
+}
+
+function formatLimitReached(count) {
+    return `*Batas Gratis Tercapai* ⚠️
+
+Anda telah menggunakan ${count}/${FREE_LIMIT} perhitungan gratis.
+
+*Untuk melanjutkan, silakan upgrade ke:*
+
+💼 *Paket Pro* - Rp 99.000/bulan
+• Unlimited perhitungan
+• Slip gaji PDF
+• Prioritas support
+
+📱 *Cara upgrade:*
+Hubungi: +62 877 7674 0102
+Atau kunjungi: gaji.ai/pricing
+
+Terima kasih telah menggunakan Gaji.AI! 🙏`;
+}
+
 // ===================================================================
 // TER RATES (PPh 21 - PP 58/2023, PMK 168/2023)
 // ===================================================================
@@ -347,14 +444,24 @@ export default async function handler(req, res) {
                 return res.status(200).json({ status: 'error message sent' });
             }
 
+            // Check usage limit before calculating
+            const usage = await checkUsageLimit(phone);
+            if (!usage.allowed) {
+                await sendWhatsAppMessage(phone, formatLimitReached(usage.count));
+                return res.status(200).json({ status: 'limit reached', count: usage.count });
+            }
+
             // Calculate payroll
             const calc = calculatePayroll(data);
+
+            // Increment usage counter
+            await incrementUsage(phone, usage.existing, usage.id, usage.count);
 
             // Format and send response
             const response = formatResponse(data, calc);
             await sendWhatsAppMessage(phone, response);
 
-            return res.status(200).json({ status: 'calculation sent', data, calc });
+            return res.status(200).json({ status: 'calculation sent', data, calc, usage: usage.count + 1 });
 
         } catch (error) {
             console.error('Webhook error:', error);
