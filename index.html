@@ -2817,19 +2817,33 @@ function applyReverseToForm() {
     // Switch to form mode
     switchInputMode('form');
 
-    // Fill in the form fields
+    // Fill in the form fields - only salary, overtime, ptkp, npwp
+    // Do NOT touch allowances (meal, transport, other) - they stay as user entered
     document.getElementById('formSalary').value = result.baseSalary;
     document.getElementById('formOvertime').value = result.hours;
     document.getElementById('formPtkp').value = result.ptkp;
     document.getElementById('formNpwp').checked = result.hasNPWP;
 
+    // Get current allowances from form to show in message
+    const meal = parseInt(document.getElementById('formMeal').value) || 0;
+    const transport = parseInt(document.getElementById('formTransport').value) || 0;
+    const other = parseInt(document.getElementById('formOther').value) || 0;
+    const totalAllowances = meal + transport + other;
+
     // Scroll to form
     document.getElementById('formModeContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Show confirmation
-    const confirmMsg = isEn
-        ? `${result.hours} overtime hours applied to form.\n\nClick "Calculate Salary" to see full results.`
-        : `${result.hours} jam lembur telah diterapkan ke form.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
+    // Show confirmation with allowance info
+    let confirmMsg;
+    if (totalAllowances > 0) {
+        confirmMsg = isEn
+            ? `${result.hours} overtime hours applied to form.\n\nAllowances (${formatIDR(totalAllowances)}) will be added on top.\n\nClick "Calculate Salary" to see full results.`
+            : `${result.hours} jam lembur telah diterapkan ke form.\n\nTunjangan (${formatIDR(totalAllowances)}) akan ditambahkan.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
+    } else {
+        confirmMsg = isEn
+            ? `${result.hours} overtime hours applied to form.\n\nClick "Calculate Salary" to see full results.`
+            : `${result.hours} jam lembur telah diterapkan ke form.\n\nKlik "Hitung Gaji" untuk melihat hasil lengkap.`;
+    }
     alert(confirmMsg);
 }
 
