@@ -1334,6 +1334,111 @@
         .slip-footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 13px; }
         .slip-signature { text-align: center; margin-top: 60px; }
         .slip-signature-line { border-top: 1px solid #333; width: 200px; margin: 0 auto; padding-top: 4px; }
+
+        /* === Cookie Consent Banner === */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--color-primary);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            z-index: 9999;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .cookie-banner.show { transform: translateY(0); }
+        .cookie-banner p {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.4;
+            max-width: 600px;
+        }
+        .cookie-banner a {
+            color: var(--color-accent);
+            text-decoration: underline;
+        }
+        .cookie-banner-buttons {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .cookie-btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .cookie-btn-accept {
+            background: var(--color-accent);
+            color: var(--color-primary);
+        }
+        .cookie-btn-accept:hover { background: var(--color-accent-hover); }
+        .cookie-btn-decline {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .cookie-btn-decline:hover { background: rgba(255,255,255,0.1); }
+
+        /* Privacy Modal */
+        .privacy-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        .privacy-modal.show { opacity: 1; visibility: visible; }
+        .privacy-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 24px;
+        }
+        .privacy-content h2 { margin-bottom: 16px; color: var(--color-primary); }
+        .privacy-content h3 { margin: 20px 0 8px; font-size: 15px; color: var(--color-primary); }
+        .privacy-content p, .privacy-content li { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+        .privacy-content ul { margin-left: 20px; margin-bottom: 12px; }
+        .privacy-close {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .privacy-close:hover { background: var(--color-primary-hover); }
+
+        @media (max-width: 600px) {
+            .cookie-banner { padding: 16px; text-align: center; }
+            .cookie-banner p { font-size: 12px; }
+            .cookie-banner-buttons { width: 100%; justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -4512,6 +4617,100 @@ function initPeriodSelector() {
 
 initPeriodSelector();
 checkSlipParameter();
+</script>
+
+<!-- Cookie Consent Banner -->
+<div class="cookie-banner" id="cookieBanner">
+    <p>
+        Kami menggunakan cookies dan menyimpan data lokal untuk meningkatkan pengalaman Anda.
+        <a href="#" onclick="showPrivacyModal(); return false;">Kebijakan Privasi</a>
+    </p>
+    <div class="cookie-banner-buttons">
+        <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()">Setuju</button>
+        <button class="cookie-btn cookie-btn-decline" onclick="declineCookies()">Tolak</button>
+    </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div class="privacy-modal" id="privacyModal">
+    <div class="privacy-content">
+        <h2>Kebijakan Privasi</h2>
+        <p><strong>Terakhir diperbarui:</strong> Februari 2026</p>
+
+        <h3>1. Data yang Kami Kumpulkan</h3>
+        <ul>
+            <li><strong>Alamat IP:</strong> Untuk membatasi penggunaan gratis (10 perhitungan)</li>
+            <li><strong>Data Lokal (localStorage):</strong> Jumlah perhitungan, preferensi pengguna</li>
+            <li><strong>Nomor WhatsApp:</strong> Jika Anda menggunakan layanan WhatsApp kami</li>
+        </ul>
+
+        <h3>2. Tujuan Pengumpulan Data</h3>
+        <ul>
+            <li>Menyediakan layanan perhitungan gaji</li>
+            <li>Membatasi penggunaan gratis untuk mencegah penyalahgunaan</li>
+            <li>Meningkatkan layanan kami</li>
+        </ul>
+
+        <h3>3. Layanan Pihak Ketiga</h3>
+        <ul>
+            <li><strong>Google Fonts:</strong> Untuk menampilkan font (mungkin menyimpan cookies)</li>
+            <li><strong>Vercel:</strong> Hosting website (mungkin menyimpan cookies teknis)</li>
+            <li><strong>Supabase:</strong> Database untuk menyimpan data penggunaan</li>
+        </ul>
+
+        <h3>4. Keamanan Data</h3>
+        <p>Kami tidak menyimpan data perhitungan gaji Anda secara permanen. Semua perhitungan dilakukan secara lokal di browser Anda.</p>
+
+        <h3>5. Hak Anda</h3>
+        <ul>
+            <li>Menolak cookies (fitur terbatas akan tetap berfungsi)</li>
+            <li>Menghapus data lokal dengan membersihkan cache browser</li>
+            <li>Menghubungi kami untuk pertanyaan privasi</li>
+        </ul>
+
+        <h3>6. Kontak</h3>
+        <p>Email: privacy@gaji.ai<br>WhatsApp: +62 877 7674 0102</p>
+
+        <button class="privacy-close" onclick="hidePrivacyModal()">Tutup</button>
+    </div>
+</div>
+
+<script>
+// Cookie Consent Logic
+function showCookieBanner() {
+    const consent = localStorage.getItem('gaji_cookie_consent');
+    if (!consent) {
+        setTimeout(() => {
+            document.getElementById('cookieBanner').classList.add('show');
+        }, 1000);
+    }
+}
+
+function acceptCookies() {
+    localStorage.setItem('gaji_cookie_consent', 'accepted');
+    document.getElementById('cookieBanner').classList.remove('show');
+}
+
+function declineCookies() {
+    localStorage.setItem('gaji_cookie_consent', 'declined');
+    document.getElementById('cookieBanner').classList.remove('show');
+}
+
+function showPrivacyModal() {
+    document.getElementById('privacyModal').classList.add('show');
+}
+
+function hidePrivacyModal() {
+    document.getElementById('privacyModal').classList.remove('show');
+}
+
+// Close modal on outside click
+document.getElementById('privacyModal').addEventListener('click', function(e) {
+    if (e.target === this) hidePrivacyModal();
+});
+
+// Show banner on page load
+showCookieBanner();
 </script>
 
 </body>
